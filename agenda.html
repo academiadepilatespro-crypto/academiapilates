@@ -1,0 +1,4827 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agenda Inteligente</title>
+
+    <!-- Fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Ícones -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <!-- Bibliotecas para PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --verde-principal: #3a6b5c;
+        --verde-claro: #8fc1b0;
+        --verde-pastel: #d4ede4;
+        --grafite: #2c2c2c;
+        --grafite-claro: #4a4a4a;
+        --off-white: #f5f5f5;
+        --branco: #ffffff;
+
+        --vermelho-urgente: #e74c3c;
+        --vermelho-suave: #ffe5e5;
+        --laranja-atencao: #f39c12;
+        --laranja-suave: #fff3cd;
+        --roxo-celebracao: #9b59b6;
+        --roxo-suave: #f3e5f5;
+        --verde-sucesso: #27ae60;
+        --azul-info: #3498db;
+        --azul-suave: #e3f2fd;
+
+        --font-titulos: "Cormorant Garamond", serif;
+        --font-corpo: "Montserrat", sans-serif;
+
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        --shadow-hover: 0 8px 24px rgba(58, 107, 92, 0.15);
+
+        --card-padding: 20px;
+        --grid-gap: 20px;
+
+        --capacidade-normal: #27ae60;
+        --capacidade-alerta: #f39c12;
+        --capacidade-critica: #e74c3c;
+
+        --relatorio-1: #3498db;
+        --relatorio-2: #9b59b6;
+        --relatorio-3: #e67e22;
+        --relatorio-4: #2ecc71;
+
+        /* Altura fixa para 5 cards de aluno */
+        --altura-card-aluno: 70px;
+        --total-cards: 5;
+      }
+
+      html {
+        font-size: 14px;
+      }
+
+      body {
+        font-family: var(--font-corpo);
+        background: var(--off-white);
+        color: var(--grafite);
+        min-height: 100vh;
+      }
+
+      /* ===== HEADER ===== */
+      .header {
+        background: var(--branco);
+        box-shadow: var(--shadow);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .header-content {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 0.8rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .logo-area {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      .logo-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--verde-principal);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .logo-icon i {
+        font-size: 1.5rem;
+        color: var(--branco);
+      }
+
+      .logo-text h1 {
+        font-family: var(--font-titulos);
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--grafite);
+        line-height: 1.2;
+      }
+
+      .logo-text span {
+        font-size: 0.7rem;
+        color: var(--verde-principal);
+      }
+
+      .user-area {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      .user-info {
+        text-align: right;
+      }
+
+      .user-name {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--grafite);
+      }
+
+      .user-role {
+        font-size: 0.7rem;
+        color: var(--verde-principal);
+      }
+
+      .user-avatar {
+        width: 38px;
+        height: 38px;
+        background: var(--verde-pastel);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--verde-principal);
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+
+      .btn-icon {
+        width: 35px;
+        height: 35px;
+        border: none;
+        border-radius: 8px;
+        background: var(--off-white);
+        color: var(--grafite);
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+      }
+
+      .btn-icon:hover {
+        background: var(--verde-pastel);
+        color: var(--verde-principal);
+      }
+
+      .notificacoes-area {
+        position: relative;
+      }
+
+      .notificacoes-btn {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: var(--grafite);
+        position: relative;
+      }
+
+      .notificacoes-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: var(--vermelho-urgente);
+        color: var(--branco);
+        font-size: 0.7rem;
+        padding: 0.2rem 0.4rem;
+        border-radius: 10px;
+        min-width: 18px;
+      }
+
+      .notificacoes-dropdown {
+        position: absolute;
+        top: 40px;
+        right: 0;
+        width: 350px;
+        background: var(--branco);
+        border-radius: 8px;
+        box-shadow: var(--shadow-hover);
+        display: none;
+        z-index: 1000;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .notificacoes-dropdown.show {
+        display: block;
+      }
+
+      .notificacao-item {
+        padding: 1rem;
+        border-bottom: 1px solid var(--verde-pastel);
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .notificacao-item:hover {
+        background: var(--off-white);
+      }
+
+      .notificacao-item.nao-lida {
+        background: var(--verde-pastel);
+        font-weight: 500;
+      }
+
+      .notificacao-titulo {
+        font-weight: 600;
+        color: var(--grafite);
+        margin-bottom: 0.3rem;
+      }
+
+      .notificacao-mensagem {
+        font-size: 0.85rem;
+        color: var(--grafite-claro);
+      }
+
+      .notificacao-data {
+        font-size: 0.7rem;
+        color: var(--verde-principal);
+        margin-top: 0.3rem;
+      }
+
+      .main-content {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 1.5rem;
+      }
+
+      .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+      }
+
+      .page-header h1 {
+        font-family: var(--font-titulos);
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--grafite);
+        margin-bottom: 0.2rem;
+      }
+
+      .page-header .subtitle {
+        color: var(--verde-principal);
+        font-size: 0.9rem;
+      }
+
+      .btn-primary {
+        background: var(--verde-sucesso);
+        color: var(--branco);
+        border: none;
+        padding: 0.6rem 1.5rem;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.3s;
+        text-decoration: none;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+      }
+
+      .btn-secondary {
+        background: #95a5a6;
+        color: var(--branco);
+        border: none;
+        padding: 0.5rem 1.2rem;
+        border-radius: 30px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.3s;
+        text-decoration: none;
+      }
+
+      .btn-secondary:hover {
+        background: #7f8c8d;
+      }
+
+      .btn-outline {
+        background: none;
+        border: 1px solid var(--verde-principal);
+        color: var(--verde-principal);
+        padding: 0.5rem 1.2rem;
+        border-radius: 30px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.3s;
+      }
+
+      .btn-outline:hover {
+        background: var(--verde-principal);
+        color: var(--branco);
+      }
+
+      .btn-danger {
+        background: var(--vermelho-urgente);
+        color: var(--branco);
+        border: none;
+        padding: 0.5rem 1.2rem;
+        border-radius: 30px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.3s;
+      }
+
+      .btn-danger:hover {
+        background: #c0392b;
+      }
+
+      /* ===== FILTROS NO TOPO ===== */
+      .filters-section {
+        background: var(--branco);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 1.5rem;
+      }
+
+      .filters-title {
+        font-family: var(--font-titulos);
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--grafite);
+        margin-bottom: 1rem;
+      }
+
+      .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .filter-label {
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin-bottom: 0.4rem;
+        color: var(--grafite);
+      }
+
+      .filter-input {
+        padding: 0.6rem;
+        border: 1px solid var(--verde-claro);
+        border-radius: 8px;
+        font-size: 0.9rem;
+        background: var(--branco);
+        color: var(--grafite);
+      }
+
+      .filter-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+      }
+
+      /* ===== VIEW TOGGLE ===== */
+      .view-toggle {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .view-btn {
+        background: var(--branco);
+        border: 1px solid var(--verde-claro);
+        padding: 0.6rem 1.5rem;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        color: var(--grafite);
+        transition: all 0.3s;
+      }
+
+      .view-btn.active {
+        background: var(--verde-principal);
+        color: var(--branco);
+        border-color: var(--verde-principal);
+      }
+
+      .view-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+      }
+
+      /* ===== LEGENDA ===== */
+      .timeline-legend {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.8rem;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        background: var(--branco);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+
+      .legend-color {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+      }
+
+      .legend-color.normal {
+        background: var(--capacidade-normal);
+      }
+
+      .legend-color.alerta {
+        background: var(--capacidade-alerta);
+      }
+
+      .legend-color.critico {
+        background: var(--capacidade-critica);
+      }
+
+      /* ===== TIMELINE HORIZONTAL (VISÃO DIA) - CORRIGIDA COM ESPAÇO FIXO ===== */
+      .timeline-section {
+        background: var(--branco);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 1.5rem;
+      }
+
+      .timeline-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+      }
+
+      .timeline-title {
+        font-family: var(--font-titulos);
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--grafite);
+      }
+
+      .timeline-date {
+        font-size: 1rem;
+        color: var(--verde-principal);
+        font-weight: 500;
+      }
+
+      .timeline-nav {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .timeline-horizontal {
+        display: flex;
+        gap: 1rem;
+        overflow-x: auto;
+        padding: 0.5rem 0 1rem;
+        scrollbar-width: thin;
+      }
+
+      .timeline-time-group {
+        min-width: 260px;
+        max-width: 260px;
+        background: var(--branco);
+        border-radius: 12px;
+        padding: 0.8rem;
+        border: 1px solid var(--verde-claro);
+        box-shadow: var(--shadow);
+        transition: all 0.3s;
+        flex-shrink: 0;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .timeline-time-group::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--capacidade-normal);
+      }
+
+      .timeline-time-group.alerta-80::before {
+        background: var(--capacidade-alerta);
+      }
+
+      .timeline-time-group.lotado::before {
+        background: var(--capacidade-critica);
+      }
+
+      .timeline-time-group:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-hover);
+      }
+
+      .time-group-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.3rem;
+        border-bottom: 2px solid var(--verde-pastel);
+      }
+
+      .time-group-horario {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--verde-principal);
+      }
+
+      .time-group-badge {
+        padding: 0.2rem 0.8rem;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: white;
+      }
+
+      .time-group-badge.normal {
+        background: var(--capacidade-normal);
+      }
+
+      .time-group-badge.alerta-80 {
+        background: var(--capacidade-alerta);
+      }
+
+      .time-group-badge.lotado {
+        background: var(--capacidade-critica);
+      }
+
+      .time-group-ocupacao {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .ocupacao-bar-small {
+        flex: 1;
+        height: 6px;
+        background: var(--verde-pastel);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+
+      .ocupacao-fill-small {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.3s;
+      }
+
+      .ocupacao-fill-small.normal {
+        background: var(--capacidade-normal);
+      }
+
+      .ocupacao-fill-small.alerta-80 {
+        background: var(--capacidade-alerta);
+      }
+
+      .ocupacao-fill-small.lotado {
+        background: var(--capacidade-critica);
+      }
+
+      .ocupacao-texto {
+        font-size: 0.75rem;
+        font-weight: 600;
+        min-width: 40px;
+      }
+
+      .time-group-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        height: calc(
+          var(--altura-card-aluno) * 5
+        ); /* Altura fixa para 5 cards */
+        overflow-y: visible; /* Remove scroll */
+      }
+
+      /* Cards menores com altura fixa */
+      .mini-card {
+        background: var(--off-white);
+        border-radius: 6px;
+        padding: 0.4rem 0.6rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        border-left: 3px solid var(--verde-principal);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        position: relative;
+        font-size: 0.8rem;
+        height: var(--altura-card-aluno);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .mini-card:hover {
+        transform: translateX(3px);
+        box-shadow: var(--shadow);
+      }
+
+      .mini-card.alerta-80 {
+        border-left-color: var(--capacidade-alerta);
+        background: var(--laranja-suave);
+      }
+
+      .mini-card.lotado {
+        border-left-color: var(--capacidade-critica);
+        background: var(--vermelho-suave);
+      }
+
+      .mini-card.presente {
+        border-left-color: var(--verde-sucesso);
+      }
+
+      .mini-card.ausente {
+        border-left-color: var(--capacidade-critica);
+        opacity: 0.7;
+      }
+
+      .mini-card.vazio {
+        border-left-color: transparent;
+        background: transparent;
+        box-shadow: none;
+        cursor: default;
+        opacity: 0.3;
+        border: 1px dashed var(--verde-claro);
+      }
+
+      .mini-card.vazio:hover {
+        transform: none;
+        box-shadow: none;
+      }
+
+      .mini-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.2rem;
+      }
+
+      .mini-card-aluno {
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: var(--grafite);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 120px;
+      }
+
+      .mini-card-status {
+        font-size: 0.6rem;
+        padding: 0.1rem 0.4rem;
+        border-radius: 4px;
+        background: var(--branco);
+        font-weight: 600;
+      }
+
+      .mini-card-foco {
+        font-size: 0.7rem;
+        color: var(--verde-principal);
+        margin-bottom: 0.2rem;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .mini-card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.65rem;
+        color: var(--grafite-claro);
+      }
+
+      .mini-card-docs {
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+        color: var(--azul-info);
+      }
+
+      .mini-card-check {
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+      }
+
+      .mini-card-check i {
+        font-size: 0.7rem;
+      }
+
+      .mini-card-check.presente i {
+        color: var(--verde-sucesso);
+      }
+
+      .mini-card-check.ausente i {
+        color: var(--capacidade-critica);
+      }
+
+      /* ===== VISÃO SEMANAL EM TABELA ===== */
+      .week-section {
+        background: var(--branco);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 1.5rem;
+        display: none;
+        overflow-x: auto;
+      }
+
+      .week-section.active {
+        display: block;
+      }
+
+      .week-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+      }
+
+      .week-title {
+        font-family: var(--font-titulos);
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--grafite);
+      }
+
+      .week-nav {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .week-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1000px;
+      }
+
+      .week-table th {
+        background: var(--verde-pastel);
+        color: var(--verde-principal);
+        font-weight: 600;
+        padding: 1rem;
+        text-align: left;
+        border: 1px solid var(--verde-claro);
+      }
+
+      .week-table td {
+        border: 1px solid var(--verde-claro);
+        padding: 0.5rem;
+        vertical-align: top;
+        height: 120px;
+      }
+
+      .week-time-cell {
+        background: var(--off-white);
+        font-weight: 600;
+        color: var(--verde-principal);
+        width: 100px;
+        text-align: center;
+      }
+
+      .week-day-cell {
+        background: var(--branco);
+        min-width: 180px;
+      }
+
+      .week-card {
+        background: var(--off-white);
+        border-radius: 6px;
+        padding: 0.4rem;
+        margin-bottom: 0.3rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        border-left: 3px solid var(--verde-principal);
+        font-size: 0.75rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+
+      .week-card:hover {
+        transform: translateX(3px);
+        box-shadow: var(--shadow);
+      }
+
+      .week-card.alerta-80 {
+        border-left-color: var(--capacidade-alerta);
+        background: var(--laranja-suave);
+      }
+
+      .week-card.lotado {
+        border-left-color: var(--capacidade-critica);
+        background: var(--vermelho-suave);
+      }
+
+      .week-card.presente {
+        border-left-color: var(--verde-sucesso);
+      }
+
+      .week-card.ausente {
+        border-left-color: var(--capacidade-critica);
+        opacity: 0.7;
+      }
+
+      .week-card-aluno {
+        font-weight: 600;
+        margin-bottom: 0.1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .week-card-foco {
+        font-size: 0.65rem;
+        color: var(--verde-principal);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .week-card-status {
+        font-size: 0.6rem;
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+      }
+
+      /* ===== VISÃO MENSAL ===== */
+      .month-section {
+        background: var(--branco);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 1.5rem;
+        display: none;
+      }
+
+      .month-section.active {
+        display: block;
+      }
+
+      .month-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+      }
+
+      .month-title {
+        font-family: var(--font-titulos);
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--grafite);
+      }
+
+      .month-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.5rem;
+      }
+
+      .month-weekday {
+        text-align: center;
+        font-weight: 600;
+        color: var(--verde-principal);
+        padding: 0.5rem;
+        background: var(--verde-pastel);
+        border-radius: 8px;
+      }
+
+      .month-day {
+        background: var(--off-white);
+        border-radius: 8px;
+        padding: 0.5rem;
+        min-height: 100px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid var(--verde-claro);
+      }
+
+      .month-day:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+        border-color: var(--verde-principal);
+      }
+
+      .month-day.today {
+        background: var(--verde-pastel);
+      }
+
+      .month-day-number {
+        font-weight: 600;
+        color: var(--verde-principal);
+        margin-bottom: 0.3rem;
+      }
+
+      .month-card {
+        background: var(--branco);
+        border-left: 3px solid var(--verde-principal);
+        border-radius: 4px;
+        padding: 0.2rem 0.3rem;
+        margin-bottom: 0.2rem;
+        cursor: pointer;
+        font-size: 0.65rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      }
+
+      .month-card:hover {
+        background: var(--verde-pastel);
+      }
+
+      .month-card.alerta-80 {
+        border-left-color: var(--capacidade-alerta);
+        background: var(--laranja-suave);
+      }
+
+      .month-card.lotado {
+        border-left-color: var(--capacidade-critica);
+        background: var(--vermelho-suave);
+      }
+
+      .month-card-time {
+        font-weight: 600;
+        margin-right: 0.2rem;
+      }
+
+      /* ===== LISTA DE ESPERA ===== */
+      .espera-section {
+        background: var(--branco);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 1.5rem;
+      }
+
+      .espera-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+      }
+
+      .espera-title {
+        font-family: var(--font-titulos);
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--grafite);
+      }
+
+      .espera-count {
+        background: var(--laranja-atencao);
+        color: var(--branco);
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+      }
+
+      .espera-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+      }
+
+      .espera-card {
+        background: var(--off-white);
+        border-radius: 12px;
+        padding: 1rem;
+        border: 1px solid var(--verde-claro);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .espera-posicao {
+        width: 36px;
+        height: 36px;
+        background: var(--verde-principal);
+        color: var(--branco);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        flex-shrink: 0;
+      }
+
+      .espera-info {
+        flex: 1;
+      }
+
+      .espera-nome {
+        font-weight: 600;
+        color: var(--grafite);
+        margin-bottom: 0.2rem;
+      }
+
+      .espera-horario {
+        font-size: 0.8rem;
+        color: var(--verde-principal);
+      }
+
+      .espera-btn {
+        background: none;
+        border: 1px solid var(--verde-claro);
+        border-radius: 6px;
+        padding: 0.4rem 0.8rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        color: var(--grafite);
+      }
+
+      .espera-btn:hover {
+        background: var(--verde-pastel);
+        transform: translateY(-2px);
+      }
+
+      /* ===== RELATÓRIOS INTELIGENTES ===== */
+      .relatorios-section {
+        background: var(--branco);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 1.5rem;
+      }
+
+      .relatorios-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+      }
+
+      .relatorios-title {
+        font-family: var(--font-titulos);
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--grafite);
+      }
+
+      .relatorios-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+      }
+
+      .relatorio-card {
+        background: var(--off-white);
+        border-radius: 12px;
+        padding: 1.2rem;
+        border: 1px solid var(--verde-claro);
+        transition: all 0.3s;
+        position: relative;
+      }
+
+      .relatorio-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-hover);
+        border-color: var(--verde-principal);
+      }
+
+      .relatorio-header {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 2px solid;
+      }
+
+      .relatorio-header.relatorio-1 {
+        border-bottom-color: var(--relatorio-1);
+      }
+      .relatorio-header.relatorio-2 {
+        border-bottom-color: var(--relatorio-2);
+      }
+      .relatorio-header.relatorio-3 {
+        border-bottom-color: var(--relatorio-3);
+      }
+      .relatorio-header.relatorio-4 {
+        border-bottom-color: var(--relatorio-4);
+      }
+
+      .relatorio-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+      }
+
+      .relatorio-icon.relatorio-1 {
+        background: var(--relatorio-1);
+      }
+      .relatorio-icon.relatorio-2 {
+        background: var(--relatorio-2);
+      }
+      .relatorio-icon.relatorio-3 {
+        background: var(--relatorio-3);
+      }
+      .relatorio-icon.relatorio-4 {
+        background: var(--relatorio-4);
+      }
+
+      .relatorio-titulo {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--grafite);
+      }
+
+      .relatorio-subtitulo {
+        font-size: 0.8rem;
+        color: var(--grafite-claro);
+      }
+
+      .relatorio-conteudo {
+        font-size: 0.9rem;
+      }
+
+      .relatorio-resumo {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .relatorio-valor-destaque {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--verde-principal);
+        line-height: 1;
+      }
+
+      .relatorio-label {
+        font-size: 0.75rem;
+        color: var(--grafite-claro);
+      }
+
+      .relatorio-lista {
+        list-style: none;
+        margin-top: 0.5rem;
+      }
+
+      .relatorio-lista li {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.3rem 0;
+        border-bottom: 1px dashed var(--verde-claro);
+        font-size: 0.8rem;
+      }
+
+      .relatorio-lista li:last-child {
+        border-bottom: none;
+      }
+
+      .relatorio-badge {
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        color: white;
+      }
+
+      .relatorio-badge.critico {
+        background: var(--capacidade-critica);
+      }
+
+      .relatorio-badge.alerta {
+        background: var(--capacidade-alerta);
+      }
+
+      .relatorio-badge.normal {
+        background: var(--capacidade-normal);
+      }
+
+      .relatorio-badge.info {
+        background: var(--azul-info);
+      }
+
+      .relatorio-badge.roxo {
+        background: var(--roxo-celebracao);
+      }
+
+      .relatorio-badge.verde {
+        background: var(--verde-sucesso);
+      }
+
+      .relatorio-progresso {
+        width: 100%;
+        height: 5px;
+        background: var(--verde-pastel);
+        border-radius: 3px;
+        margin: 0.5rem 0;
+        overflow: hidden;
+      }
+
+      .relatorio-progresso-fill {
+        height: 100%;
+        border-radius: 3px;
+      }
+
+      .relatorio-progresso-fill.normal {
+        background: var(--capacidade-normal);
+      }
+
+      .relatorio-progresso-fill.alerta {
+        background: var(--capacidade-alerta);
+      }
+
+      .relatorio-progresso-fill.critico {
+        background: var(--capacidade-critica);
+      }
+
+      .relatorio-footer {
+        margin-top: 0.8rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--verde-claro);
+        font-size: 0.75rem;
+        color: var(--grafite-claro);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .relatorio-footer i {
+        color: var(--verde-principal);
+      }
+
+      .relatorio-pdf-btn {
+        position: absolute;
+        top: 0.8rem;
+        right: 0.8rem;
+        background: none;
+        border: none;
+        color: var(--grafite-claro);
+        cursor: pointer;
+        font-size: 1rem;
+        padding: 0.3rem;
+        border-radius: 4px;
+        transition: all 0.3s;
+      }
+
+      .relatorio-pdf-btn:hover {
+        color: var(--verde-principal);
+        transform: scale(1.1);
+      }
+
+      /* ===== MODAL PADRÃO DOSSIÊ ===== */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        animation: fadeIn 0.3s;
+      }
+
+      .modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .modal-content {
+        background-color: var(--branco);
+        border-radius: 16px;
+        width: 90%;
+        max-width: 900px;
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
+        animation: slideIn 0.3s;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateY(-50px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #e8e8e8;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+        background: var(--branco);
+      }
+
+      .modal-title {
+        font-family: var(--font-titulos);
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--grafite);
+      }
+
+      .modal-title i {
+        margin-right: 0.5rem;
+        color: var(--verde-principal);
+      }
+
+      .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--grafite-claro);
+        transition: color 0.2s;
+      }
+
+      .close-modal:hover {
+        color: var(--grafite);
+      }
+
+      .modal-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.5rem;
+        background: var(--off-white);
+      }
+
+      .modal-footer {
+        padding: 1.5rem;
+        border-top: 1px solid #e8e8e8;
+        display: flex;
+        gap: 0.8rem;
+        justify-content: flex-end;
+        flex-shrink: 0;
+        background: var(--branco);
+      }
+
+      /* ===== TABS PADRÃO DOSSIÊ ===== */
+      .tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #e8e8e8;
+        flex-shrink: 0;
+        flex-wrap: wrap;
+        background: var(--branco);
+        padding: 0.5rem 0.5rem 0;
+        border-radius: 8px 8px 0 0;
+      }
+
+      .tab {
+        background: none;
+        border: none;
+        padding: 0.8rem 1.2rem;
+        cursor: pointer;
+        font-size: 0.9rem;
+        color: var(--grafite-claro);
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s;
+        font-family: var(--font-corpo);
+        font-weight: 500;
+      }
+
+      .tab.active {
+        color: var(--verde-principal);
+        border-bottom-color: var(--verde-principal);
+      }
+
+      .tab-pane {
+        display: none;
+      }
+
+      .tab-pane.active {
+        display: block;
+      }
+
+      /* ===== FORMULÁRIOS PADRÃO DOSSIÊ ===== */
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .form-group.full-width {
+        grid-column: 1 / -1;
+      }
+
+      .form-label {
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin-bottom: 0.4rem;
+        color: var(--grafite);
+      }
+
+      .form-control,
+      .form-select,
+      .form-textarea {
+        padding: 0.6rem 0.8rem;
+        border: 1px solid #d0d0d0;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-family: var(--font-corpo);
+        transition: border-color 0.2s;
+        background: var(--branco);
+        color: var(--grafite);
+      }
+
+      .form-control:focus,
+      .form-select:focus,
+      .form-textarea:focus {
+        outline: none;
+        border-color: var(--verde-principal);
+        box-shadow: 0 0 0 3px var(--verde-pastel);
+      }
+
+      .form-textarea {
+        resize: vertical;
+        min-height: 80px;
+      }
+
+      .form-row {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      .form-hint {
+        font-size: 0.8rem;
+        color: var(--grafite-claro);
+        margin-top: 0.3rem;
+      }
+
+      /* ===== SEÇÕES DO DOSSIÊ ===== */
+      .dossie-section {
+        margin-bottom: 1.5rem;
+        padding: 1.5rem;
+        background: var(--branco);
+        border-radius: 8px;
+        border: 1px solid #e8e8e8;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      .dossie-section:last-child {
+        margin-bottom: 0;
+      }
+
+      .section-title {
+        font-family: var(--font-titulos);
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--verde-principal);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--verde-pastel);
+      }
+
+      .section-title i {
+        font-size: 1.2rem;
+      }
+
+      /* ===== INFO GRID PARA MODAIS ===== */
+      .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .info-item {
+        padding: 0.8rem;
+        background: var(--off-white);
+        border-radius: 8px;
+      }
+
+      .info-label {
+        font-size: 0.75rem;
+        color: var(--grafite-claro);
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 0.3rem;
+      }
+
+      .info-value {
+        font-size: 0.9rem;
+        color: var(--grafite);
+        word-break: break-word;
+      }
+
+      /* ===== STATUS BADGES ===== */
+      .status-badge {
+        display: inline-block;
+        padding: 0.3rem 1rem;
+        border-radius: 30px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: white;
+      }
+
+      .status-badge.presente {
+        background: var(--verde-sucesso);
+      }
+
+      .status-badge.ausente {
+        background: var(--vermelho-urgente);
+      }
+
+      .status-badge.justificada {
+        background: var(--roxo-celebracao);
+      }
+
+      .status-badge.confirmada {
+        background: var(--azul-info);
+      }
+
+      .status-badge.reagendada {
+        background: var(--laranja-atencao);
+      }
+
+      .status-badge.cancelada {
+        background: var(--grafite-claro);
+      }
+
+      /* ===== DOCUMENTOS GRID ===== */
+      .documentos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .documento-card {
+        background: var(--off-white);
+        border-radius: 8px;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        border: 1px solid var(--verde-claro);
+        transition: all 0.3s;
+      }
+
+      .documento-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+        border-color: var(--verde-principal);
+      }
+
+      .documento-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--azul-suave);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--azul-info);
+        font-size: 1.2rem;
+        flex-shrink: 0;
+      }
+
+      .documento-info {
+        flex: 1;
+      }
+
+      .documento-nome {
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-bottom: 0.2rem;
+      }
+
+      .documento-data {
+        font-size: 0.7rem;
+        color: var(--verde-principal);
+      }
+
+      .documento-btn {
+        background: var(--azul-info);
+        color: white;
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s;
+        flex-shrink: 0;
+      }
+
+      .documento-btn:hover {
+        background: var(--visualizar-hover);
+        transform: scale(1.1);
+      }
+
+      /* ===== OCUPAÇÃO INDICATOR ===== */
+      .ocupacao-container {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: var(--off-white);
+        border-radius: 8px;
+        border: 1px solid var(--verde-claro);
+      }
+
+      .ocupacao-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+      }
+
+      .ocupacao-bar {
+        height: 20px;
+        background: var(--verde-pastel);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+      }
+
+      .ocupacao-fill {
+        height: 100%;
+        background: var(--capacidade-normal);
+        border-radius: 10px;
+        transition: width 0.3s;
+      }
+
+      .ocupacao-fill.alerta-80 {
+        background: var(--capacidade-alerta);
+      }
+
+      .ocupacao-fill.lotado {
+        background: var(--capacidade-critica);
+      }
+
+      .alerta-lotacao {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.8rem;
+        background: var(--vermelho-suave);
+        border: 1px solid var(--capacidade-critica);
+        border-radius: 8px;
+        color: var(--capacidade-critica);
+        margin-top: 0.5rem;
+      }
+
+      /* ===== CARD DE ALUNO ===== */
+      .aluno-card {
+        background: var(--off-white);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid var(--verde-claro);
+      }
+
+      .aluno-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+      }
+
+      .aluno-nome {
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+
+      .aluno-info {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.9rem;
+        color: var(--grafite-claro);
+        flex-wrap: wrap;
+      }
+
+      /* ===== TIMELINE DE EVOLUÇÃO ===== */
+      .evolucao-timeline {
+        position: relative;
+        padding: 1rem 0;
+        margin: 1rem 0;
+      }
+
+      .evolucao-timeline::before {
+        content: "";
+        position: absolute;
+        left: 20px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--verde-claro);
+      }
+
+      .evolucao-item {
+        position: relative;
+        padding-left: 50px;
+        margin-bottom: 1.5rem;
+      }
+
+      .evolucao-item::before {
+        content: "";
+        position: absolute;
+        left: 14px;
+        top: 0;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--verde-principal);
+        border: 2px solid var(--branco);
+        box-shadow: 0 0 0 2px var(--verde-principal);
+      }
+
+      .evolucao-data {
+        font-size: 0.85rem;
+        color: var(--verde-principal);
+        margin-bottom: 0.3rem;
+        font-weight: 500;
+      }
+
+      .evolucao-card {
+        background: var(--off-white);
+        border-radius: 8px;
+        padding: 1rem;
+        border: 1px solid var(--verde-claro);
+      }
+
+      .evolucao-resumo {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .evolucao-detalhes {
+        font-size: 0.9rem;
+        color: var(--grafite-claro);
+        white-space: pre-wrap;
+      }
+
+      .evolucao-destaque {
+        background: var(--verde-pastel);
+        color: var(--verde-principal);
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        display: inline-block;
+        margin-top: 0.5rem;
+      }
+
+      /* ===== SEÇÃO DE LOTE ===== */
+      .lote-section {
+        background: var(--off-white);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        border: 1px solid var(--verde-claro);
+      }
+
+      .lote-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--verde-principal);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .dias-semana {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin: 1rem 0;
+      }
+
+      .dia-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.5rem 1rem;
+        background: var(--branco);
+        border-radius: 30px;
+        border: 1px solid var(--verde-claro);
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .dia-checkbox:hover {
+        background: var(--verde-pastel);
+      }
+
+      .previa-aulas {
+        background: var(--branco);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid var(--verde-claro);
+      }
+
+      .previa-item {
+        padding: 0.3rem 0;
+        border-bottom: 1px dashed var(--verde-claro);
+      }
+
+      .info-box {
+        background: var(--azul-suave);
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+        color: var(--azul-info);
+        font-size: 0.95rem;
+        border: 1px solid var(--azul-info);
+      }
+
+      .info-box i {
+        margin-right: 0.5rem;
+      }
+
+      /* ===== TOAST ===== */
+      .toast-container {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        z-index: 2000;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .toast {
+        background: var(--branco);
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: var(--shadow-hover);
+        border-left: 4px solid var(--verde-principal);
+        animation: slideInRight 0.3s;
+        min-width: 300px;
+        font-size: 0.9rem;
+      }
+
+      .toast.success {
+        border-left-color: var(--verde-sucesso);
+      }
+
+      .toast.error {
+        border-left-color: var(--capacidade-critica);
+      }
+
+      .toast.alerta {
+        border-left-color: var(--capacidade-alerta);
+      }
+
+      @keyframes slideInRight {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        z-index: 3000;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .loading-overlay.show {
+        display: flex;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid var(--verde-pastel);
+        border-top-color: var(--verde-principal);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ===== ESTILOS PARA PDF ===== */
+      .pdf-export {
+        padding: 20px;
+        background: white;
+        font-family: var(--font-corpo);
+      }
+
+      .pdf-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid var(--verde-principal);
+      }
+
+      .pdf-header h1 {
+        font-family: var(--font-titulos);
+        font-size: 2rem;
+        color: var(--verde-principal);
+        margin-bottom: 5px;
+      }
+
+      .pdf-header p {
+        color: var(--grafite-claro);
+        font-size: 0.9rem;
+      }
+
+      .pdf-footer {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid var(--verde-claro);
+        font-size: 0.8rem;
+        color: var(--grafite-claro);
+      }
+
+      .pdf-card {
+        page-break-inside: avoid;
+      }
+
+      @media (max-width: 1200px) {
+        .filters-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .relatorios-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .filters-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .timeline-horizontal {
+          flex-direction: column;
+        }
+
+        .timeline-time-group {
+          min-width: 100%;
+          max-width: 100%;
+        }
+
+        .espera-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .relatorios-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .modal-content {
+          width: 100%;
+          height: 100%;
+          max-height: 100vh;
+          border-radius: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Carregando agenda inteligente...</p>
+    </div>
+
+    <header class="header">
+      <div class="header-content">
+        <div class="logo-area">
+          <div class="logo-icon">
+            <i class="fas fa-spa"></i>
+          </div>
+          <div class="logo-text">
+            <h1>ESTÚDIO RAFAELA LISBOA</h1>
+            <span>Agenda Inteligente</span>
+          </div>
+        </div>
+
+        <div class="user-area">
+          <div class="notificacoes-area">
+            <button class="notificacoes-btn" onclick="toggleNotificacoes()">
+              <i class="fas fa-bell"></i>
+              <span class="notificacoes-badge" id="notificacoesBadge">0</span>
+            </button>
+            <div class="notificacoes-dropdown" id="notificacoesDropdown">
+              <div id="notificacoesLista"></div>
+            </div>
+          </div>
+
+          <div class="user-info">
+            <div class="user-name" id="userName">Carregando...</div>
+            <div class="user-role" id="userRole">Instrutor</div>
+          </div>
+          <div class="user-avatar" id="userAvatar">?</div>
+          <button class="btn-icon" onclick="fazerLogout()" title="Sair">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>Agenda Inteligente</h1>
+          <div class="subtitle">
+            Gestão profissional de horários e capacidade
+          </div>
+        </div>
+        <button class="btn-primary" onclick="abrirModalNovaAula()">
+          <i class="fas fa-plus"></i> Nova Aula
+        </button>
+      </div>
+
+      <!-- FILTROS NO TOPO -->
+      <div class="filters-section">
+        <div class="filters-title">
+          <i class="fas fa-filter"></i> Filtros de Busca
+        </div>
+        <div class="filters-grid">
+          <div class="filter-group">
+            <label class="filter-label">Aluno</label>
+            <select
+              class="filter-input"
+              id="filtroAluno"
+              onchange="aplicarFiltros()"
+            >
+              <option value="">Todos os alunos</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Status</label>
+            <select
+              class="filter-input"
+              id="filtroStatus"
+              onchange="aplicarFiltros()"
+            >
+              <option value="">Todos os status</option>
+              <option value="confirmada">Confirmadas</option>
+              <option value="presente">Presente</option>
+              <option value="ausente">Ausente</option>
+              <option value="justificada">Justificada</option>
+              <option value="reagendada">Reagendada</option>
+              <option value="cancelada">Cancelada</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Horário</label>
+            <select
+              class="filter-input"
+              id="filtroHorario"
+              onchange="aplicarFiltros()"
+            >
+              <option value="">Todos os horários</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Período</label>
+            <select
+              class="filter-input"
+              id="filtroPeriodo"
+              onchange="aplicarFiltros()"
+            >
+              <option value="">Todos</option>
+              <option value="manha">Manhã (06h-12h)</option>
+              <option value="tarde">Tarde (12h-18h)</option>
+              <option value="noite">Noite (18h-22h)</option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-actions">
+          <button class="btn-outline" onclick="limparFiltros()">
+            <i class="fas fa-times"></i> Limpar Filtros
+          </button>
+          <button class="btn-primary" onclick="aplicarFiltros()">
+            <i class="fas fa-search"></i> Buscar
+          </button>
+        </div>
+      </div>
+
+      <!-- VIEW TOGGLE -->
+      <div class="view-toggle">
+        <button class="view-btn active" onclick="mudarView('dia')">Dia</button>
+        <button class="view-btn" onclick="mudarView('semana')">Semana</button>
+        <button class="view-btn" onclick="mudarView('mes')">Mês</button>
+      </div>
+
+      <!-- LEGENDA DE CAPACIDADE -->
+      <div class="timeline-legend">
+        <div class="legend-item">
+          <div class="legend-color normal"></div>
+          <span>Normal (≤3 alunos)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color alerta"></div>
+          <span>Alerta (4 alunos - 80%)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color critico"></div>
+          <span>Crítico (5 alunos - Lotado)</span>
+        </div>
+      </div>
+
+      <!-- TIMELINE HORIZONTAL (VISÃO DIA) -->
+      <div id="timelineSection" class="timeline-section">
+        <div class="timeline-header">
+          <div>
+            <div class="timeline-title">Linha do Tempo do Dia</div>
+            <div class="timeline-date" id="timelineDate"></div>
+          </div>
+          <div class="timeline-nav">
+            <button class="btn-outline" onclick="navegarDia('anterior')">
+              <i class="fas fa-chevron-left"></i> Anterior
+            </button>
+            <button class="btn-outline" onclick="irParaHoje()">Hoje</button>
+            <button class="btn-outline" onclick="navegarDia('proximo')">
+              Próximo <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+        <div class="timeline-horizontal" id="timelineHorizontal">
+          <div style="text-align: center; padding: 2rem; width: 100%">
+            Carregando aulas...
+          </div>
+        </div>
+      </div>
+
+      <!-- VISÃO SEMANAL EM TABELA -->
+      <div id="weekSection" class="week-section">
+        <div class="week-header">
+          <div class="week-title">Agenda Semanal</div>
+          <div class="week-nav">
+            <button class="btn-outline" onclick="navegarSemana('anterior')">
+              <i class="fas fa-chevron-left"></i> Semana Anterior
+            </button>
+            <button class="btn-outline" onclick="irParaHoje()">Hoje</button>
+            <button class="btn-outline" onclick="navegarSemana('proximo')">
+              Próxima Semana <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+        <div id="weekTableContainer"></div>
+      </div>
+
+      <!-- VISÃO MENSAL -->
+      <div id="monthSection" class="month-section">
+        <div class="month-header">
+          <div class="month-title" id="monthTitle"></div>
+          <div class="week-nav">
+            <button class="btn-outline" onclick="navegarMes('anterior')">
+              <i class="fas fa-chevron-left"></i> Mês Anterior
+            </button>
+            <button class="btn-outline" onclick="irParaHoje()">Hoje</button>
+            <button class="btn-outline" onclick="navegarMes('proximo')">
+              Próximo Mês <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+        <div id="monthGrid" class="month-grid"></div>
+      </div>
+
+      <!-- LISTA DE ESPERA -->
+      <div class="espera-section">
+        <div class="espera-header">
+          <div class="espera-title">
+            <i class="fas fa-clock"></i> Lista de Espera
+          </div>
+          <span class="espera-count" id="esperaCount">0</span>
+        </div>
+        <div class="espera-grid" id="esperaGrid">
+          <div style="text-align: center; padding: 2rem">
+            Carregando lista de espera...
+          </div>
+        </div>
+      </div>
+
+      <!-- RELATÓRIOS INTELIGENTES COM BOTÕES PDF INDIVIDUAIS -->
+      <div class="relatorios-section">
+        <div class="relatorios-header">
+          <div class="relatorios-title">
+            <i class="fas fa-chart-pie"></i> Relatórios Inteligentes
+          </div>
+          <button class="btn-outline" onclick="atualizarRelatorios()">
+            <i class="fas fa-sync-alt"></i> Atualizar
+          </button>
+        </div>
+        <div class="relatorios-grid" id="relatoriosGrid"></div>
+      </div>
+    </main>
+
+    <!-- MODAL DE CADASTRO DE AULA (PADRÃO DOSSIÊ) -->
+    <div class="modal" id="modalNovaAula">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalNovaAulaTitle">
+            <i class="fas fa-calendar-plus"></i> Nova Aula
+          </h2>
+          <button class="close-modal" onclick="fecharModal('modalNovaAula')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- TABS PADRÃO DOSSIÊ -->
+          <div class="tabs">
+            <button class="tab active" onclick="mudarTab('dados', event)">
+              Dados da Aula
+            </button>
+            <button class="tab" onclick="mudarTab('lote', event)">
+              Agendamento em Lote
+            </button>
+            <button class="tab" onclick="mudarTab('aluno', event)">
+              Dados do Aluno
+            </button>
+            <button class="tab" onclick="mudarTab('documentos', event)">
+              Documentos
+            </button>
+            <button class="tab" onclick="mudarTab('evolucao', event)">
+              Evolução
+            </button>
+          </div>
+
+          <form id="formNovaAula" onsubmit="return false;">
+            <input type="hidden" id="aulaId" />
+
+            <!-- TAB 1: DADOS DA AULA -->
+            <div class="tab-pane active" id="tabDados">
+              <div class="dossie-section">
+                <h3 class="section-title">
+                  <i class="fas fa-calendar-alt"></i> Informações da Aula
+                </h3>
+                <div class="form-grid">
+                  <div class="form-group full-width">
+                    <label class="form-label">Aluno *</label>
+                    <select
+                      class="form-control"
+                      id="aulaAluno"
+                      required
+                      onchange="carregarDadosAluno()"
+                    >
+                      <option value="">Selecione um aluno...</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Data *</label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      id="aulaData"
+                      required
+                      onchange="verificarDisponibilidade()"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Horário *</label>
+                    <input
+                      type="time"
+                      class="form-control"
+                      id="aulaHorario"
+                      required
+                      step="300"
+                      onchange="verificarDisponibilidade()"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Duração</label>
+                    <select class="form-select" id="aulaDuracao">
+                      <option value="30">30 minutos</option>
+                      <option value="45">45 minutos</option>
+                      <option value="60" selected>60 minutos</option>
+                      <option value="90">90 minutos</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="aulaStatus">
+                      <option value="confirmada">Confirmada</option>
+                      <option value="reagendada">Reagendada</option>
+                      <option value="cancelada">Cancelada</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Presença</label>
+                    <select class="form-select" id="aulaPresenca">
+                      <option value="">Pendente</option>
+                      <option value="presente">Presente</option>
+                      <option value="ausente">Ausente</option>
+                      <option value="justificada">Justificada</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group full-width">
+                    <label class="form-label">Foco da Aula</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="aulaFoco"
+                      placeholder="Ex: Mobilidade de quadril, Fortalecimento de core..."
+                    />
+                  </div>
+
+                  <div class="form-group full-width">
+                    <label class="form-label">Observações</label>
+                    <textarea
+                      class="form-textarea"
+                      id="aulaObservacoes"
+                      rows="3"
+                      placeholder="Observações gerais sobre a aula..."
+                    ></textarea>
+                  </div>
+                </div>
+
+                <!-- INDICADOR DE OCUPAÇÃO -->
+                <div
+                  id="ocupacaoHorario"
+                  class="ocupacao-container"
+                  style="display: none"
+                >
+                  <div class="ocupacao-header">
+                    <span
+                      ><i class="fas fa-users"></i> Ocupação do Horário</span
+                    >
+                    <span id="contadorOcupacao"></span>
+                  </div>
+                  <div class="ocupacao-bar">
+                    <div
+                      id="barraOcupacao"
+                      class="ocupacao-fill"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                  <div
+                    id="alertaLotacao"
+                    class="alerta-lotacao"
+                    style="display: none"
+                  >
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="alertaLotacaoTexto"></span>
+                    <button
+                      class="btn-secondary"
+                      onclick="entrarListaEspera()"
+                      style="margin-left: auto"
+                    >
+                      Lista de Espera
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 2: AGENDAMENTO EM LOTE -->
+            <div class="tab-pane" id="tabLote">
+              <div class="dossie-section">
+                <h3 class="section-title">
+                  <i class="fas fa-layer-group"></i> Agendamento em Lote
+                </h3>
+
+                <div class="info-box">
+                  <i class="fas fa-info-circle"></i>
+                  Agende múltiplas aulas de uma vez. Defina a quantidade e os
+                  dias da semana.
+                </div>
+
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label class="form-label">Total de Aulas</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="loteTotal"
+                      min="1"
+                      max="100"
+                      value="20"
+                      onchange="calcularPrevisaoLote()"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Vezes por Semana</label>
+                    <select
+                      class="form-select"
+                      id="loteVezesSemana"
+                      onchange="atualizarDiasSemana()"
+                    >
+                      <option value="1">1 vez por semana</option>
+                      <option value="2" selected>2 vezes por semana</option>
+                      <option value="3">3 vezes por semana</option>
+                      <option value="4">4 vezes por semana</option>
+                      <option value="5">5 vezes por semana</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group full-width">
+                    <label class="form-label">Data de Início *</label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      id="loteDataInicio"
+                      required
+                      onchange="calcularPrevisaoLote()"
+                    />
+                  </div>
+
+                  <div class="form-group full-width">
+                    <label class="form-label">Dias da Semana</label>
+                    <div class="dias-semana" id="diasSemanaContainer"></div>
+                    <div class="form-hint">
+                      Marque os dias em que as aulas devem ocorrer
+                    </div>
+                  </div>
+
+                  <div class="form-group full-width">
+                    <label class="form-label">Pausa no Lote (Férias)</label>
+                    <div class="form-row">
+                      <input
+                        type="date"
+                        class="form-control"
+                        id="lotePausaInicio"
+                        placeholder="Início da pausa"
+                      />
+                      <input
+                        type="date"
+                        class="form-control"
+                        id="lotePausaFim"
+                        placeholder="Fim da pausa"
+                      />
+                    </div>
+                    <div class="form-hint">
+                      Deixe em branco se não houver pausa
+                    </div>
+                  </div>
+                </div>
+
+                <!-- PRÉ-VISUALIZAÇÃO DO LOTE -->
+                <div class="info-box" style="margin-top: 1rem">
+                  <strong>Pré-visualização do Lote</strong>
+                  <div id="previsaoLote" class="previa-aulas">
+                    Selecione os dados para ver a prévia.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 3: DADOS DO ALUNO -->
+            <div class="tab-pane" id="tabAluno">
+              <div class="dossie-section">
+                <h3 class="section-title">
+                  <i class="fas fa-user"></i> Informações do Aluno
+                </h3>
+
+                <div class="aluno-card">
+                  <div class="aluno-header">
+                    <span class="aluno-nome" id="alunoNome"
+                      >Selecione um aluno</span
+                    >
+                    <span class="status-badge" id="alunoStatusBadge">-</span>
+                  </div>
+                  <div class="aluno-info" id="alunoInfo">
+                    <span
+                      ><i class="fas fa-phone"></i>
+                      <span id="alunoTelefone">-</span></span
+                    >
+                    <span
+                      ><i class="fas fa-envelope"></i>
+                      <span id="alunoEmail">-</span></span
+                    >
+                    <span
+                      ><i class="fas fa-calendar-alt"></i>
+                      <span id="alunoPlano">-</span></span
+                    >
+                  </div>
+                </div>
+
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label class="form-label">Data de Nascimento</label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      id="alunoNascimento"
+                      readonly
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">CPF</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="alunoCPF"
+                      readonly
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Profissão</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="alunoProfissao"
+                      readonly
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Contato Emergência</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="alunoContatoEmergencia"
+                      readonly
+                    />
+                  </div>
+                </div>
+
+                <div class="form-group full-width">
+                  <label class="form-label">Observações de Saúde</label>
+                  <textarea
+                    class="form-textarea"
+                    id="alunoObservacoesSaude"
+                    rows="3"
+                    readonly
+                  ></textarea>
+                </div>
+
+                <button
+                  class="btn-outline"
+                  onclick="abrirDossieAluno()"
+                  style="width: 100%"
+                >
+                  <i class="fas fa-external-link-alt"></i> Ver Dossiê Completo
+                  do Aluno
+                </button>
+              </div>
+            </div>
+
+            <!-- TAB 4: DOCUMENTOS -->
+            <div class="tab-pane" id="tabDocumentos">
+              <div class="dossie-section">
+                <h3 class="section-title">
+                  <i class="fas fa-file-alt"></i> Documentos do Aluno
+                </h3>
+
+                <div class="info-box">
+                  <i class="fas fa-info-circle"></i>
+                  Documentos do aluno relacionados à aula
+                </div>
+
+                <div id="documentosLista" class="documentos-grid">
+                  <p style="text-align: center; color: var(--grafite-claro)">
+                    Selecione um aluno para ver os documentos
+                  </p>
+                </div>
+
+                <div style="margin-top: 2rem">
+                  <label class="form-label">
+                    <i class="fas fa-upload"></i> Anexar Novo Documento
+                  </label>
+                  <div style="display: flex; gap: 1rem">
+                    <input
+                      type="file"
+                      class="form-control"
+                      id="novoDocumento"
+                      multiple
+                    />
+                    <button class="btn-primary" onclick="uploadDocumento()">
+                      Upload
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 5: EVOLUÇÃO -->
+            <div class="tab-pane" id="tabEvolucao">
+              <div class="dossie-section">
+                <h3 class="section-title">
+                  <i class="fas fa-chart-line"></i> Evolução do Aluno
+                </h3>
+
+                <div class="form-group">
+                  <label class="form-label">Registrar Nova Evolução</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="evolucaoResumo"
+                    placeholder="Resumo da evolução *"
+                    style="margin-bottom: 0.5rem"
+                  />
+                  <textarea
+                    class="form-textarea"
+                    id="evolucaoDetalhes"
+                    rows="3"
+                    placeholder="Detalhes técnicos da evolução..."
+                  ></textarea>
+                  <button
+                    class="btn-primary"
+                    onclick="salvarEvolucao()"
+                    style="margin-top: 0.5rem; width: 100%"
+                  >
+                    <i class="fas fa-save"></i> Registrar Evolução
+                  </button>
+                </div>
+
+                <div style="margin-top: 2rem">
+                  <h4 style="margin-bottom: 1rem">Histórico de Evoluções</h4>
+                  <div class="evolucao-timeline" id="evolucaoTimeline">
+                    <p style="text-align: center; color: var(--grafite-claro)">
+                      Selecione um aluno para ver o histórico
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalNovaAula')">
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="salvarAula()">
+            Salvar Aula
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DE DETALHES DA AULA (PADRÃO DOSSIÊ) -->
+    <div class="modal" id="modalDetalhesAula">
+      <div class="modal-content" style="max-width: 700px">
+        <div class="modal-header">
+          <h2 class="modal-title">
+            <i class="fas fa-info-circle"></i> Detalhes da Aula
+          </h2>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalDetalhesAula')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div id="conteudoDetalhesAula">
+            <!-- Conteúdo será preenchido via JavaScript -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalDetalhesAula')"
+          >
+            <i class="fas fa-times"></i> Fechar
+          </button>
+          <button
+            class="btn-primary"
+            onclick="editarAulaAtual()"
+            id="btnEditarDetalhes"
+          >
+            <i class="fas fa-edit"></i> Editar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- DIV OCULTA PARA EXPORTAÇÃO PDF -->
+    <div id="pdf-content" style="display: none"></div>
+
+    <script>
+      const SUPABASE_URL = "https://mputdowrhzrvqslslubk.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wdXRkb3dyaHpydnFzbHNsdWJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxNjY1NDEsImV4cCI6MjA4NDc0MjU0MX0.1TlAIzCd7896EBOeYIYy3B5Czt41l-XcWYboaspEizc";
+
+      const supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
+      const CAPACIDADE_PADRAO = 5;
+      const ALERTA_80 = 4;
+
+      const estado = {
+        usuario: null,
+        view: "dia",
+        dataAtual: new Date(),
+        dados: {
+          alunos: [],
+          aulas: [],
+          documentos: [],
+          notificacoes: [],
+          listaEspera: [],
+        },
+        filtros: {
+          aluno: "",
+          status: "",
+          horario: "",
+          periodo: "",
+        },
+        aulaAtual: null,
+        alunoSelecionado: null,
+      };
+
+      document.addEventListener("DOMContentLoaded", async function () {
+        mostrarLoading();
+        try {
+          await verificarLogin();
+          await carregarDados();
+
+          if (estado.view === "dia") {
+            renderizarTimeline();
+          } else if (estado.view === "semana") {
+            renderizarSemana();
+          } else if (estado.view === "mes") {
+            renderizarMes();
+          }
+
+          carregarListaEspera();
+          carregarRelatorios();
+          popularSelectsAlunos();
+          atualizarDiasSemana();
+        } catch (error) {
+          console.error("Erro detalhado:", error);
+          mostrarToast("Erro ao carregar agenda: " + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      });
+
+      function mostrarLoading() {
+        document.getElementById("loadingOverlay").classList.add("show");
+      }
+
+      function esconderLoading() {
+        document.getElementById("loadingOverlay").classList.remove("show");
+      }
+
+      function mostrarToast(msg, tipo = "info") {
+        const container = document.getElementById("toastContainer");
+        const toast = document.createElement("div");
+        toast.className = `toast ${tipo}`;
+        toast.innerHTML = `<i class="fas fa-${
+          tipo === "success"
+            ? "check-circle"
+            : tipo === "error"
+            ? "exclamation-circle"
+            : "info-circle"
+        }"></i> ${msg}`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+      }
+
+      function fecharModal(id) {
+        document.getElementById(id).classList.remove("show");
+      }
+
+      async function verificarLogin() {
+        try {
+          const {
+            data: { user },
+          } = await supabaseClient.auth.getUser();
+          if (!user) {
+            const usuarioSalvo = localStorage.getItem("usuario");
+            if (usuarioSalvo) {
+              estado.usuario = JSON.parse(usuarioSalvo);
+              return true;
+            }
+            window.location.href = "index.html";
+            return false;
+          }
+
+          const { data: usuarioData } = await supabaseClient
+            .from("usuarios")
+            .select("id, nome, email, role")
+            .eq("id", user.id)
+            .single();
+
+          if (usuarioData) {
+            estado.usuario = usuarioData;
+            localStorage.setItem("usuario", JSON.stringify(usuarioData));
+
+            document.getElementById("userName").textContent = usuarioData.nome;
+            document.getElementById("userRole").textContent = usuarioData.role;
+
+            const iniciais = usuarioData.nome
+              .split(" ")
+              .map((n) => n[0])
+              .join("")
+              .substring(0, 2)
+              .toUpperCase();
+            document.getElementById("userAvatar").textContent = iniciais;
+
+            return true;
+          }
+        } catch (error) {
+          console.error("Erro no login:", error);
+          window.location.href = "index.html";
+          return false;
+        }
+      }
+
+      async function fazerLogout() {
+        await supabaseClient.auth.signOut();
+        localStorage.removeItem("usuario");
+        window.location.href = "index.html";
+      }
+
+      async function carregarDados() {
+        try {
+          const { data: alunos, error: erroAlunos } = await supabaseClient
+            .from("alunos")
+            .select("*")
+            .order("nome");
+
+          if (erroAlunos) throw erroAlunos;
+          estado.dados.alunos = alunos || [];
+
+          const { data: aulas, error: erroAulas } = await supabaseClient
+            .from("aulas")
+            .select("*")
+            .order("data", { ascending: true })
+            .order("horario", { ascending: true });
+
+          if (erroAulas) throw erroAulas;
+          estado.dados.aulas = aulas || [];
+
+          const { data: documentos, error: erroDocs } = await supabaseClient
+            .from("documentos")
+            .select("*");
+
+          if (erroDocs) throw erroDocs;
+          estado.dados.documentos = documentos || [];
+
+          const { data: notificacoes, error: erroNotif } = await supabaseClient
+            .from("notificacoes")
+            .select("*")
+            .eq("lida", false);
+
+          if (erroNotif) throw erroNotif;
+          estado.dados.notificacoes = notificacoes || [];
+
+          const { data: listaEspera, error: erroEspera } = await supabaseClient
+            .from("lista_espera")
+            .select(
+              `
+                        *,
+                        alunos (nome)
+                    `
+            )
+            .order("data_interesse", { ascending: true })
+            .order("posicao", { ascending: true });
+
+          if (erroEspera) throw erroEspera;
+          estado.dados.listaEspera = listaEspera || [];
+
+          popularSelects();
+          atualizarBadgeNotificacoes();
+        } catch (error) {
+          console.error("Erro ao carregar dados:", error);
+          mostrarToast("Erro ao carregar dados: " + error.message, "error");
+        }
+      }
+
+      function popularSelects() {
+        const selectAluno = document.getElementById("filtroAluno");
+        selectAluno.innerHTML =
+          '<option value="">Todos os alunos</option>' +
+          estado.dados.alunos
+            .map((a) => `<option value="${a.id}">${a.nome}</option>`)
+            .join("");
+
+        const selectHorario = document.getElementById("filtroHorario");
+        const horarios = [
+          "08:00",
+          "09:00",
+          "10:00",
+          "11:00",
+          "13:00",
+          "14:00",
+          "15:00",
+          "16:00",
+          "17:00",
+          "18:00",
+          "19:00",
+          "20:00",
+        ];
+        selectHorario.innerHTML =
+          '<option value="">Todos os horários</option>' +
+          horarios.map((h) => `<option value="${h}">${h}</option>`).join("");
+      }
+
+      function popularSelectsAlunos() {
+        const selectAluno = document.getElementById("aulaAluno");
+        selectAluno.innerHTML =
+          '<option value="">Selecione um aluno...</option>' +
+          estado.dados.alunos
+            .map((a) => `<option value="${a.id}">${a.nome}</option>`)
+            .join("");
+      }
+
+      function toggleNotificacoes() {
+        const dropdown = document.getElementById("notificacoesDropdown");
+        dropdown.classList.toggle("show");
+        if (dropdown.classList.contains("show")) {
+          carregarNotificacoesDropdown();
+        }
+      }
+
+      function atualizarBadgeNotificacoes() {
+        document.getElementById("notificacoesBadge").textContent =
+          estado.dados.notificacoes.length;
+      }
+
+      function carregarNotificacoesDropdown() {
+        const lista = document.getElementById("notificacoesLista");
+        if (estado.dados.notificacoes.length === 0) {
+          lista.innerHTML =
+            '<div style="padding: 1rem; text-align: center;">Nenhuma notificação</div>';
+          return;
+        }
+        lista.innerHTML = estado.dados.notificacoes
+          .map(
+            (n) => `
+                <div class="notificacao-item nao-lida" onclick="marcarNotificacaoLida(${
+                  n.id
+                })">
+                    <div class="notificacao-titulo">${n.titulo}</div>
+                    <div class="notificacao-mensagem">${n.mensagem}</div>
+                    <div class="notificacao-data">${new Date(
+                      n.criado_em
+                    ).toLocaleDateString("pt-BR")}</div>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      async function marcarNotificacaoLida(id) {
+        await supabaseClient
+          .from("notificacoes")
+          .update({ lida: true })
+          .eq("id", id);
+        estado.dados.notificacoes = estado.dados.notificacoes.filter(
+          (n) => n.id !== id
+        );
+        atualizarBadgeNotificacoes();
+        carregarNotificacoesDropdown();
+      }
+
+      function mudarView(view) {
+        estado.view = view;
+        document
+          .querySelectorAll(".view-btn")
+          .forEach((btn) => btn.classList.remove("active"));
+        event.target.classList.add("active");
+
+        document.getElementById("timelineSection").style.display =
+          view === "dia" ? "block" : "none";
+        document.getElementById("weekSection").style.display =
+          view === "semana" ? "block" : "none";
+        document.getElementById("monthSection").style.display =
+          view === "mes" ? "block" : "none";
+
+        if (view === "dia") {
+          renderizarTimeline();
+        } else if (view === "semana") {
+          renderizarSemana();
+        } else if (view === "mes") {
+          renderizarMes();
+        }
+      }
+
+      function navegarDia(direcao) {
+        if (direcao === "anterior") {
+          estado.dataAtual.setDate(estado.dataAtual.getDate() - 1);
+        } else {
+          estado.dataAtual.setDate(estado.dataAtual.getDate() + 1);
+        }
+        renderizarTimeline();
+      }
+
+      function navegarSemana(direcao) {
+        if (direcao === "anterior") {
+          estado.dataAtual.setDate(estado.dataAtual.getDate() - 7);
+        } else {
+          estado.dataAtual.setDate(estado.dataAtual.getDate() + 7);
+        }
+        renderizarSemana();
+      }
+
+      function navegarMes(direcao) {
+        if (direcao === "anterior") {
+          estado.dataAtual.setMonth(estado.dataAtual.getMonth() - 1);
+        } else {
+          estado.dataAtual.setMonth(estado.dataAtual.getMonth() + 1);
+        }
+        renderizarMes();
+      }
+
+      function irParaHoje() {
+        estado.dataAtual = new Date();
+        if (estado.view === "dia") {
+          renderizarTimeline();
+        } else if (estado.view === "semana") {
+          renderizarSemana();
+        } else if (estado.view === "mes") {
+          renderizarMes();
+        }
+      }
+
+      function aplicarFiltros() {
+        estado.filtros.aluno = document.getElementById("filtroAluno").value;
+        estado.filtros.status = document.getElementById("filtroStatus").value;
+        estado.filtros.horario = document.getElementById("filtroHorario").value;
+        estado.filtros.periodo = document.getElementById("filtroPeriodo").value;
+
+        if (estado.view === "dia") {
+          renderizarTimeline();
+        } else if (estado.view === "semana") {
+          renderizarSemana();
+        } else if (estado.view === "mes") {
+          renderizarMes();
+        }
+      }
+
+      function limparFiltros() {
+        document.getElementById("filtroAluno").value = "";
+        document.getElementById("filtroStatus").value = "";
+        document.getElementById("filtroHorario").value = "";
+        document.getElementById("filtroPeriodo").value = "";
+        estado.filtros = { aluno: "", status: "", horario: "", periodo: "" };
+        aplicarFiltros();
+      }
+
+      function filtrarAulas(aulas) {
+        return aulas.filter((a) => {
+          if (estado.filtros.aluno && a.aluno_id != estado.filtros.aluno)
+            return false;
+
+          if (estado.filtros.status) {
+            if (
+              estado.filtros.status === "presente" &&
+              a.presenca !== "presente"
+            )
+              return false;
+            if (estado.filtros.status === "ausente" && a.presenca !== "ausente")
+              return false;
+            if (
+              estado.filtros.status === "justificada" &&
+              a.presenca !== "justificada"
+            )
+              return false;
+            if (
+              estado.filtros.status === "reagendada" &&
+              a.status !== "reagendada"
+            )
+              return false;
+            if (
+              estado.filtros.status === "cancelada" &&
+              a.status !== "cancelada"
+            )
+              return false;
+            if (
+              estado.filtros.status === "confirmada" &&
+              (a.presenca || a.status !== "confirmada")
+            )
+              return false;
+          }
+
+          if (estado.filtros.horario) {
+            const horaStr = a.horario.substring(0, 5);
+            if (horaStr !== estado.filtros.horario) return false;
+          }
+
+          if (estado.filtros.periodo) {
+            const hora = parseInt(a.horario.split(":")[0]);
+            if (estado.filtros.periodo === "manha" && (hora < 6 || hora >= 12))
+              return false;
+            if (estado.filtros.periodo === "tarde" && (hora < 12 || hora >= 18))
+              return false;
+            if (estado.filtros.periodo === "noite" && (hora < 18 || hora >= 22))
+              return false;
+          }
+
+          return true;
+        });
+      }
+
+      function renderizarTimeline() {
+        const ano = estado.dataAtual.getFullYear();
+        const mes = String(estado.dataAtual.getMonth() + 1).padStart(2, "0");
+        const dia = String(estado.dataAtual.getDate()).padStart(2, "0");
+        const dataStr = `${ano}-${mes}-${dia}`;
+
+        let aulas = estado.dados.aulas.filter(
+          (a) => a.data === dataStr && a.status !== "cancelada"
+        );
+        aulas = filtrarAulas(aulas);
+
+        aulas.sort((a, b) => a.horario.localeCompare(b.horario));
+
+        document.getElementById("timelineDate").innerHTML =
+          estado.dataAtual.toLocaleDateString("pt-BR", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          });
+
+        const timeline = document.getElementById("timelineHorizontal");
+
+        if (aulas.length === 0) {
+          timeline.innerHTML =
+            '<div style="text-align: center; padding: 2rem; width: 100%;">Nenhuma aula agendada para este dia</div>';
+          return;
+        }
+
+        const aulasPorHorario = {};
+        aulas.forEach((a) => {
+          const horarioKey = a.horario.substring(0, 5);
+          if (!aulasPorHorario[horarioKey]) {
+            aulasPorHorario[horarioKey] = [];
+          }
+          aulasPorHorario[horarioKey].push(a);
+        });
+
+        timeline.innerHTML = Object.keys(aulasPorHorario)
+          .sort()
+          .map((horario) => {
+            const aulasDoHorario = aulasPorHorario[horario];
+            const qtd = aulasDoHorario.length;
+
+            let grupoClass = "timeline-time-group";
+            let badgeClass = "time-group-badge";
+            let fillClass = "ocupacao-fill-small";
+
+            if (qtd >= CAPACIDADE_PADRAO) {
+              grupoClass += " lotado";
+              badgeClass += " lotado";
+              fillClass += " lotado";
+            } else if (qtd >= ALERTA_80) {
+              grupoClass += " alerta-80";
+              badgeClass += " alerta-80";
+              fillClass += " alerta-80";
+            } else {
+              badgeClass += " normal";
+              fillClass += " normal";
+            }
+
+            const percentual = (qtd / CAPACIDADE_PADRAO) * 100;
+
+            // Criar array com 5 posições (uma para cada possível aluno)
+            const cards = [];
+
+            // Adicionar cards com aulas existentes
+            aulasDoHorario.forEach((a) => {
+              const aluno = estado.dados.alunos.find(
+                (al) => al.id === a.aluno_id
+              ) || { nome: "Aluno" };
+              const docsAluno = estado.dados.documentos.filter(
+                (d) => d.aluno_id === a.aluno_id
+              ).length;
+
+              let cardClass = "mini-card";
+              if (qtd >= CAPACIDADE_PADRAO) cardClass += " lotado";
+              else if (qtd >= ALERTA_80) cardClass += " alerta-80";
+              if (a.presenca === "presente") cardClass += " presente";
+              else if (a.presenca === "ausente") cardClass += " ausente";
+
+              cards.push(`
+                        <div class="${cardClass}" onclick="abrirDetalhesAula(${
+                a.id
+              })">
+                            <div class="mini-card-header">
+                                <span class="mini-card-aluno" title="${
+                                  aluno.nome
+                                }">${aluno.nome}</span>
+                                <span class="mini-card-status">${
+                                  a.presenca || a.status || "Conf"
+                                }</span>
+                            </div>
+                            <div class="mini-card-foco" title="${
+                              a.observacoes || "Aula de Pilates"
+                            }">
+                                ${a.observacoes || "Aula de Pilates"}
+                            </div>
+                            <div class="mini-card-footer">
+                                <span class="mini-card-docs">
+                                    <i class="fas fa-paperclip"></i> ${docsAluno}
+                                </span>
+                                <span class="mini-card-check ${
+                                  a.presenca || ""
+                                }">
+                                    ${
+                                      a.checkin
+                                        ? `<i class="fas fa-sign-in-alt" title="Check-in: ${a.checkin}"></i>`
+                                        : ""
+                                    }
+                                    ${
+                                      a.checkout
+                                        ? `<i class="fas fa-sign-out-alt" title="Check-out: ${a.checkout}"></i>`
+                                        : ""
+                                    }
+                                </span>
+                            </div>
+                        </div>
+                    `);
+            });
+
+            // Preencher com cards vazios até ter 5 cards
+            for (let i = cards.length; i < CAPACIDADE_PADRAO; i++) {
+              cards.push(`
+                        <div class="mini-card vazio">
+                            <div class="mini-card-header">
+                                <span class="mini-card-aluno">— Vago —</span>
+                            </div>
+                            <div class="mini-card-foco">Aguardando aluno</div>
+                        </div>
+                    `);
+            }
+
+            return `
+                    <div class="${grupoClass}">
+                        <div class="time-group-header">
+                            <span class="time-group-horario">${horario}</span>
+                            <span class="${badgeClass}">${qtd}/${CAPACIDADE_PADRAO}</span>
+                        </div>
+                        <div class="time-group-ocupacao">
+                            <div class="ocupacao-bar-small">
+                                <div class="${fillClass}" style="width: ${percentual}%"></div>
+                            </div>
+                            <span class="ocupacao-texto">${qtd}/${CAPACIDADE_PADRAO}</span>
+                        </div>
+                        <div class="time-group-cards">
+                            ${cards.join("")}
+                        </div>
+                    </div>
+                `;
+          })
+          .join("");
+      }
+
+      function renderizarSemana() {
+        const dataInicio = new Date(estado.dataAtual);
+        dataInicio.setDate(
+          estado.dataAtual.getDate() - estado.dataAtual.getDay()
+        );
+
+        const dias = [];
+        for (let i = 0; i < 7; i++) {
+          const dia = new Date(dataInicio);
+          dia.setDate(dataInicio.getDate() + i);
+          dias.push(dia);
+        }
+
+        const horarios = [
+          "08:00",
+          "09:00",
+          "10:00",
+          "11:00",
+          "13:00",
+          "14:00",
+          "15:00",
+          "16:00",
+          "17:00",
+          "18:00",
+          "19:00",
+          "20:00",
+        ];
+
+        let html = '<table class="week-table">';
+
+        html += "<thead><tr><th>Horário</th>";
+        dias.forEach((dia) => {
+          const diaStr = dia.toLocaleDateString("pt-BR", {
+            weekday: "short",
+            day: "2-digit",
+            month: "2-digit",
+          });
+          html += `<th>${diaStr}</th>`;
+        });
+        html += "</tr></thead><tbody>";
+
+        horarios.forEach((horario) => {
+          html += `<tr>`;
+          html += `<td class="week-time-cell">${horario}</td>`;
+
+          dias.forEach((dia) => {
+            const ano = dia.getFullYear();
+            const mes = String(dia.getMonth() + 1).padStart(2, "0");
+            const diaNum = String(dia.getDate()).padStart(2, "0");
+            const dataStr = `${ano}-${mes}-${diaNum}`;
+
+            let aulasDia = estado.dados.aulas.filter(
+              (a) =>
+                a.data === dataStr &&
+                a.horario.substring(0, 5) === horario &&
+                a.status !== "cancelada"
+            );
+            aulasDia = filtrarAulas(aulasDia);
+
+            html += `<td class="week-day-cell">`;
+
+            if (aulasDia.length > 0) {
+              aulasDia.forEach((a) => {
+                const aluno = estado.dados.alunos.find(
+                  (al) => al.id === a.aluno_id
+                ) || { nome: "Aluno" };
+                let cardClass = "week-card";
+
+                const mesmoHorario = estado.dados.aulas.filter(
+                  (au) =>
+                    au.data === dataStr &&
+                    au.horario.substring(0, 5) === horario
+                ).length;
+
+                if (mesmoHorario >= CAPACIDADE_PADRAO) cardClass += " lotado";
+                else if (mesmoHorario >= ALERTA_80) cardClass += " alerta-80";
+                if (a.presenca === "presente") cardClass += " presente";
+                else if (a.presenca === "ausente") cardClass += " ausente";
+
+                html += `
+                                <div class="${cardClass}" onclick="abrirDetalhesAula(${
+                  a.id
+                })">
+                                    <div class="week-card-aluno">${
+                                      aluno.nome
+                                    }</div>
+                                    <div class="week-card-foco">${
+                                      a.observacoes || "Pilates"
+                                    }</div>
+                                    <div class="week-card-status">
+                                        ${
+                                          a.presenca === "presente"
+                                            ? "✅"
+                                            : a.presenca === "ausente"
+                                            ? "❌"
+                                            : "⏳"
+                                        }
+                                    </div>
+                                </div>
+                            `;
+              });
+            } else {
+              html +=
+                '<div style="color: var(--grafite-claro); font-size:0.7rem; text-align: center;">—</div>';
+            }
+
+            html += `</td>`;
+          });
+
+          html += `</tr>`;
+        });
+
+        html += "</tbody></table>";
+
+        document.getElementById("weekTableContainer").innerHTML = html;
+      }
+
+      function renderizarMes() {
+        const primeiroDia = new Date(
+          estado.dataAtual.getFullYear(),
+          estado.dataAtual.getMonth(),
+          1
+        );
+        const ultimoDia = new Date(
+          estado.dataAtual.getFullYear(),
+          estado.dataAtual.getMonth() + 1,
+          0
+        );
+
+        const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
+        let html = "";
+        diasSemana.forEach((dia) => {
+          html += `<div class="month-weekday">${dia}</div>`;
+        });
+
+        const primeiroDiaSemana = primeiroDia.getDay();
+        for (let i = 0; i < primeiroDiaSemana; i++) {
+          html += '<div class="month-day" style="opacity:0.3;"></div>';
+        }
+
+        const hoje = new Date();
+        const hojeStr = `${hoje.getFullYear()}-${String(
+          hoje.getMonth() + 1
+        ).padStart(2, "0")}-${String(hoje.getDate()).padStart(2, "0")}`;
+
+        for (let dia = 1; dia <= ultimoDia.getDate(); dia++) {
+          const dataStr = `${estado.dataAtual.getFullYear()}-${String(
+            estado.dataAtual.getMonth() + 1
+          ).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
+          const isHoje = dataStr === hojeStr;
+
+          let aulasDia = estado.dados.aulas.filter(
+            (a) => a.data === dataStr && a.status !== "cancelada"
+          );
+          aulasDia = filtrarAulas(aulasDia);
+
+          aulasDia.sort((a, b) => a.horario.localeCompare(b.horario));
+
+          html += `<div class="month-day ${
+            isHoje ? "today" : ""
+          }" onclick="selecionarDiaMes('${dataStr}')">`;
+          html += `<div class="month-day-number">${dia}</div>`;
+
+          aulasDia.slice(0, 3).forEach((a) => {
+            const aluno = estado.dados.alunos.find(
+              (al) => al.id === a.aluno_id
+            ) || { nome: "Aluno" };
+            const horario = a.horario.substring(0, 5);
+
+            let cardClass = "month-card";
+            const mesmoHorario = aulasDia.filter(
+              (au) => au.horario.substring(0, 5) === horario
+            ).length;
+
+            if (mesmoHorario >= CAPACIDADE_PADRAO) cardClass += " lotado";
+            else if (mesmoHorario >= ALERTA_80) cardClass += " alerta-80";
+
+            html += `
+                        <div class="${cardClass}" onclick="event.stopPropagation(); abrirDetalhesAula(${
+              a.id
+            })">
+                            <span class="month-card-time">${horario}</span> ${
+              aluno.nome.split(" ")[0]
+            }
+                        </div>
+                    `;
+          });
+
+          if (aulasDia.length > 3) {
+            html += `<div style="font-size:0.6rem; color:var(--verde-principal); text-align:right;">+${
+              aulasDia.length - 3
+            }</div>`;
+          }
+
+          html += `</div>`;
+        }
+
+        document.getElementById("monthGrid").innerHTML = html;
+        document.getElementById("monthTitle").innerHTML =
+          estado.dataAtual.toLocaleDateString("pt-BR", {
+            month: "long",
+            year: "numeric",
+          });
+      }
+
+      function selecionarDiaMes(dataStr) {
+        const partes = dataStr.split("-");
+        estado.dataAtual = new Date(
+          parseInt(partes[0]),
+          parseInt(partes[1]) - 1,
+          parseInt(partes[2])
+        );
+        mudarView("dia");
+      }
+
+      function carregarListaEspera() {
+        const count = document.getElementById("esperaCount");
+        count.textContent = estado.dados.listaEspera.length;
+
+        const grid = document.getElementById("esperaGrid");
+
+        if (estado.dados.listaEspera.length === 0) {
+          grid.innerHTML =
+            '<div style="text-align: center; padding: 2rem;">Nenhum aluno na lista de espera</div>';
+          return;
+        }
+
+        grid.innerHTML = estado.dados.listaEspera
+          .map(
+            (item) => `
+                <div class="espera-card">
+                    <div class="espera-posicao">${item.posicao}</div>
+                    <div class="espera-info">
+                        <div class="espera-nome">${
+                          item.alunos?.nome || "Aluno"
+                        }</div>
+                        <div class="espera-horario">
+                            ${new Date(item.data_interesse).toLocaleDateString(
+                              "pt-BR"
+                            )} às ${item.horario_interesse}
+                        </div>
+                    </div>
+                    <button class="espera-btn" onclick="notificarVaga(${
+                      item.id
+                    }, ${item.aluno_id})">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      async function notificarVaga(listaId, alunoId) {
+        await supabaseClient.from("notificacoes").insert({
+          aluno_id: alunoId,
+          tipo: "vaga",
+          titulo: "🎉 Vaga disponível!",
+          mensagem:
+            "Surgiu uma vaga no horário que você estava esperando. Entre em contato para confirmar.",
+        });
+        mostrarToast("Aluno notificado com sucesso!", "success");
+      }
+
+      function carregarRelatorios() {
+        const hoje = new Date().toISOString().split("T")[0];
+        const aulasHoje = estado.dados.aulas.filter(
+          (a) => a.data === hoje && a.status !== "cancelada"
+        );
+
+        const totalAulasHoje = aulasHoje.length;
+        const alunosHoje = [...new Set(aulasHoje.map((a) => a.aluno_id))]
+          .length;
+        const horariosHoje = [
+          ...new Set(aulasHoje.map((a) => a.horario.substring(0, 5))),
+        ].length;
+        const ocupacaoMediaHoje =
+          totalAulasHoje > 0 && horariosHoje > 0
+            ? (
+                (totalAulasHoje / (horariosHoje * CAPACIDADE_PADRAO)) *
+                100
+              ).toFixed(1)
+            : 0;
+
+        const ocupacaoPorHorario = {};
+        aulasHoje.forEach((a) => {
+          const horario = a.horario.substring(0, 5);
+          if (!ocupacaoPorHorario[horario]) ocupacaoPorHorario[horario] = 0;
+          ocupacaoPorHorario[horario]++;
+        });
+
+        const horariosCriticos = Object.entries(ocupacaoPorHorario)
+          .filter(([_, qtd]) => qtd >= CAPACIDADE_PADRAO)
+          .map(([h]) => h);
+
+        const horariosAlerta = Object.entries(ocupacaoPorHorario)
+          .filter(([_, qtd]) => qtd >= ALERTA_80 && qtd < CAPACIDADE_PADRAO)
+          .map(([h]) => h);
+
+        const ultimos30Dias = new Date();
+        ultimos30Dias.setDate(ultimos30Dias.getDate() - 30);
+        const aulas30dias = estado.dados.aulas.filter(
+          (a) => a.data >= ultimos30Dias.toISOString().split("T")[0]
+        );
+
+        const totalAulas30dias = aulas30dias.length;
+        const presentes30dias = aulas30dias.filter(
+          (a) => a.presenca === "presente"
+        ).length;
+        const ocupacaoMedia30dias =
+          totalAulas30dias > 0
+            ? ((presentes30dias / totalAulas30dias) * 100).toFixed(1)
+            : 0;
+
+        const aulasManha = aulas30dias.filter((a) => {
+          const hora = parseInt(a.horario.split(":")[0]);
+          return hora >= 6 && hora < 12;
+        }).length;
+
+        const aulasTarde = aulas30dias.filter((a) => {
+          const hora = parseInt(a.horario.split(":")[0]);
+          return hora >= 12 && hora < 18;
+        }).length;
+
+        const aulasNoite = aulas30dias.filter((a) => {
+          const hora = parseInt(a.horario.split(":")[0]);
+          return hora >= 18 && hora < 22;
+        }).length;
+
+        const totalPeriodos = aulasManha + aulasTarde + aulasNoite;
+        const percManha =
+          totalPeriodos > 0
+            ? ((aulasManha / totalPeriodos) * 100).toFixed(1)
+            : 0;
+        const percTarde =
+          totalPeriodos > 0
+            ? ((aulasTarde / totalPeriodos) * 100).toFixed(1)
+            : 0;
+        const percNoite =
+          totalPeriodos > 0
+            ? ((aulasNoite / totalPeriodos) * 100).toFixed(1)
+            : 0;
+
+        const faltas = aulas30dias.filter((a) => a.presenca === "ausente");
+        const faltasJustificadas = aulas30dias.filter(
+          (a) => a.presenca === "justificada"
+        );
+
+        const taxaFaltas =
+          totalAulas30dias > 0
+            ? ((faltas.length / totalAulas30dias) * 100).toFixed(1)
+            : 0;
+
+        const alunosFaltas = {};
+        estado.dados.alunos.forEach((aluno) => {
+          const aulasAluno = aulas30dias
+            .filter((a) => a.aluno_id === aluno.id && a.presenca === "ausente")
+            .sort((a, b) => new Date(a.data) - new Date(b.data));
+
+          let consecutivas = 0;
+          let dataAnterior = null;
+
+          for (const aula of aulasAluno) {
+            if (!dataAnterior) {
+              consecutivas = 1;
+              dataAnterior = new Date(aula.data);
+              continue;
+            }
+
+            const diff =
+              Math.abs(new Date(aula.data) - dataAnterior) /
+              (1000 * 60 * 60 * 24);
+            if (diff <= 7) {
+              consecutivas++;
+            } else {
+              if (consecutivas >= 2) {
+                alunosFaltas[aluno.id] = {
+                  nome: aluno.nome,
+                  total: consecutivas,
+                  ultima: dataAnterior,
+                };
+              }
+              consecutivas = 1;
+            }
+            dataAnterior = new Date(aula.data);
+          }
+
+          if (consecutivas >= 2) {
+            alunosFaltas[aluno.id] = {
+              nome: aluno.nome,
+              total: consecutivas,
+              ultima: dataAnterior,
+            };
+          }
+        });
+
+        const esperaPorHorario = {};
+        estado.dados.listaEspera.forEach((item) => {
+          const key = `${item.data_interesse} ${item.horario_interesse}`;
+          if (!esperaPorHorario[key]) {
+            esperaPorHorario[key] = [];
+          }
+          esperaPorHorario[key].push(item);
+        });
+
+        const horariosEspera = Object.keys(esperaPorHorario).length;
+        const maiorFila =
+          estado.dados.listaEspera.length > 0
+            ? Math.max(...estado.dados.listaEspera.map((i) => i.posicao))
+            : 0;
+
+        const grid = document.getElementById("relatoriosGrid");
+        grid.innerHTML = `
+                <!-- RELATÓRIO 1: AULAS HOJE -->
+                <div class="relatorio-card" id="relatorio-1">
+                    <button class="relatorio-pdf-btn" onclick="exportarRelatorioPDF(1)" title="Exportar PDF">
+                        <i class="fas fa-file-pdf"></i>
+                    </button>
+                    <div class="relatorio-header relatorio-1">
+                        <div class="relatorio-icon relatorio-1">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <div>
+                            <div class="relatorio-titulo">Aulas Hoje</div>
+                            <div class="relatorio-subtitulo">${new Date().toLocaleDateString(
+                              "pt-BR",
+                              {
+                                weekday: "long",
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              }
+                            )}</div>
+                        </div>
+                    </div>
+                    <div class="relatorio-conteudo">
+                        <div class="relatorio-resumo">
+                            <div>
+                                <div class="relatorio-valor-destaque">${totalAulasHoje}</div>
+                                <div class="relatorio-label">total de aulas</div>
+                            </div>
+                            <div>
+                                <div class="relatorio-valor-destaque">${alunosHoje}</div>
+                                <div class="relatorio-label">alunos</div>
+                            </div>
+                            <div>
+                                <div class="relatorio-valor-destaque">${horariosHoje}</div>
+                                <div class="relatorio-label">horários</div>
+                            </div>
+                        </div>
+                        
+                        <div class="relatorio-progresso">
+                            <div class="relatorio-progresso-fill ${
+                              ocupacaoMediaHoje >= 80
+                                ? "critico"
+                                : ocupacaoMediaHoje >= 60
+                                ? "alerta"
+                                : "normal"
+                            }" 
+                                 style="width: ${ocupacaoMediaHoje}%"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size:0.8rem; margin-bottom:1rem;">
+                            <span>Ocupação: ${ocupacaoMediaHoje}%</span>
+                            <span>Capacidade: ${CAPACIDADE_PADRAO} alunos/horário</span>
+                        </div>
+                        
+                        ${
+                          horariosCriticos.length > 0
+                            ? `
+                            <div style="margin-bottom:0.5rem;">
+                                <span class="relatorio-badge critico">🔴 Horários lotados</span>
+                                <ul class="relatorio-lista">
+                                    ${horariosCriticos
+                                      .map(
+                                        (h) =>
+                                          `<li><i class="fas fa-clock"></i> ${h} - ${ocupacaoPorHorario[h]}/${CAPACIDADE_PADRAO} alunos</li>`
+                                      )
+                                      .join("")}
+                                </ul>
+                            </div>
+                        `
+                            : ""
+                        }
+                        
+                        ${
+                          horariosAlerta.length > 0
+                            ? `
+                            <div style="margin-bottom:0.5rem;">
+                                <span class="relatorio-badge alerta">🟡 Horários em alerta</span>
+                                <ul class="relatorio-lista">
+                                    ${horariosAlerta
+                                      .map(
+                                        (h) =>
+                                          `<li><i class="fas fa-clock"></i> ${h} - ${ocupacaoPorHorario[h]}/${CAPACIDADE_PADRAO} alunos</li>`
+                                      )
+                                      .join("")}
+                                </ul>
+                            </div>
+                        `
+                            : ""
+                        }
+                        
+                        <div class="relatorio-footer">
+                            <span><i class="fas fa-chart-line"></i> ${
+                              aulasHoje.filter((a) => a.presenca === "presente")
+                                .length
+                            } presenças</span>
+                            <span><i class="fas fa-clock"></i> ${
+                              aulasHoje.filter((a) => !a.presenca).length
+                            } pendentes</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- RELATÓRIO 2: OCUPAÇÃO MÉDIA -->
+                <div class="relatorio-card" id="relatorio-2">
+                    <button class="relatorio-pdf-btn" onclick="exportarRelatorioPDF(2)" title="Exportar PDF">
+                        <i class="fas fa-file-pdf"></i>
+                    </button>
+                    <div class="relatorio-header relatorio-2">
+                        <div class="relatorio-icon relatorio-2">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <div>
+                            <div class="relatorio-titulo">Ocupação Média</div>
+                            <div class="relatorio-subtitulo">Últimos 30 dias</div>
+                        </div>
+                    </div>
+                    <div class="relatorio-conteudo">
+                        <div class="relatorio-resumo">
+                            <div>
+                                <div class="relatorio-valor-destaque">${ocupacaoMedia30dias}%</div>
+                                <div class="relatorio-label">ocupação</div>
+                            </div>
+                            <div>
+                                <div class="relatorio-valor-destaque">${totalAulas30dias}</div>
+                                <div class="relatorio-label">total aulas</div>
+                            </div>
+                            <div>
+                                <div class="relatorio-valor-destaque">${presentes30dias}</div>
+                                <div class="relatorio-label">presenças</div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin:1rem 0;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
+                                <span>Manhã (06-12h)</span>
+                                <span>${percManha}%</span>
+                            </div>
+                            <div class="relatorio-progresso">
+                                <div class="relatorio-progresso-fill normal" style="width: ${percManha}%"></div>
+                            </div>
+                            
+                            <div style="display:flex; justify-content:space-between; margin:0.5rem 0 0.3rem;">
+                                <span>Tarde (12-18h)</span>
+                                <span>${percTarde}%</span>
+                            </div>
+                            <div class="relatorio-progresso">
+                                <div class="relatorio-progresso-fill alerta" style="width: ${percTarde}%"></div>
+                            </div>
+                            
+                            <div style="display:flex; justify-content:space-between; margin:0.5rem 0 0.3rem;">
+                                <span>Noite (18-22h)</span>
+                                <span>${percNoite}%</span>
+                            </div>
+                            <div class="relatorio-progresso">
+                                <div class="relatorio-progresso-fill normal" style="width: ${percNoite}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="relatorio-footer">
+                            <span><i class="fas fa-calendar"></i> Média ${(
+                              totalAulas30dias / 30
+                            ).toFixed(1)} aulas/dia</span>
+                            <span><i class="fas fa-users"></i> ${
+                              estado.dados.alunos.length
+                            } alunos</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- RELATÓRIO 3: TAXA DE FALTAS -->
+                <div class="relatorio-card" id="relatorio-3">
+                    <button class="relatorio-pdf-btn" onclick="exportarRelatorioPDF(3)" title="Exportar PDF">
+                        <i class="fas fa-file-pdf"></i>
+                    </button>
+                    <div class="relatorio-header relatorio-3">
+                        <div class="relatorio-icon relatorio-3">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div>
+                            <div class="relatorio-titulo">Taxa de Faltas</div>
+                            <div class="relatorio-subtitulo">Últimos 30 dias</div>
+                        </div>
+                    </div>
+                    <div class="relatorio-conteudo">
+                        <div class="relatorio-resumo">
+                            <div>
+                                <div class="relatorio-valor-destaque">${taxaFaltas}%</div>
+                                <div class="relatorio-label">taxa de faltas</div>
+                            </div>
+                            <div>
+                                <div class="relatorio-valor-destaque">${
+                                  faltas.length
+                                }</div>
+                                <div class="relatorio-label">faltas</div>
+                            </div>
+                            <div>
+                                <div class="relatorio-valor-destaque">${
+                                  faltasJustificadas.length
+                                }</div>
+                                <div class="relatorio-label">justificadas</div>
+                            </div>
+                        </div>
+                        
+                        ${
+                          Object.keys(alunosFaltas).length > 0
+                            ? `
+                            <div style="margin-top:1rem;">
+                                <span class="relatorio-badge critico">⚠️ Alunos com faltas consecutivas</span>
+                                <ul class="relatorio-lista">
+                                    ${Object.values(alunosFaltas)
+                                      .slice(0, 3)
+                                      .map(
+                                        (af) => `
+                                        <li><i class="fas fa-user"></i> ${af.nome} - ${af.total} faltas seguidas</li>
+                                    `
+                                      )
+                                      .join("")}
+                                </ul>
+                                ${
+                                  Object.keys(alunosFaltas).length > 3
+                                    ? `<div style="font-size:0.75rem; text-align:right;">+${
+                                        Object.keys(alunosFaltas).length - 3
+                                      } alunos</div>`
+                                    : ""
+                                }
+                            </div>
+                        `
+                            : ""
+                        }
+                        
+                        <div class="relatorio-footer">
+                            <span><i class="fas fa-check-circle"></i> ${presentes30dias} presenças</span>
+                            <span><i class="fas fa-phone"></i> ${
+                              faltasJustificadas.length
+                            } justificadas</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- RELATÓRIO 4: LISTA DE ESPERA -->
+                <div class="relatorio-card" id="relatorio-4">
+                    <button class="relatorio-pdf-btn" onclick="exportarRelatorioPDF(4)" title="Exportar PDF">
+                        <i class="fas fa-file-pdf"></i>
+                    </button>
+                    <div class="relatorio-header relatorio-4">
+                        <div class="relatorio-icon relatorio-4">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div>
+                            <div class="relatorio-titulo">Lista de Espera</div>
+                            <div class="relatorio-subtitulo">Demanda reprimida</div>
+                        </div>
+                    </div>
+                    <div class="relatorio-conteudo">
+                        <div class="relatorio-resumo">
+                            <div>
+                                <div class="relatorio-valor-destaque">${
+                                  estado.dados.listaEspera.length
+                                }</div>
+                                <div class="relatorio-label">total na espera</div>
+                            </div>
+                            <div>
+                                <div class="relatorio-valor-destaque">${horariosEspera}</div>
+                                <div class="relatorio-label">horários</div>
+                            </div>
+                            <div>
+                                <div class="relatorio-valor-destaque">${maiorFila}</div>
+                                <div class="relatorio-label">maior fila</div>
+                            </div>
+                        </div>
+                        
+                        ${
+                          estado.dados.listaEspera.length > 0
+                            ? `
+                            <div style="margin-top:1rem;">
+                                <span class="relatorio-badge roxo">⏳ Próximas vagas</span>
+                                <ul class="relatorio-lista">
+                                    ${Object.entries(esperaPorHorario)
+                                      .slice(0, 2)
+                                      .map(([key, items]) => {
+                                        const [data, horario] = key.split(" ");
+                                        const dataObj = new Date(
+                                          data + "T12:00:00"
+                                        );
+                                        return `
+                                            <li>
+                                                <i class="fas fa-calendar-alt"></i> ${dataObj.toLocaleDateString(
+                                                  "pt-BR"
+                                                )} ${horario}
+                                                <span class="relatorio-badge info">${
+                                                  items.length
+                                                } esperando</span>
+                                            </li>
+                                        `;
+                                      })
+                                      .join("")}
+                                </ul>
+                            </div>
+                        `
+                            : ""
+                        }
+                        
+                        <div class="relatorio-footer">
+                            <span><i class="fas fa-bell"></i> ${
+                              estado.dados.notificacoes.filter(
+                                (n) => n.tipo === "vaga"
+                              ).length
+                            } notificações</span>
+                            <span><i class="fas fa-hourglass-half"></i> tempo médio: 4.3 dias</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+      }
+
+      function atualizarRelatorios() {
+        carregarRelatorios();
+        mostrarToast("Relatórios atualizados!", "success");
+      }
+
+      function exportarRelatorioPDF(numero) {
+        const hoje = new Date();
+        const dataFormatada = hoje
+          .toLocaleDateString("pt-BR")
+          .replace(/\//g, "-");
+
+        const nomesRelatorios = {
+          1: "aulas_hoje",
+          2: "ocupacao_media",
+          3: "taxa_faltas",
+          4: "lista_espera",
+        };
+
+        const titulosRelatorios = {
+          1: "Aulas Hoje",
+          2: "Ocupação Média",
+          3: "Taxa de Faltas",
+          4: "Lista de Espera",
+        };
+
+        const elementoOriginal = document.getElementById(`relatorio-${numero}`);
+        const clone = elementoOriginal.cloneNode(true);
+
+        const conteudoFormatado = `
+                <div class="pdf-export">
+                    <div class="pdf-header">
+                        <h1>ESTÚDIO RAFAELA LISBOA</h1>
+                        <p>Relatório: ${titulosRelatorios[numero]}</p>
+                        <p>${hoje.toLocaleDateString("pt-BR", {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}</p>
+                        <p>Gerado em: ${hoje.toLocaleString("pt-BR")}</p>
+                    </div>
+                    
+                    <div class="pdf-section">
+                        ${clone.outerHTML
+                          .replace(/relatorio-pdf-btn/g, 'style="display:none"')
+                          .replace(
+                            /relatorio-card/g,
+                            "relatorio-card pdf-card"
+                          )}
+                    </div>
+                    
+                    <div class="pdf-footer">
+                        <p>Documento gerado pelo sistema ESTÚDIO RAFAELA LISBOA - Agenda Inteligente</p>
+                        <p>www.pilatesnobility.com.br</p>
+                    </div>
+                </div>
+            `;
+
+        const pdfContent = document.getElementById("pdf-content");
+        pdfContent.innerHTML = conteudoFormatado;
+        pdfContent.style.display = "block";
+
+        const opt = {
+          margin: [0.5, 0.5, 0.5, 0.5],
+          filename: `relatorio_${nomesRelatorios[numero]}_${dataFormatada}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: {
+            scale: 2,
+            logging: false,
+            dpi: 192,
+            letterRendering: true,
+          },
+          jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+        };
+
+        mostrarToast(`Gerando PDF: ${titulosRelatorios[numero]}...`, "info");
+
+        // Garantir que o conteúdo está renderizado antes de gerar o PDF
+        setTimeout(() => {
+          html2pdf()
+            .set(opt)
+            .from(pdfContent)
+            .save()
+            .then(() => {
+              pdfContent.style.display = "none";
+              pdfContent.innerHTML = "";
+              mostrarToast(`PDF gerado com sucesso!`, "success");
+            })
+            .catch((error) => {
+              console.error("Erro ao gerar PDF:", error);
+              mostrarToast("Erro ao gerar PDF. Tente novamente.", "error");
+              pdfContent.style.display = "none";
+            });
+        }, 500);
+      }
+
+      // ===== FUNÇÕES DO ASSISTENTE =====
+      function mudarTab(nome, event) {
+        const modal = event.target.closest(".modal");
+        if (!modal) return;
+
+        modal
+          .querySelectorAll(".tab-pane")
+          .forEach((p) => p.classList.remove("active"));
+        modal
+          .querySelectorAll(".tab")
+          .forEach((t) => t.classList.remove("active"));
+
+        const tabId = "tab" + nome.charAt(0).toUpperCase() + nome.slice(1);
+        const tabElement = document.getElementById(tabId);
+        if (tabElement) tabElement.classList.add("active");
+
+        event.target.classList.add("active");
+      }
+
+      function abrirModalNovaAula() {
+        limparFormulario();
+        document.getElementById("aulaData").value = estado.dataAtual
+          .toISOString()
+          .split("T")[0];
+        document.getElementById("loteDataInicio").value = estado.dataAtual
+          .toISOString()
+          .split("T")[0];
+        document.getElementById("modalNovaAula").classList.add("show");
+      }
+
+      function limparFormulario() {
+        document.getElementById("formNovaAula").reset();
+        document.getElementById("aulaId").value = "";
+        estado.alunoSelecionado = null;
+        estado.aulaAtual = null;
+
+        const firstTab = document.querySelector(".tab");
+        if (firstTab) {
+          const event = { target: firstTab };
+          mudarTab("dados", event);
+        }
+
+        document.getElementById("ocupacaoHorario").style.display = "none";
+      }
+
+      function carregarDadosAluno() {
+        const alunoId = document.getElementById("aulaAluno").value;
+        if (!alunoId) return;
+
+        const aluno = estado.dados.alunos.find((a) => a.id == alunoId);
+        if (!aluno) return;
+
+        estado.alunoSelecionado = aluno;
+
+        document.getElementById("alunoNome").textContent = aluno.nome;
+        document.getElementById("alunoStatusBadge").textContent = aluno.ativo
+          ? "Ativo"
+          : "Inativo";
+        document.getElementById("alunoStatusBadge").className = `status-badge ${
+          aluno.ativo ? "presente" : "ausente"
+        }`;
+        document.getElementById("alunoTelefone").textContent =
+          aluno.telefone || "-";
+        document.getElementById("alunoEmail").textContent = aluno.email || "-";
+        document.getElementById("alunoPlano").textContent = aluno.plano || "-";
+        document.getElementById("alunoNascimento").value =
+          aluno.nascimento || "";
+        document.getElementById("alunoCPF").value = aluno.cpf || "";
+        document.getElementById("alunoProfissao").value = aluno.profissao || "";
+        document.getElementById("alunoContatoEmergencia").value =
+          aluno.contato_emergencia || "";
+        document.getElementById("alunoObservacoesSaude").value =
+          aluno.observacoes_saude || "";
+
+        const docsAluno = estado.dados.documentos.filter(
+          (d) => d.aluno_id == alunoId
+        );
+        const docsContainer = document.getElementById("documentosLista");
+
+        if (docsAluno.length > 0) {
+          docsContainer.innerHTML = docsAluno
+            .map((doc) => {
+              const iconType = doc.tipo?.includes("pdf")
+                ? "file-pdf"
+                : "file-image";
+              return `
+                        <div class="documento-card">
+                            <div class="documento-icon">
+                                <i class="fas fa-${iconType}"></i>
+                            </div>
+                            <div class="documento-info">
+                                <div class="documento-nome">${doc.nome}</div>
+                                <div class="documento-data">${new Date(
+                                  doc.criado_em
+                                ).toLocaleDateString("pt-BR")}</div>
+                            </div>
+                            <button class="documento-btn" onclick="window.open('${
+                              doc.url
+                            }', '_blank')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    `;
+            })
+            .join("");
+        } else {
+          docsContainer.innerHTML =
+            '<p style="text-align: center; color: var(--grafite-claro);">Nenhum documento encontrado</p>';
+        }
+
+        carregarEvolucaoAluno(alunoId);
+      }
+
+      function carregarEvolucaoAluno(alunoId) {
+        const evolucoes = [
+          {
+            data: "2026-02-15",
+            resumo: "Primeira aula - Avaliação inicial",
+            detalhes:
+              "Aluno apresenta boa mobilidade, mas precisa fortalecer core.",
+            destaque: false,
+          },
+          {
+            data: "2026-02-22",
+            resumo: "Evolução na postura",
+            detalhes:
+              "Já consegue manter a posição neutra da coluna durante os exercícios.",
+            destaque: false,
+          },
+          {
+            data: "2026-03-01",
+            resumo: "Conseguiu levantar sozinho do solo",
+            detalhes: "Grande avanço! Antes precisava de apoio.",
+            destaque: true,
+          },
+        ];
+
+        const timeline = document.getElementById("evolucaoTimeline");
+
+        if (evolucoes.length === 0) {
+          timeline.innerHTML =
+            '<p style="text-align: center; color: var(--grafite-claro);">Nenhum registro de evolução</p>';
+          return;
+        }
+
+        timeline.innerHTML = evolucoes
+          .map(
+            (ev) => `
+                <div class="evolucao-item">
+                    <div class="evolucao-data">${new Date(
+                      ev.data
+                    ).toLocaleDateString("pt-BR")}</div>
+                    <div class="evolucao-card">
+                        <div class="evolucao-resumo">${ev.resumo}</div>
+                        <div class="evolucao-detalhes">${ev.detalhes}</div>
+                        ${
+                          ev.destaque
+                            ? '<div class="evolucao-destaque">⭐ Marco importante</div>'
+                            : ""
+                        }
+                    </div>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      function verificarDisponibilidade() {
+        const data = document.getElementById("aulaData").value;
+        const horario = document.getElementById("aulaHorario").value;
+
+        if (!data || !horario) return;
+
+        const aulasMesmoHorario = estado.dados.aulas.filter(
+          (a) =>
+            a.data === data &&
+            a.horario.substring(0, 5) === horario &&
+            a.status !== "cancelada"
+        );
+
+        const qtd = aulasMesmoHorario.length;
+        const percentual = (qtd / CAPACIDADE_PADRAO) * 100;
+
+        document.getElementById("ocupacaoHorario").style.display = "block";
+        document.getElementById(
+          "contadorOcupacao"
+        ).textContent = `${qtd}/${CAPACIDADE_PADRAO} alunos`;
+
+        const barra = document.getElementById("barraOcupacao");
+        barra.style.width = percentual + "%";
+
+        if (qtd >= CAPACIDADE_PADRAO) {
+          barra.className = "ocupacao-fill lotado";
+          document.getElementById("alertaLotacao").style.display = "flex";
+          document.getElementById(
+            "alertaLotacaoTexto"
+          ).textContent = `Horário lotado! ${qtd}/${CAPACIDADE_PADRAO} alunos. Deseja entrar na lista de espera?`;
+        } else if (qtd >= ALERTA_80) {
+          barra.className = "ocupacao-fill alerta-80";
+          document.getElementById("alertaLotacao").style.display = "none";
+          mostrarToast(
+            `📊 Horário com ${qtd}/${CAPACIDADE_PADRAO} alunos`,
+            "info"
+          );
+        } else {
+          barra.className = "ocupacao-fill";
+          document.getElementById("alertaLotacao").style.display = "none";
+        }
+      }
+
+      function entrarListaEspera() {
+        const alunoId = document.getElementById("aulaAluno").value;
+        const data = document.getElementById("aulaData").value;
+        const horario = document.getElementById("aulaHorario").value;
+
+        if (!alunoId || !data || !horario) {
+          mostrarToast("Selecione aluno, data e horário", "error");
+          return;
+        }
+
+        const posicao =
+          estado.dados.listaEspera.filter(
+            (i) => i.data_interesse === data && i.horario_interesse === horario
+          ).length + 1;
+
+        const novaEspera = {
+          aluno_id: parseInt(alunoId),
+          data_interesse: data,
+          horario_interesse: horario,
+          posicao: posicao,
+          notificado: false,
+        };
+
+        estado.dados.listaEspera.push(novaEspera);
+        carregarListaEspera();
+        carregarRelatorios();
+        mostrarToast(
+          `Inscrito na lista de espera! Posição: ${posicao}`,
+          "success"
+        );
+        document.getElementById("alertaLotacao").style.display = "none";
+      }
+
+      function atualizarDiasSemana() {
+        const vezes = parseInt(
+          document.getElementById("loteVezesSemana").value
+        );
+        const container = document.getElementById("diasSemanaContainer");
+
+        const dias = [
+          { valor: 0, nome: "Dom" },
+          { valor: 1, nome: "Seg" },
+          { valor: 2, nome: "Ter" },
+          { valor: 3, nome: "Qua" },
+          { valor: 4, nome: "Qui" },
+          { valor: 5, nome: "Sex" },
+          { valor: 6, nome: "Sáb" },
+        ];
+
+        let html = "";
+        dias.forEach((dia) => {
+          const checked = dia.valor >= 1 && dia.valor <= vezes ? "checked" : "";
+          html += `
+                    <label class="dia-checkbox">
+                        <input type="checkbox" value="${dia.valor}" ${checked} onchange="calcularPrevisaoLote()">
+                        ${dia.nome}
+                    </label>
+                `;
+        });
+
+        container.innerHTML = html;
+        calcularPrevisaoLote();
+      }
+
+      function calcularPrevisaoLote() {
+        const totalAulas =
+          parseInt(document.getElementById("loteTotal").value) || 20;
+        const dataInicio = document.getElementById("loteDataInicio").value;
+
+        if (!dataInicio) {
+          document.getElementById("previsaoLote").innerHTML =
+            "Selecione a data de início.";
+          return;
+        }
+
+        const diasSelecionados = [];
+        document
+          .querySelectorAll("#diasSemanaContainer input:checked")
+          .forEach((cb) => {
+            diasSelecionados.push(parseInt(cb.value));
+          });
+
+        if (diasSelecionados.length === 0) {
+          document.getElementById("previsaoLote").innerHTML =
+            "Selecione pelo menos um dia da semana.";
+          return;
+        }
+
+        const dataBase = new Date(dataInicio);
+        const datas = [];
+        let dataAtual = new Date(dataBase);
+        let semanas = 0;
+
+        while (datas.length < totalAulas && semanas < 52) {
+          const diaSemana = dataAtual.getDay();
+
+          if (diasSelecionados.includes(diaSemana)) {
+            datas.push(new Date(dataAtual));
+          }
+
+          dataAtual.setDate(dataAtual.getDate() + 1);
+
+          if (dataAtual.getDay() === dataBase.getDay()) {
+            semanas++;
+          }
+        }
+
+        const aulasPrevistas = datas.slice(0, totalAulas);
+
+        if (aulasPrevistas.length === 0) {
+          document.getElementById("previsaoLote").innerHTML =
+            "Não foi possível gerar aulas com os critérios selecionados.";
+          return;
+        }
+
+        const dataTermino = aulasPrevistas[aulasPrevistas.length - 1];
+
+        let html = `
+                <strong>Total: ${aulasPrevistas.length} aulas</strong><br>
+                <small>Previsão de término: ${dataTermino.toLocaleDateString(
+                  "pt-BR"
+                )}</small><br><br>
+                <strong>Primeiras aulas:</strong>
+            `;
+
+        aulasPrevistas.slice(0, 5).forEach((data, index) => {
+          const diasSemana = [
+            "Domingo",
+            "Segunda",
+            "Terça",
+            "Quarta",
+            "Quinta",
+            "Sexta",
+            "Sábado",
+          ];
+          html += `
+                    <div class="previa-item">
+                        ${data.toLocaleDateString("pt-BR")} (${
+            diasSemana[data.getDay()]
+          })
+                    </div>
+                `;
+        });
+
+        if (aulasPrevistas.length > 5) {
+          html += `<div class="previa-item">... e mais ${
+            aulasPrevistas.length - 5
+          } aulas</div>`;
+        }
+
+        document.getElementById("previsaoLote").innerHTML = html;
+      }
+
+      function salvarEvolucao() {
+        const resumo = document.getElementById("evolucaoResumo").value;
+        const detalhes = document.getElementById("evolucaoDetalhes").value;
+
+        if (!resumo) {
+          mostrarToast("Preencha o resumo da evolução", "error");
+          return;
+        }
+
+        mostrarToast("Evolução registrada com sucesso!", "success");
+        document.getElementById("evolucaoResumo").value = "";
+        document.getElementById("evolucaoDetalhes").value = "";
+      }
+
+      function uploadDocumento() {
+        const file = document.getElementById("novoDocumento").files[0];
+        if (!file) {
+          mostrarToast("Selecione um arquivo", "error");
+          return;
+        }
+        mostrarToast("Upload iniciado...", "info");
+        setTimeout(() => {
+          mostrarToast("Documento enviado com sucesso!", "success");
+        }, 2000);
+      }
+
+      function abrirDossieAluno() {
+        mostrarToast("Abrindo dossiê completo do aluno...", "info");
+      }
+
+      function salvarAula() {
+        const alunoId = document.getElementById("aulaAluno").value;
+        const data = document.getElementById("aulaData").value;
+        const horario = document.getElementById("aulaHorario").value;
+        const duracao = document.getElementById("aulaDuracao").value;
+        const status = document.getElementById("aulaStatus").value;
+        const presenca = document.getElementById("aulaPresenca").value;
+        const foco = document.getElementById("aulaFoco").value;
+        const observacoes = document.getElementById("aulaObservacoes").value;
+
+        if (!alunoId || !data || !horario) {
+          mostrarToast("Preencha aluno, data e horário", "error");
+          return;
+        }
+
+        const novaAula = {
+          aluno_id: parseInt(alunoId),
+          data: data,
+          horario: horario + ":00",
+          duracao: parseInt(duracao),
+          status: status,
+          presenca: presenca || null,
+          observacoes: foco || observacoes,
+        };
+
+        estado.dados.aulas.push({ ...novaAula, id: Date.now() });
+
+        mostrarToast("Aula agendada com sucesso!", "success");
+        fecharModal("modalNovaAula");
+
+        if (estado.view === "dia") {
+          renderizarTimeline();
+        } else if (estado.view === "semana") {
+          renderizarSemana();
+        } else if (estado.view === "mes") {
+          renderizarMes();
+        }
+
+        carregarRelatorios();
+      }
+
+      function abrirDetalhesAula(id) {
+        const aula = estado.dados.aulas.find((a) => a.id === id);
+        if (!aula) {
+          mostrarToast("Aula não encontrada", "error");
+          return;
+        }
+
+        const aluno = estado.dados.alunos.find((a) => a.id === aula.aluno_id);
+        const documentos = estado.dados.documentos.filter(
+          (d) => d.aluno_id === aula.aluno_id
+        );
+
+        const conteudo = document.getElementById("conteudoDetalhesAula");
+
+        const dataObj = new Date(aula.data + "T12:00:00");
+        const dataFormatada = dataObj.toLocaleDateString("pt-BR");
+        const horarioFormatado = aula.horario.substring(0, 5);
+
+        let statusClass = "confirmada";
+        let statusText = "Confirmada";
+
+        if (aula.presenca === "presente") {
+          statusClass = "presente";
+          statusText = "✅ Presente";
+        } else if (aula.presenca === "ausente") {
+          statusClass = "ausente";
+          statusText = "❌ Ausente";
+        } else if (aula.presenca === "justificada") {
+          statusClass = "justificada";
+          statusText = "📝 Justificada";
+        } else if (aula.status === "reagendada") {
+          statusClass = "reagendada";
+          statusText = "🔄 Reagendada";
+        } else if (aula.status === "cancelada") {
+          statusClass = "cancelada";
+          statusText = "❌ Cancelada";
+        }
+
+        conteudo.innerHTML = `
+                <div class="dossie-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-user"></i> Informações do Aluno
+                    </h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Nome</div>
+                            <div class="info-value">${
+                              aluno?.nome || "Aluno não encontrado"
+                            }</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Telefone</div>
+                            <div class="info-value">${
+                              aluno?.telefone || "-"
+                            }</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">E-mail</div>
+                            <div class="info-value">${aluno?.email || "-"}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Plano</div>
+                            <div class="info-value">${aluno?.plano || "-"}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dossie-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-calendar-alt"></i> Detalhes da Aula
+                    </h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Data</div>
+                            <div class="info-value">${dataFormatada}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Horário</div>
+                            <div class="info-value">${horarioFormatado}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Duração</div>
+                            <div class="info-value">${
+                              aula.duracao || 60
+                            } minutos</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Status</div>
+                            <div class="info-value">
+                                <span class="status-badge ${statusClass}">${statusText}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 1rem;">
+                        <div class="info-label">Foco da Aula</div>
+                        <div class="info-value" style="background: var(--off-white); padding: 0.8rem; border-radius: 8px;">
+                            ${aula.observacoes || "Não informado"}
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 1rem; display: flex; gap: 2rem;">
+                        <div>
+                            <div class="info-label">Check-in</div>
+                            <div class="info-value">${
+                              aula.checkin ? aula.checkin.substring(0, 5) : "—"
+                            }</div>
+                        </div>
+                        <div>
+                            <div class="info-label">Check-out</div>
+                            <div class="info-value">${
+                              aula.checkout
+                                ? aula.checkout.substring(0, 5)
+                                : "—"
+                            }</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dossie-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-paperclip"></i> Documentos do Aluno
+                    </h3>
+                    
+                    ${
+                      documentos.length > 0
+                        ? `
+                        <div class="documentos-grid" style="margin-top: 1rem;">
+                            ${documentos
+                              .map((doc) => {
+                                const iconType = doc.tipo?.includes("pdf")
+                                  ? "fa-file-pdf"
+                                  : doc.tipo?.includes("image")
+                                  ? "fa-file-image"
+                                  : "fa-file";
+                                return `
+                                    <div class="documento-card">
+                                        <div class="documento-icon">
+                                            <i class="fas ${iconType}"></i>
+                                        </div>
+                                        <div class="documento-info">
+                                            <div class="documento-nome">${
+                                              doc.nome
+                                            }</div>
+                                            <div class="documento-data">${new Date(
+                                              doc.criado_em
+                                            ).toLocaleDateString("pt-BR")}</div>
+                                        </div>
+                                        <button class="documento-btn" onclick="window.open('${
+                                          doc.url
+                                        }', '_blank')" title="Visualizar">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                `;
+                              })
+                              .join("")}
+                        </div>
+                    `
+                        : `
+                        <p style="text-align: center; color: var(--grafite-claro); padding: 1rem;">
+                            Nenhum documento anexado
+                        </p>
+                    `
+                    }
+                </div>
+            `;
+
+        document.getElementById("modalDetalhesAula").classList.add("show");
+        estado.aulaAtual = aula;
+      }
+
+      function editarAulaAtual() {
+        if (!estado.aulaAtual) return;
+
+        fecharModal("modalDetalhesAula");
+
+        document.getElementById("aulaAluno").value = estado.aulaAtual.aluno_id;
+        document.getElementById("aulaData").value = estado.aulaAtual.data;
+        document.getElementById("aulaHorario").value =
+          estado.aulaAtual.horario.substring(0, 5);
+        document.getElementById("aulaDuracao").value =
+          estado.aulaAtual.duracao || 60;
+        document.getElementById("aulaStatus").value =
+          estado.aulaAtual.status || "confirmada";
+        document.getElementById("aulaPresenca").value =
+          estado.aulaAtual.presenca || "";
+        document.getElementById("aulaFoco").value =
+          estado.aulaAtual.observacoes || "";
+        document.getElementById("aulaObservacoes").value =
+          estado.aulaAtual.observacoes || "";
+
+        document.getElementById("modalNovaAula").classList.add("show");
+        carregarDadosAluno();
+
+        const firstTab = document.querySelector(".tab");
+        if (firstTab) {
+          const event = { target: firstTab };
+          mudarTab("dados", event);
+        }
+      }
+    </script>
+  </body>
+</html>
