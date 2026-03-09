@@ -1,0 +1,3840 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Configurações do Sistema</title>
+
+    <!-- Fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Ícones -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --verde-principal: #3a6b5c;
+        --verde-claro: #8fc1b0;
+        --verde-pastel: #d4ede4;
+        --grafite: #2c2c2c;
+        --grafite-claro: #4a4a4a;
+        --off-white: #faf9f6;
+        --branco: #ffffff;
+
+        --vermelho-urgente: #e74c3c;
+        --vermelho-suave: #ffe5e5;
+        --laranja-atencao: #f39c12;
+        --laranja-suave: #fff3cd;
+        --roxo-celebracao: #9b59b6;
+        --roxo-suave: #f3e5f5;
+        --verde-sucesso: #27ae60;
+        --azul-info: #3498db;
+        --azul-suave: #e3f2fd;
+
+        --font-titulos: "Cormorant Garamond", serif;
+        --font-corpo: "Montserrat", sans-serif;
+
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        --shadow-hover: 0 8px 24px rgba(58, 107, 92, 0.15);
+      }
+
+      html {
+        font-size: 14px;
+      }
+
+      body {
+        font-family: var(--font-corpo);
+        background: var(--off-white);
+        color: var(--grafite);
+        min-height: 100vh;
+      }
+
+      /* HEADER */
+      .header {
+        background: var(--branco);
+        box-shadow: var(--shadow);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .header-content {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 0.8rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .logo-area {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      .logo-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--verde-principal);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+      }
+
+      .logo-icon i {
+        font-size: 1.5rem;
+        color: var(--branco);
+      }
+
+      .logo-text h1 {
+        font-family: var(--font-titulos);
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--grafite);
+        line-height: 1.2;
+        text-transform: uppercase;
+      }
+
+      .logo-text span {
+        font-size: 0.7rem;
+        color: var(--verde-principal);
+      }
+
+      .user-area {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      .user-info {
+        text-align: right;
+      }
+
+      .user-name {
+        font-weight: 600;
+        font-size: 0.85rem;
+      }
+
+      .user-role {
+        font-size: 0.7rem;
+        color: var(--verde-principal);
+      }
+
+      .user-avatar {
+        width: 38px;
+        height: 38px;
+        background: var(--verde-pastel);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--verde-principal);
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+
+      .btn-icon {
+        width: 35px;
+        height: 35px;
+        border: none;
+        border-radius: 8px;
+        background: var(--off-white);
+        color: var(--grafite);
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        text-decoration: none;
+      }
+
+      .btn-icon:hover {
+        background: var(--verde-pastel);
+        color: var(--verde-principal);
+      }
+
+      /* MAIN */
+      .main-content {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 1.5rem;
+      }
+
+      .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+      }
+
+      .page-header h1 {
+        font-family: var(--font-titulos);
+        font-size: 2.2rem;
+        font-weight: 600;
+        color: var(--grafite);
+        margin-bottom: 0.2rem;
+      }
+
+      .page-header .subtitle {
+        color: var(--verde-principal);
+        font-size: 0.95rem;
+      }
+
+      /* TABS */
+      .tabs {
+        display: flex;
+        gap: 0.3rem;
+        border-bottom: 1px solid var(--verde-pastel);
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        overflow-x: auto;
+      }
+
+      .tab {
+        padding: 0.8rem 1.5rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 0.95rem;
+        color: var(--grafite);
+        opacity: 0.7;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+      }
+
+      .tab:hover {
+        opacity: 1;
+        color: var(--verde-principal);
+      }
+
+      .tab.active {
+        opacity: 1;
+        color: var(--verde-principal);
+        border-bottom-color: var(--verde-principal);
+        font-weight: 600;
+      }
+
+      /* CARDS & FORMS */
+      .card {
+        background: var(--branco);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 1.5rem;
+      }
+
+      .card-title {
+        font-family: var(--font-titulos);
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--grafite);
+        margin-bottom: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        border-bottom: 1px solid var(--verde-pastel);
+        padding-bottom: 0.8rem;
+      }
+
+      .card-title i {
+        color: var(--verde-principal);
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.2rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.2rem;
+      }
+
+      .form-group.full {
+        grid-column: span 2;
+      }
+
+      .form-label {
+        display: block;
+        margin-bottom: 0.4rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: var(--grafite);
+      }
+
+      .form-label.required::after {
+        content: " *";
+        color: var(--vermelho-urgente);
+      }
+
+      .form-control,
+      .form-select {
+        width: 100%;
+        padding: 0.7rem 1rem;
+        border: 1px solid var(--verde-claro);
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-family: var(--font-corpo);
+        transition: all 0.3s;
+      }
+
+      .form-control:focus,
+      .form-select:focus {
+        outline: none;
+        border-color: var(--verde-principal);
+        box-shadow: 0 0 0 3px rgba(58, 107, 92, 0.1);
+      }
+
+      textarea.form-control {
+        resize: vertical;
+        min-height: 80px;
+      }
+
+      /* BUTTONS */
+      .btn-primary {
+        background: var(--verde-sucesso);
+        color: var(--branco);
+        border: none;
+        padding: 0.7rem 1.8rem;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s;
+        text-decoration: none;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+      }
+
+      .btn-outline {
+        background: none;
+        border: 1px solid var(--verde-principal);
+        color: var(--verde-principal);
+        padding: 0.6rem 1.5rem;
+        border-radius: 30px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s;
+      }
+
+      .btn-outline:hover {
+        background: var(--verde-principal);
+        color: var(--branco);
+      }
+
+      .btn-danger {
+        background: var(--vermelho-urgente);
+        color: var(--branco);
+        border: none;
+        padding: 0.6rem 1.5rem;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s;
+      }
+
+      .btn-danger:hover {
+        filter: brightness(1.1);
+      }
+
+      .btn-secondary {
+        background: #95a5a6;
+        color: var(--branco);
+        border: none;
+        padding: 0.5rem 1.2rem;
+        border-radius: 30px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.3s;
+      }
+
+      .btn-secondary:hover {
+        background: #7f8c8d;
+      }
+
+      .btn-warning {
+        background: var(--laranja-atencao);
+        color: var(--branco);
+        border: none;
+        padding: 0.6rem 1.5rem;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s;
+      }
+
+      .btn-warning:hover {
+        filter: brightness(1.1);
+      }
+
+      /* LISTS */
+      .list-container {
+        border: 1px solid var(--verde-pastel);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .list-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.2rem;
+        border-bottom: 1px solid var(--verde-pastel);
+        transition: all 0.3s;
+      }
+
+      .list-item:last-child {
+        border-bottom: none;
+      }
+
+      .list-item:hover {
+        background: rgba(212, 237, 228, 0.2);
+      }
+
+      .list-item-info {
+        flex: 1;
+      }
+
+      .list-item-title {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--grafite);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .list-item-sub {
+        font-size: 0.8rem;
+        color: var(--verde-principal);
+        margin-top: 0.2rem;
+      }
+
+      .list-item-badge {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        color: white;
+      }
+
+      .badge-success {
+        background: var(--verde-sucesso);
+      }
+
+      .badge-warning {
+        background: var(--laranja-atencao);
+      }
+
+      .badge-info {
+        background: var(--azul-info);
+      }
+
+      .list-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .action-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+      }
+
+      .action-btn.editar {
+        background: var(--laranja-atencao);
+      }
+
+      .action-btn.ativar {
+        background: var(--verde-sucesso);
+      }
+
+      .action-btn.desativar {
+        background: var(--grafite-claro);
+      }
+
+      .action-btn.visualizar {
+        background: var(--azul-info);
+      }
+
+      .action-btn:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.1);
+      }
+
+      /* SWITCH (TOGGLE) */
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+      }
+
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+        border-radius: 24px;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 2px;
+        bottom: 2px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+
+      input:checked + .slider {
+        background-color: var(--verde-sucesso);
+      }
+
+      input:focus + .slider {
+        box-shadow: 0 0 1px var(--verde-sucesso);
+      }
+
+      input:checked + .slider:before {
+        transform: translateX(26px);
+      }
+
+      /* DIAS SEMANA CHECKBOX */
+      .dias-semana-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.5rem;
+        margin: 1rem 0;
+      }
+
+      .dia-checkbox {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0.5rem;
+        border: 1px solid var(--verde-claro);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        user-select: none;
+      }
+
+      .dia-checkbox input {
+        display: none;
+      }
+
+      .dia-checkbox i {
+        font-size: 1.2rem;
+        color: var(--grafite-claro);
+        margin-bottom: 0.3rem;
+      }
+
+      .dia-checkbox span {
+        font-size: 0.8rem;
+      }
+
+      .dia-checkbox.active {
+        background: var(--verde-pastel);
+        border-color: var(--verde-principal);
+      }
+
+      .dia-checkbox.active i {
+        color: var(--verde-principal);
+      }
+
+      .dia-checkbox:hover {
+        background: var(--verde-pastel);
+      }
+
+      /* MODALS */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+      }
+
+      .modal.show {
+        display: flex;
+      }
+
+      .modal-content {
+        background: var(--branco);
+        border-radius: 20px;
+        width: 90%;
+        max-width: 600px;
+        animation: modalSlideUp 0.3s;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      @keyframes modalSlideUp {
+        from {
+          transform: translateY(30px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .modal-header {
+        padding: 1.2rem 1.5rem;
+        border-bottom: 1px solid var(--verde-pastel);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .modal-title {
+        font-family: var(--font-titulos);
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--grafite);
+      }
+
+      .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--grafite);
+        opacity: 0.5;
+        transition: all 0.3s;
+      }
+
+      .close-modal:hover {
+        opacity: 1;
+      }
+
+      .modal-body {
+        padding: 1.5rem;
+      }
+
+      .modal-footer {
+        padding: 1.2rem 1.5rem;
+        border-top: 1px solid var(--verde-pastel);
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.8rem;
+      }
+
+      /* TOAST */
+      .toast-container {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        z-index: 9999;
+      }
+
+      .toast {
+        background: var(--branco);
+        padding: 0.8rem 1.5rem;
+        border-radius: 10px;
+        margin-top: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border-left: 4px solid var(--verde-principal);
+        animation: slideIn 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        min-width: 250px;
+        font-size: 0.85rem;
+      }
+
+      .toast.success {
+        border-left-color: var(--verde-sucesso);
+      }
+
+      .toast.error {
+        border-left-color: var(--vermelho-urgente);
+      }
+
+      .toast.warning {
+        border-left-color: var(--laranja-atencao);
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      /* LOADING */
+      .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        z-index: 3000;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .loading-overlay.show {
+        display: flex;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid var(--verde-pastel);
+        border-top-color: var(--verde-principal);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* EMPTY STATE */
+      .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--grafite-claro);
+      }
+
+      .empty-state i {
+        font-size: 3rem;
+        color: var(--verde-pastel);
+        margin-bottom: 1rem;
+        display: block;
+      }
+
+      /* RESPONSIVIDADE */
+      @media screen and (max-width: 1024px) {
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+        .form-group.full {
+          grid-column: span 1;
+        }
+      }
+
+      @media screen and (max-width: 768px) {
+        .main-content {
+          padding: 1rem;
+        }
+        .header-content {
+          padding: 0.8rem 1rem;
+        }
+        .user-info {
+          display: none;
+        }
+        .modal-content {
+          width: 95%;
+        }
+        .dias-semana-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Carregando configurações...</p>
+    </div>
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-content">
+        <div class="logo-area">
+          <a href="index.html" class="logo-icon"><i class="fas fa-spa"></i></a>
+          <div class="logo-text">
+            <h1>ESTÚDIO RAFAELA LISBOA</h1>
+            <span>CONFIGURAÇÕES DO SISTEMA</span>
+          </div>
+        </div>
+        <div class="user-area">
+          <div class="user-info">
+            <div class="user-name" id="userName">Carregando...</div>
+            <div class="user-role" id="userRole">Configurações</div>
+          </div>
+          <div class="user-avatar" id="userAvatar">?</div>
+          <button class="btn-icon" onclick="fazerLogout()" title="Sair">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>Configurações do Sistema</h1>
+          <div class="subtitle" id="totalConfiguracoes">
+            Configure todos os parâmetros do estúdio
+          </div>
+        </div>
+        <div>
+          <button class="btn-outline" onclick="exportarBackup()">
+            <i class="fas fa-download"></i> Exportar
+          </button>
+          <button
+            class="btn-outline"
+            onclick="abrirModalImportar()"
+            style="margin-left: 0.5rem"
+          >
+            <i class="fas fa-upload"></i> Importar
+          </button>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs" id="tabsContainer">
+        <button class="tab active" onclick="mudarAba('estudio')">
+          <i class="fas fa-building"></i> Estúdio
+        </button>
+        <button class="tab" onclick="mudarAba('planos')">
+          <i class="fas fa-list"></i> Planos
+        </button>
+        <button class="tab" onclick="mudarAba('formasPagamento')">
+          <i class="fas fa-credit-card"></i> Formas Pagamento
+        </button>
+        <button class="tab" onclick="mudarAba('categoriasReceitas')">
+          <i class="fas fa-arrow-up" style="color: var(--verde-sucesso)"></i>
+          Cat. Receitas
+        </button>
+        <button class="tab" onclick="mudarAba('categoriasDespesas')">
+          <i
+            class="fas fa-arrow-down"
+            style="color: var(--vermelho-urgente)"
+          ></i>
+          Cat. Despesas
+        </button>
+        <button class="tab" onclick="mudarAba('jurosMultas')">
+          <i class="fas fa-percent"></i> Juros e Multas
+        </button>
+        <button class="tab" onclick="mudarAba('eventos')">
+          <i class="fas fa-star"></i> Eventos
+        </button>
+      </div>
+
+      <!-- ABA ESTÚDIO -->
+      <div id="abaEstudio" class="tab-content">
+        <div class="card">
+          <h2 class="card-title">
+            <i class="fas fa-building"></i> Dados do Estúdio
+          </h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label required">Nome do Estúdio</label>
+              <input
+                type="text"
+                class="form-control"
+                id="estudioNome"
+                placeholder="ESTÚDIO RAFAELA LISBOA"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Email</label>
+              <input
+                type="email"
+                class="form-control"
+                id="estudioEmail"
+                placeholder="contato@estudio.com"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Telefone</label>
+              <input
+                type="tel"
+                class="form-control"
+                id="estudioTelefone"
+                placeholder="(11) 99999-9999"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">CNPJ</label>
+              <input
+                type="text"
+                class="form-control"
+                id="estudioCnpj"
+                placeholder="00.000.000/0001-00"
+              />
+            </div>
+            <div class="form-group full">
+              <label class="form-label required">Endereço</label>
+              <input
+                type="text"
+                class="form-control"
+                id="estudioEndereco"
+                placeholder="Rua dos Alamos, 123"
+              />
+            </div>
+          </div>
+          <button class="btn-primary" onclick="salvarEstudio()">
+            <i class="fas fa-save"></i> Salvar Alterações
+          </button>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">
+            <i class="fas fa-clock"></i> Horários de Funcionamento
+          </h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label required">Hora de Abertura</label>
+              <input
+                type="time"
+                class="form-control"
+                id="horaAbertura"
+                value="06:00"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Hora de Fechamento</label>
+              <input
+                type="time"
+                class="form-control"
+                id="horaFechamento"
+                value="22:00"
+              />
+            </div>
+          </div>
+
+          <h3
+            style="
+              margin: 1.5rem 0 1rem;
+              color: var(--grafite);
+              font-weight: 600;
+            "
+          >
+            Dias de Funcionamento
+          </h3>
+          <div class="dias-semana-grid" id="diasSemanaContainer">
+            <label
+              class="dia-checkbox"
+              data-dia="1"
+              id="diaSegunda"
+              onclick="toggleDiaCheckbox(this)"
+            >
+              <input
+                type="checkbox"
+                id="diasSegunda"
+                value="1"
+                style="display: none"
+              />
+              <i class="fas fa-calendar-day"></i>
+              <span>Segunda</span>
+            </label>
+            <label
+              class="dia-checkbox"
+              data-dia="2"
+              id="diaTerca"
+              onclick="toggleDiaCheckbox(this)"
+            >
+              <input
+                type="checkbox"
+                id="diasTerca"
+                value="2"
+                style="display: none"
+              />
+              <i class="fas fa-calendar-day"></i>
+              <span>Terça</span>
+            </label>
+            <label
+              class="dia-checkbox"
+              data-dia="3"
+              id="diaQuarta"
+              onclick="toggleDiaCheckbox(this)"
+            >
+              <input
+                type="checkbox"
+                id="diasQuarta"
+                value="3"
+                style="display: none"
+              />
+              <i class="fas fa-calendar-day"></i>
+              <span>Quarta</span>
+            </label>
+            <label
+              class="dia-checkbox"
+              data-dia="4"
+              id="diaQuinta"
+              onclick="toggleDiaCheckbox(this)"
+            >
+              <input
+                type="checkbox"
+                id="diasQuinta"
+                value="4"
+                style="display: none"
+              />
+              <i class="fas fa-calendar-day"></i>
+              <span>Quinta</span>
+            </label>
+            <label
+              class="dia-checkbox"
+              data-dia="5"
+              id="diaSexta"
+              onclick="toggleDiaCheckbox(this)"
+            >
+              <input
+                type="checkbox"
+                id="diasSexta"
+                value="5"
+                style="display: none"
+              />
+              <i class="fas fa-calendar-day"></i>
+              <span>Sexta</span>
+            </label>
+            <label
+              class="dia-checkbox"
+              data-dia="6"
+              id="diaSabado"
+              onclick="toggleDiaCheckbox(this)"
+            >
+              <input
+                type="checkbox"
+                id="diasSabado"
+                value="6"
+                style="display: none"
+              />
+              <i class="fas fa-calendar-day"></i>
+              <span>Sábado</span>
+            </label>
+            <label
+              class="dia-checkbox"
+              data-dia="7"
+              id="diaDomingo"
+              onclick="toggleDiaCheckbox(this)"
+            >
+              <input
+                type="checkbox"
+                id="diasDomingo"
+                value="7"
+                style="display: none"
+              />
+              <i class="fas fa-calendar-day"></i>
+              <span>Domingo</span>
+            </label>
+          </div>
+
+          <button class="btn-primary" onclick="salvarHorarios()">
+            <i class="fas fa-save"></i> Salvar Horários
+          </button>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">
+            <i class="fas fa-users"></i> Capacidade e Configurações
+          </h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label required"
+                >Capacidade Máxima por Horário</label
+              >
+              <input
+                type="number"
+                class="form-control"
+                id="capacidadeMaxima"
+                min="1"
+                placeholder="5"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label required"
+                >Duração Padrão da Aula (minutos)</label
+              >
+              <input
+                type="number"
+                class="form-control"
+                id="duracaoPadrao"
+                min="15"
+                step="15"
+                placeholder="60"
+              />
+            </div>
+          </div>
+          <button class="btn-primary" onclick="salvarCapacidade()">
+            <i class="fas fa-save"></i> Salvar Configurações
+          </button>
+        </div>
+      </div>
+
+      <!-- ABA PLANOS -->
+      <div id="abaPlanos" class="tab-content" style="display: none">
+        <div class="card">
+          <h2 class="card-title">
+            <i class="fas fa-plus-circle"></i> Novo Plano
+          </h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label required">Nome do Plano</label>
+              <input
+                type="text"
+                class="form-control"
+                id="planoNome"
+                placeholder="Ex: Plano Premium"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Valor (R$)</label>
+              <input
+                type="number"
+                class="form-control"
+                id="planoValor"
+                step="0.01"
+                placeholder="300.00"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Duração (dias)</label>
+              <input
+                type="number"
+                class="form-control"
+                id="planoDuracao"
+                placeholder="30"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Aulas por Semana</label>
+              <input
+                type="number"
+                class="form-control"
+                id="planoAulas"
+                min="1"
+                max="7"
+                placeholder="2"
+              />
+            </div>
+            <div class="form-group full">
+              <label class="form-label">Descrição</label>
+              <textarea
+                class="form-control"
+                id="planoDescricao"
+                rows="2"
+                placeholder="Benefícios do plano..."
+              ></textarea>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="adicionarPlano()">
+            <i class="fas fa-save"></i> Salvar Plano
+          </button>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">
+            <i class="fas fa-list"></i> Planos Cadastrados
+          </h2>
+          <div class="list-container" id="listaPlanos">
+            <!-- Preenchido via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ABA FORMAS DE PAGAMENTO -->
+      <div id="abaFormasPagamento" class="tab-content" style="display: none">
+        <div class="card">
+          <h2 class="card-title">
+            <i class="fas fa-plus-circle"></i> Nova Forma de Pagamento
+          </h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label required">Nome</label>
+              <input
+                type="text"
+                class="form-control"
+                id="formaNome"
+                placeholder="Ex: PIX, Cartão de Crédito"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Taxa (%)</label>
+              <input
+                type="number"
+                class="form-control"
+                id="formaTaxa"
+                step="0.01"
+                min="0"
+                placeholder="0.00"
+              />
+            </div>
+            <div class="form-group full">
+              <label class="form-label">Descrição</label>
+              <input
+                type="text"
+                class="form-control"
+                id="formaDescricao"
+                placeholder="Descrição opcional"
+              />
+            </div>
+          </div>
+          <button class="btn-primary" onclick="adicionarFormaPagamento()">
+            <i class="fas fa-save"></i> Salvar Forma
+          </button>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">
+            <i class="fas fa-credit-card"></i> Formas de Pagamento
+          </h2>
+          <div class="list-container" id="listaFormasPagamento">
+            <!-- Preenchido via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ABA CATEGORIAS DE RECEITAS -->
+      <div id="abaCategoriasReceitas" class="tab-content" style="display: none">
+        <div class="card">
+          <h2 class="card-title">
+            <i class="fas fa-plus-circle"></i> Nova Categoria de Receita
+          </h2>
+          <div class="form-group full">
+            <label class="form-label required">Nome da Categoria</label>
+            <input
+              type="text"
+              class="form-control"
+              id="categoriaReceitaNome"
+              placeholder="Ex: Venda de Produtos"
+            />
+          </div>
+          <button class="btn-primary" onclick="adicionarCategoriaReceita()">
+            <i class="fas fa-save"></i> Salvar Categoria
+          </button>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">
+            <i class="fas fa-arrow-up" style="color: var(--verde-sucesso)"></i>
+            Categorias de Receitas
+          </h2>
+          <div class="list-container" id="listaCategoriasReceitas">
+            <!-- Preenchido via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ABA CATEGORIAS DE DESPESAS -->
+      <div id="abaCategoriasDespesas" class="tab-content" style="display: none">
+        <div class="card">
+          <h2 class="card-title">
+            <i class="fas fa-plus-circle"></i> Nova Categoria de Despesa
+          </h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label required">Nome da Categoria</label>
+              <input
+                type="text"
+                class="form-control"
+                id="categoriaDespesaNome"
+                placeholder="Ex: Material de Limpeza"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Tipo</label>
+              <select class="form-select" id="categoriaDespesaTipo">
+                <option value="fixa">Fixa (aluguel, salários)</option>
+                <option value="variavel">Variável (água, luz)</option>
+                <option value="eventual">Eventual (manutenção)</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="adicionarCategoriaDespesa()">
+            <i class="fas fa-save"></i> Salvar Categoria
+          </button>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">
+            <i
+              class="fas fa-arrow-down"
+              style="color: var(--vermelho-urgente)"
+            ></i>
+            Categorias de Despesas
+          </h2>
+          <div class="list-container" id="listaCategoriasDespesas">
+            <!-- Preenchido via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ABA JUROS E MULTAS (NOVA) -->
+      <div id="abaJurosMultas" class="tab-content" style="display: none">
+        <div class="card">
+          <h2 class="card-title">
+            <i class="fas fa-plus-circle"></i> Nova Faixa de Juros/Multa
+          </h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label required">Dias de Atraso (até)</label>
+              <input
+                type="number"
+                class="form-control"
+                id="jurosDias"
+                min="1"
+                placeholder="30"
+              />
+              <small style="color: var(--grafite-claro)"
+                >A faixa se aplica para atrasos de 1 até este número de
+                dias.</small
+              >
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Juros (%)</label>
+              <input
+                type="number"
+                class="form-control"
+                id="jurosPercent"
+                step="0.01"
+                min="0"
+                placeholder="2.0"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Multa (%)</label>
+              <input
+                type="number"
+                class="form-control"
+                id="multaPercent"
+                step="0.01"
+                min="0"
+                placeholder="2.0"
+              />
+            </div>
+          </div>
+          <button class="btn-primary" onclick="adicionarJurosMulta()">
+            <i class="fas fa-save"></i> Salvar Faixa
+          </button>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">
+            <i class="fas fa-percent"></i> Faixas de Juros e Multa
+          </h2>
+          <div class="list-container" id="listaJurosMultas">
+            <!-- Preenchido via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ABA EVENTOS -->
+      <div id="abaEventos" class="tab-content" style="display: none">
+        <div class="card">
+          <h2 class="card-title">
+            <i class="fas fa-plus-circle"></i> Novo Evento
+          </h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label required">Título</label>
+              <input
+                type="text"
+                class="form-control"
+                id="eventoTitulo"
+                placeholder="Ex: Natal"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Data</label>
+              <input type="date" class="form-control" id="eventoData" />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Tipo</label>
+              <select class="form-select" id="eventoTipo">
+                <option value="evento">Evento</option>
+                <option value="feriado">Feriado</option>
+                <option value="marco">Marco</option>
+                <option value="aniversario">Aniversário</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Recorrência</label>
+              <select class="form-select" id="eventoRecorrente">
+                <option value="false">Não recorrente</option>
+                <option value="true">Recorrente anualmente</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <div style="display: flex; gap: 1rem; align-items: center">
+                <label style="display: flex; align-items: center; gap: 0.5rem">
+                  <input type="checkbox" id="eventoBloquearAgenda" /> Bloquear
+                  agenda
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem">
+                  <input type="checkbox" id="eventoDestaque" /> Destacar no
+                  calendário
+                </label>
+              </div>
+            </div>
+            <div class="form-group full">
+              <label class="form-label">Descrição</label>
+              <textarea
+                class="form-control"
+                id="eventoDescricao"
+                rows="2"
+              ></textarea>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="adicionarEvento()">
+            <i class="fas fa-save"></i> Salvar Evento
+          </button>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">
+            <i class="fas fa-star"></i> Eventos Cadastrados
+          </h2>
+          <div class="list-container" id="listaEventos">
+            <!-- Preenchido via JS -->
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- MODAL IMPORTAR -->
+    <div class="modal" id="modalImportar">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Importar Backup</h2>
+          <button class="close-modal" onclick="fecharModal('modalImportar')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label required"
+              >Selecione o arquivo de backup</label
+            >
+            <input
+              type="file"
+              class="form-control"
+              id="arquivoBackup"
+              accept=".json"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalImportar')">
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="importarBackup()">
+            <i class="fas fa-upload"></i> Importar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL EDITAR PLANO -->
+    <div class="modal" id="modalEditarPlano">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Editar Plano</h2>
+          <button class="close-modal" onclick="fecharModal('modalEditarPlano')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editPlanoId" />
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label required">Nome do Plano</label>
+              <input type="text" class="form-control" id="editPlanoNome" />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Valor (R$)</label>
+              <input
+                type="number"
+                class="form-control"
+                id="editPlanoValor"
+                step="0.01"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Duração (dias)</label>
+              <input type="number" class="form-control" id="editPlanoDuracao" />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Aulas por Semana</label>
+              <input
+                type="number"
+                class="form-control"
+                id="editPlanoAulas"
+                min="1"
+                max="7"
+              />
+            </div>
+            <div class="form-group full">
+              <label class="form-label">Descrição</label>
+              <textarea
+                class="form-control"
+                id="editPlanoDescricao"
+                rows="2"
+              ></textarea>
+            </div>
+            <div class="form-group full">
+              <label style="display: flex; align-items: center; gap: 0.5rem">
+                <input type="checkbox" id="editPlanoAtivo" /> Plano ativo
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalEditarPlano')"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="atualizarPlano()">
+            <i class="fas fa-save"></i> Atualizar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL EDITAR FORMA PAGAMENTO -->
+    <div class="modal" id="modalEditarForma">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Editar Forma de Pagamento</h2>
+          <button class="close-modal" onclick="fecharModal('modalEditarForma')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editFormaId" />
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label required">Nome</label>
+              <input type="text" class="form-control" id="editFormaNome" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Taxa (%)</label>
+              <input
+                type="number"
+                class="form-control"
+                id="editFormaTaxa"
+                step="0.01"
+                min="0"
+              />
+            </div>
+            <div class="form-group full">
+              <label class="form-label">Descrição</label>
+              <input type="text" class="form-control" id="editFormaDescricao" />
+            </div>
+            <div class="form-group full">
+              <label style="display: flex; align-items: center; gap: 0.5rem">
+                <input type="checkbox" id="editFormaAtivo" /> Ativo
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalEditarForma')"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="atualizarFormaPagamento()">
+            <i class="fas fa-save"></i> Atualizar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL EDITAR CATEGORIA RECEITA -->
+    <div class="modal" id="modalEditarCategoriaReceita">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Editar Categoria de Receita</h2>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalEditarCategoriaReceita')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editCatReceitaId" />
+          <div class="form-group">
+            <label class="form-label required">Nome da Categoria</label>
+            <input type="text" class="form-control" id="editCatReceitaNome" />
+          </div>
+          <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 0.5rem">
+              <input type="checkbox" id="editCatReceitaAtivo" /> Ativo
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalEditarCategoriaReceita')"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="atualizarCategoriaReceita()">
+            <i class="fas fa-save"></i> Atualizar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL EDITAR CATEGORIA DESPESA -->
+    <div class="modal" id="modalEditarCategoriaDespesa">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Editar Categoria de Despesa</h2>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalEditarCategoriaDespesa')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editCatDespesaId" />
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label required">Nome da Categoria</label>
+              <input type="text" class="form-control" id="editCatDespesaNome" />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Tipo</label>
+              <select class="form-select" id="editCatDespesaTipo">
+                <option value="fixa">Fixa</option>
+                <option value="variavel">Variável</option>
+                <option value="eventual">Eventual</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label style="display: flex; align-items: center; gap: 0.5rem">
+                <input type="checkbox" id="editCatDespesaAtivo" /> Ativo
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalEditarCategoriaDespesa')"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="atualizarCategoriaDespesa()">
+            <i class="fas fa-save"></i> Atualizar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL EDITAR JUROS/MULTA -->
+    <div class="modal" id="modalEditarJuros">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Editar Faixa de Juros/Multa</h2>
+          <button class="close-modal" onclick="fecharModal('modalEditarJuros')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editJurosId" />
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label required">Dias de Atraso (até)</label>
+              <input
+                type="number"
+                class="form-control"
+                id="editJurosDias"
+                min="1"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Juros (%)</label>
+              <input
+                type="number"
+                class="form-control"
+                id="editJurosPercent"
+                step="0.01"
+                min="0"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Multa (%)</label>
+              <input
+                type="number"
+                class="form-control"
+                id="editMultaPercent"
+                step="0.01"
+                min="0"
+              />
+            </div>
+            <div class="form-group full">
+              <label style="display: flex; align-items: center; gap: 0.5rem">
+                <input type="checkbox" id="editJurosAtivo" /> Ativo
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalEditarJuros')"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="atualizarJurosMulta()">
+            <i class="fas fa-save"></i> Atualizar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL EDITAR EVENTO -->
+    <div class="modal" id="modalEditarEvento">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Editar Evento</h2>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalEditarEvento')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editEventoId" />
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label required">Título</label>
+              <input type="text" class="form-control" id="editEventoTitulo" />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Data</label>
+              <input type="date" class="form-control" id="editEventoData" />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Tipo</label>
+              <select class="form-select" id="editEventoTipo">
+                <option value="evento">Evento</option>
+                <option value="feriado">Feriado</option>
+                <option value="marco">Marco</option>
+                <option value="aniversario">Aniversário</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Recorrência</label>
+              <select class="form-select" id="editEventoRecorrente">
+                <option value="false">Não recorrente</option>
+                <option value="true">Recorrente anualmente</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <div style="display: flex; gap: 1rem; align-items: center">
+                <label style="display: flex; align-items: center; gap: 0.5rem">
+                  <input type="checkbox" id="editEventoBloquearAgenda" />
+                  Bloquear agenda
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem">
+                  <input type="checkbox" id="editEventoDestaque" /> Destacar no
+                  calendário
+                </label>
+              </div>
+            </div>
+            <div class="form-group full">
+              <label class="form-label">Descrição</label>
+              <textarea
+                class="form-control"
+                id="editEventoDescricao"
+                rows="2"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalEditarEvento')"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="atualizarEvento()">
+            <i class="fas fa-save"></i> Atualizar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+      // ============================================================
+      // CONFIGURAÇÃO SUPABASE
+      // ============================================================
+      const URL_SUPABASE = "https://mputdowrhzrvqslslubk.supabase.co";
+      const KEY_SUPABASE =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wdXRkb3dyaHpydnFzbHNsdWJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxNjY1NDEsImV4cCI6MjA4NDc0MjU0MX0.1TlAIzCd7896EBOeYIYy3B5Czt41l-XcWYboaspEizc";
+
+      const supabaseClient = window.supabase.createClient(
+        URL_SUPABASE,
+        KEY_SUPABASE
+      );
+
+      // ============================================================
+      // ESTADO GLOBAL
+      // ============================================================
+      const estado = {
+        usuario: null,
+        abaAtiva: "estudio",
+        dados: {
+          config_estudio: null,
+          planos: [],
+          formas_pagamento: [],
+          categorias_receitas: [],
+          categorias_despesas: [],
+          juros_multas: [],
+          eventos: [],
+        },
+      };
+
+      // ============================================================
+      // INICIALIZAÇÃO
+      // ============================================================
+      document.addEventListener("DOMContentLoaded", async function () {
+        mostrarLoading();
+        try {
+          await verificarLogin();
+          await carregarDados();
+          atualizarInterface();
+          carregarInfoUsuario();
+        } catch (error) {
+          console.error("Erro na inicialização:", error);
+          mostrarToast(
+            "Erro ao carregar configurações: " + error.message,
+            "error"
+          );
+        } finally {
+          esconderLoading();
+        }
+      });
+
+      // ============================================================
+      // FUNÇÕES DE UTILIDADE
+      // ============================================================
+      function mostrarLoading() {
+        document.getElementById("loadingOverlay").classList.add("show");
+      }
+
+      function esconderLoading() {
+        document.getElementById("loadingOverlay").classList.remove("show");
+      }
+
+      function mostrarToast(mensagem, tipo = "info") {
+        const container = document.getElementById("toastContainer");
+        const toast = document.createElement("div");
+        toast.className = `toast ${tipo}`;
+        let icone = "info-circle";
+        if (tipo === "success") icone = "check-circle";
+        if (tipo === "error") icone = "exclamation-circle";
+        if (tipo === "warning") icone = "exclamation-triangle";
+
+        toast.innerHTML = `<i class="fas fa-${icone}"></i> ${mensagem}`;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+          toast.style.animation = "slideIn 0.3s reverse";
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      }
+
+      function fecharModal(id) {
+        document.getElementById(id).classList.remove("show");
+      }
+
+      function formatarMoeda(valor) {
+        return new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }).format(valor || 0);
+      }
+
+      function formatarData(data) {
+        if (!data) return "-";
+        return new Date(data + "T12:00:00").toLocaleDateString("pt-BR");
+      }
+
+      function hoje() {
+        return new Date().toISOString().split("T")[0];
+      }
+
+      function toggleDiaCheckbox(element) {
+        const checkbox = element.querySelector('input[type="checkbox"]');
+        checkbox.checked = !checkbox.checked;
+        if (checkbox.checked) {
+          element.classList.add("active");
+        } else {
+          element.classList.remove("active");
+        }
+      }
+
+      // ============================================================
+      // AUTENTICAÇÃO
+      // ============================================================
+      async function verificarLogin() {
+        try {
+          const {
+            data: { user },
+            error,
+          } = await supabaseClient.auth.getUser();
+
+          if (error || !user) {
+            const usuarioSalvo = localStorage.getItem("usuario");
+            if (usuarioSalvo) {
+              estado.usuario = JSON.parse(usuarioSalvo);
+              return true;
+            }
+            window.location.href = "index.html";
+            return false;
+          }
+
+          const { data: usuarioData, error: usuarioError } =
+            await supabaseClient
+              .from("usuarios")
+              .select("id, nome, email, role")
+              .eq("id", user.id)
+              .single();
+
+          if (!usuarioError && usuarioData) {
+            estado.usuario = usuarioData;
+            localStorage.setItem("usuario", JSON.stringify(usuarioData));
+            return true;
+          }
+
+          return false;
+        } catch (error) {
+          console.error("Erro ao verificar login:", error);
+          window.location.href = "index.html";
+          return false;
+        }
+      }
+
+      function carregarInfoUsuario() {
+        if (estado.usuario) {
+          document.getElementById("userName").textContent =
+            estado.usuario.nome || "Usuário";
+          document.getElementById("userRole").textContent =
+            estado.usuario.role === "admin" ? "Administrador" : "Usuário";
+
+          const iniciais = (estado.usuario.nome || "U")
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .substring(0, 2)
+            .toUpperCase();
+          document.getElementById("userAvatar").textContent = iniciais;
+        }
+      }
+
+      async function fazerLogout() {
+        if (confirm("Deseja sair?")) {
+          await supabaseClient.auth.signOut();
+          localStorage.removeItem("usuario");
+          window.location.href = "index.html";
+        }
+      }
+
+      // ============================================================
+      // CARREGAMENTO DE DADOS
+      // ============================================================
+      async function carregarDados() {
+        try {
+          // Carregar configuração do estúdio
+          const { data: estudio, error: errorEstudio } = await supabaseClient
+            .from("config_estudio")
+            .select("*")
+            .eq("id", 1)
+            .single();
+
+          if (!errorEstudio && estudio) {
+            estado.dados.config_estudio = estudio;
+          } else if (errorEstudio && errorEstudio.code === "PGRST116") {
+            await criarConfiguracaoPadrao();
+          }
+
+          // Carregar planos
+          const { data: planos, error: errorPlanos } = await supabaseClient
+            .from("planos")
+            .select("*")
+            .order("nome");
+
+          if (!errorPlanos && planos) {
+            estado.dados.planos = planos;
+          }
+
+          // Carregar formas de pagamento
+          const { data: formas, error: errorFormas } = await supabaseClient
+            .from("formas_pagamento")
+            .select("*")
+            .order("nome");
+
+          if (!errorFormas && formas) {
+            estado.dados.formas_pagamento = formas;
+          }
+
+          // Carregar categorias de receitas
+          const { data: catReceitas, error: errorCatReceitas } =
+            await supabaseClient
+              .from("categorias_receitas")
+              .select("*")
+              .order("nome");
+
+          if (!errorCatReceitas && catReceitas) {
+            estado.dados.categorias_receitas = catReceitas;
+          }
+
+          // Carregar categorias de despesas
+          const { data: catDespesas, error: errorCatDespesas } =
+            await supabaseClient
+              .from("categorias_contas")
+              .select("*")
+              .order("nome");
+
+          if (!errorCatDespesas && catDespesas) {
+            estado.dados.categorias_despesas = catDespesas;
+          }
+
+          // Carregar juros e multas
+          const { data: juros, error: errorJuros } = await supabaseClient
+            .from("config_juros")
+            .select("*")
+            .order("dias_atraso");
+
+          if (!errorJuros && juros) {
+            estado.dados.juros_multas = juros;
+          }
+
+          // Se não houver nenhuma faixa, criar uma padrão
+          if (estado.dados.juros_multas.length === 0) {
+            await criarFaixaJurosPadrao();
+          }
+
+          // Carregar eventos
+          const { data: eventos, error: errorEventos } = await supabaseClient
+            .from("eventos")
+            .select("*")
+            .order("data", { ascending: false });
+
+          if (!errorEventos && eventos) {
+            estado.dados.eventos = eventos;
+          }
+
+          console.log("Dados carregados:", {
+            estudio: estado.dados.config_estudio ? "OK" : "Padrão",
+            planos: estado.dados.planos.length,
+            formas: estado.dados.formas_pagamento.length,
+            categoriasReceitas: estado.dados.categorias_receitas.length,
+            categoriasDespesas: estado.dados.categorias_despesas.length,
+            jurosMultas: estado.dados.juros_multas.length,
+            eventos: estado.dados.eventos.length,
+          });
+
+          atualizarTotalConfiguracoes();
+        } catch (error) {
+          console.error("Erro ao carregar dados:", error);
+          mostrarToast("Erro ao carregar dados: " + error.message, "error");
+        }
+      }
+
+      async function criarConfiguracaoPadrao() {
+        const configPadrao = {
+          id: 1,
+          nome: "ESTÚDIO RAFAELA LISBOA",
+          telefone: "",
+          email: "",
+          endereco: "",
+          cnpj: "",
+          capacidade_maxima: 5,
+          duracao_padrao: 60,
+          horario_abertura: "08:00",
+          horario_fechamento: "20:00",
+          dias_funcionamento: [1, 2, 3, 4, 5],
+        };
+
+        const { data, error } = await supabaseClient
+          .from("config_estudio")
+          .insert([configPadrao])
+          .select()
+          .single();
+
+        if (!error && data) {
+          estado.dados.config_estudio = data;
+          mostrarToast("Configuração padrão criada", "success");
+        }
+      }
+
+      async function criarFaixaJurosPadrao() {
+        const faixaPadrao = {
+          dias_atraso: 30,
+          percentual_juros: 1.0,
+          percentual_multa: 2.0,
+          ativo: true,
+        };
+
+        const { data, error } = await supabaseClient
+          .from("config_juros")
+          .insert([faixaPadrao])
+          .select()
+          .single();
+
+        if (!error && data) {
+          estado.dados.juros_multas.push(data);
+          mostrarToast("Faixa de juros padrão criada", "success");
+        }
+      }
+
+      function atualizarTotalConfiguracoes() {
+        const total =
+          (estado.dados.planos?.length || 0) +
+          (estado.dados.formas_pagamento?.length || 0) +
+          (estado.dados.categorias_receitas?.length || 0) +
+          (estado.dados.categorias_despesas?.length || 0) +
+          (estado.dados.juros_multas?.length || 0) +
+          (estado.dados.eventos?.length || 0);
+
+        document.getElementById(
+          "totalConfiguracoes"
+        ).textContent = `${total} configurações ativas`;
+      }
+
+      // ============================================================
+      // NAVEGAÇÃO DE ABAS
+      // ============================================================
+      function mudarAba(abaName) {
+        estado.abaAtiva = abaName;
+
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((el) => (el.style.display = "none"));
+        document
+          .querySelectorAll(".tab")
+          .forEach((el) => el.classList.remove("active"));
+
+        const abaId = `aba${
+          abaName.charAt(0).toUpperCase() + abaName.slice(1)
+        }`;
+        const abaElement = document.getElementById(abaId);
+        if (abaElement) abaElement.style.display = "block";
+
+        event.currentTarget.classList.add("active");
+      }
+
+      // ============================================================
+      // ESTÚDIO
+      // ============================================================
+      function atualizarInterface() {
+        if (!estado.dados.config_estudio) return;
+
+        const e = estado.dados.config_estudio;
+
+        document.getElementById("estudioNome").value = e.nome || "";
+        document.getElementById("estudioEmail").value = e.email || "";
+        document.getElementById("estudioTelefone").value = e.telefone || "";
+        document.getElementById("estudioCnpj").value = e.cnpj || "";
+        document.getElementById("estudioEndereco").value = e.endereco || "";
+        document.getElementById("horaAbertura").value =
+          e.horario_abertura || "08:00";
+        document.getElementById("horaFechamento").value =
+          e.horario_fechamento || "20:00";
+        document.getElementById("capacidadeMaxima").value =
+          e.capacidade_maxima || 5;
+        document.getElementById("duracaoPadrao").value = e.duracao_padrao || 60;
+
+        // Dias de funcionamento
+        const dias = e.dias_funcionamento || [1, 2, 3, 4, 5];
+
+        // Resetar todos
+        document.querySelectorAll(".dia-checkbox").forEach((el) => {
+          el.classList.remove("active");
+          const checkbox = el.querySelector('input[type="checkbox"]');
+          if (checkbox) checkbox.checked = false;
+        });
+
+        // Ativar os selecionados
+        dias.forEach((dia) => {
+          const checkbox = document.querySelector(
+            `.dia-checkbox[data-dia="${dia}"] input[type="checkbox"]`
+          );
+          const label = document.querySelector(
+            `.dia-checkbox[data-dia="${dia}"]`
+          );
+          if (checkbox && label) {
+            checkbox.checked = true;
+            label.classList.add("active");
+          }
+        });
+
+        // Atualizar listas
+        atualizarListaPlanos();
+        atualizarListaFormasPagamento();
+        atualizarListaCategoriasReceitas();
+        atualizarListaCategoriasDespesas();
+        atualizarListaJurosMultas();
+        atualizarListaEventos();
+      }
+
+      async function salvarEstudio() {
+        mostrarLoading();
+
+        const estudioData = {
+          nome: document.getElementById("estudioNome").value,
+          email: document.getElementById("estudioEmail").value,
+          telefone: document.getElementById("estudioTelefone").value,
+          endereco: document.getElementById("estudioEndereco").value,
+          cnpj: document.getElementById("estudioCnpj").value,
+          atualizado_em: new Date().toISOString(),
+        };
+
+        try {
+          const { error } = await supabaseClient
+            .from("config_estudio")
+            .update(estudioData)
+            .eq("id", 1);
+
+          if (error) throw error;
+
+          estado.dados.config_estudio = {
+            ...estado.dados.config_estudio,
+            ...estudioData,
+          };
+          mostrarToast("Dados do estúdio salvos com sucesso!", "success");
+        } catch (error) {
+          console.error("Erro ao salvar estúdio:", error);
+          mostrarToast("Erro ao salvar: " + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      async function salvarHorarios() {
+        mostrarLoading();
+
+        const diasFuncionamento = [];
+        document
+          .querySelectorAll('.dia-checkbox input[type="checkbox"]:checked')
+          .forEach((cb) => {
+            diasFuncionamento.push(parseInt(cb.value));
+          });
+
+        if (diasFuncionamento.length === 0) {
+          mostrarToast("Selecione pelo menos um dia de funcionamento", "error");
+          esconderLoading();
+          return;
+        }
+
+        const horariosData = {
+          horario_abertura: document.getElementById("horaAbertura").value,
+          horario_fechamento: document.getElementById("horaFechamento").value,
+          dias_funcionamento: diasFuncionamento,
+          atualizado_em: new Date().toISOString(),
+        };
+
+        try {
+          const { error } = await supabaseClient
+            .from("config_estudio")
+            .update(horariosData)
+            .eq("id", 1);
+
+          if (error) throw error;
+
+          estado.dados.config_estudio = {
+            ...estado.dados.config_estudio,
+            ...horariosData,
+          };
+          mostrarToast("Horários salvos com sucesso!", "success");
+        } catch (error) {
+          console.error("Erro ao salvar horários:", error);
+          mostrarToast("Erro ao salvar: " + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      async function salvarCapacidade() {
+        mostrarLoading();
+
+        const capacidade = parseInt(
+          document.getElementById("capacidadeMaxima").value
+        );
+        const duracao = parseInt(
+          document.getElementById("duracaoPadrao").value
+        );
+
+        if (!capacidade || capacidade < 1) {
+          mostrarToast("Capacidade deve ser maior que 0", "error");
+          esconderLoading();
+          return;
+        }
+
+        if (!duracao || duracao < 15) {
+          mostrarToast("Duração deve ser no mínimo 15 minutos", "error");
+          esconderLoading();
+          return;
+        }
+
+        const configData = {
+          capacidade_maxima: capacidade,
+          duracao_padrao: duracao,
+          atualizado_em: new Date().toISOString(),
+        };
+
+        try {
+          const { error } = await supabaseClient
+            .from("config_estudio")
+            .update(configData)
+            .eq("id", 1);
+
+          if (error) throw error;
+
+          estado.dados.config_estudio = {
+            ...estado.dados.config_estudio,
+            ...configData,
+          };
+          mostrarToast("Configurações salvas com sucesso!", "success");
+        } catch (error) {
+          console.error("Erro ao salvar configurações:", error);
+          mostrarToast("Erro ao salvar: " + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      // ============================================================
+      // PLANOS
+      // ============================================================
+      function atualizarListaPlanos() {
+        const lista = document.getElementById("listaPlanos");
+
+        if (!estado.dados.planos || estado.dados.planos.length === 0) {
+          lista.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-list"></i>
+                        <p>Nenhum plano cadastrado. Clique em "Novo Plano" para começar.</p>
+                    </div>
+                `;
+          return;
+        }
+
+        lista.innerHTML = estado.dados.planos
+          .map(
+            (p) => `
+                <div class="list-item">
+                    <div class="list-item-info">
+                        <div class="list-item-title">
+                            ${p.nome}
+                            ${
+                              p.ativo
+                                ? '<span class="list-item-badge badge-success">Ativo</span>'
+                                : '<span class="list-item-badge badge-warning">Inativo</span>'
+                            }
+                        </div>
+                        <div class="list-item-sub">
+                            ${formatarMoeda(p.valor)} • ${p.duracao} dias • ${
+              p.aulas_por_semana
+            } aulas/semana
+                        </div>
+                        ${
+                          p.descricao
+                            ? `<div style="font-size:0.75rem; color:var(--grafite-claro); margin-top:0.2rem">${p.descricao}</div>`
+                            : ""
+                        }
+                    </div>
+                    <div class="list-actions">
+                        <button class="action-btn editar" onclick="abrirEditarPlano(${
+                          p.id
+                        })" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        ${
+                          p.ativo
+                            ? `<button class="action-btn desativar" onclick="togglePlanoStatus(${p.id}, false)" title="Desativar">
+                                <i class="fas fa-ban"></i>
+                            </button>`
+                            : `<button class="action-btn ativar" onclick="togglePlanoStatus(${p.id}, true)" title="Ativar">
+                                <i class="fas fa-check"></i>
+                            </button>`
+                        }
+                    </div>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      async function adicionarPlano() {
+        const nome = document.getElementById("planoNome").value;
+        const valor = parseFloat(document.getElementById("planoValor").value);
+        const duracao = parseInt(document.getElementById("planoDuracao").value);
+        const aulas = parseInt(document.getElementById("planoAulas").value);
+        const descricao = document.getElementById("planoDescricao").value;
+
+        if (!nome || !valor || !duracao || !aulas) {
+          mostrarToast("Preencha todos os campos obrigatórios", "error");
+          return;
+        }
+
+        if (valor <= 0 || duracao <= 0 || aulas <= 0) {
+          mostrarToast("Valores devem ser maiores que zero", "error");
+          return;
+        }
+
+        mostrarLoading();
+
+        try {
+          const { data, error } = await supabaseClient
+            .from("planos")
+            .insert([
+              {
+                nome,
+                valor,
+                duracao,
+                aulas_por_semana: aulas,
+                descricao: descricao || null,
+                ativo: true,
+              },
+            ])
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          estado.dados.planos.push(data);
+          atualizarListaPlanos();
+          atualizarTotalConfiguracoes();
+
+          document.getElementById("planoNome").value = "";
+          document.getElementById("planoValor").value = "";
+          document.getElementById("planoDuracao").value = "";
+          document.getElementById("planoAulas").value = "";
+          document.getElementById("planoDescricao").value = "";
+
+          mostrarToast("Plano adicionado com sucesso!", "success");
+        } catch (error) {
+          console.error("Erro ao adicionar plano:", error);
+          mostrarToast("Erro ao adicionar: " + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      function abrirEditarPlano(id) {
+        const plano = estado.dados.planos.find((p) => p.id === id);
+        if (!plano) return;
+
+        document.getElementById("editPlanoId").value = plano.id;
+        document.getElementById("editPlanoNome").value = plano.nome;
+        document.getElementById("editPlanoValor").value = plano.valor;
+        document.getElementById("editPlanoDuracao").value = plano.duracao;
+        document.getElementById("editPlanoAulas").value =
+          plano.aulas_por_semana;
+        document.getElementById("editPlanoDescricao").value =
+          plano.descricao || "";
+        document.getElementById("editPlanoAtivo").checked = plano.ativo;
+
+        document.getElementById("modalEditarPlano").classList.add("show");
+      }
+
+      async function atualizarPlano() {
+        const id = parseInt(document.getElementById("editPlanoId").value);
+        const nome = document.getElementById("editPlanoNome").value;
+        const valor = parseFloat(
+          document.getElementById("editPlanoValor").value
+        );
+        const duracao = parseInt(
+          document.getElementById("editPlanoDuracao").value
+        );
+        const aulas = parseInt(document.getElementById("editPlanoAulas").value);
+        const descricao = document.getElementById("editPlanoDescricao").value;
+        const ativo = document.getElementById("editPlanoAtivo").checked;
+
+        if (!nome || !valor || !duracao || !aulas) {
+          mostrarToast("Preencha todos os campos obrigatórios", "error");
+          return;
+        }
+
+        mostrarLoading();
+
+        try {
+          const { error } = await supabaseClient
+            .from("planos")
+            .update({
+              nome,
+              valor,
+              duracao,
+              aulas_por_semana: aulas,
+              descricao: descricao || null,
+              ativo,
+              atualizado_em: new Date().toISOString(),
+            })
+            .eq("id", id);
+
+          if (error) throw error;
+
+          const index = estado.dados.planos.findIndex((p) => p.id === id);
+          if (index !== -1) {
+            estado.dados.planos[index] = {
+              ...estado.dados.planos[index],
+              nome,
+              valor,
+              duracao,
+              aulas_por_semana: aulas,
+              descricao,
+              ativo,
+            };
+          }
+
+          fecharModal("modalEditarPlano");
+          atualizarListaPlanos();
+          mostrarToast("Plano atualizado com sucesso!", "success");
+        } catch (error) {
+          console.error("Erro ao atualizar plano:", error);
+          mostrarToast("Erro ao atualizar: " + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      async function togglePlanoStatus(id, ativo) {
+        const acao = ativo ? "ativar" : "desativar";
+        if (!confirm(`Tem certeza que deseja ${acao} este plano?`)) return;
+
+        mostrarLoading();
+
+        try {
+          const { error } = await supabaseClient
+            .from("planos")
+            .update({
+              ativo,
+              atualizado_em: new Date().toISOString(),
+            })
+            .eq("id", id);
+
+          if (error) throw error;
+
+          const index = estado.dados.planos.findIndex((p) => p.id === id);
+          if (index !== -1) {
+            estado.dados.planos[index].ativo = ativo;
+          }
+
+          atualizarListaPlanos();
+          mostrarToast(`Plano ${acao}do com sucesso!`, "success");
+        } catch (error) {
+          console.error(`Erro ao ${acao} plano:`, error);
+          mostrarToast(`Erro ao ${acao}: ` + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      // ============================================================
+      // FORMAS DE PAGAMENTO
+      // ============================================================
+      function atualizarListaFormasPagamento() {
+        const lista = document.getElementById("listaFormasPagamento");
+
+        if (
+          !estado.dados.formas_pagamento ||
+          estado.dados.formas_pagamento.length === 0
+        ) {
+          lista.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-credit-card"></i>
+                        <p>Nenhuma forma de pagamento cadastrada.</p>
+                    </div>
+                `;
+          return;
+        }
+
+        lista.innerHTML = estado.dados.formas_pagamento
+          .map(
+            (f) => `
+                <div class="list-item">
+                    <div class="list-item-info">
+                        <div class="list-item-title">
+                            ${f.nome}
+                            ${
+                              f.ativo
+                                ? '<span class="list-item-badge badge-success">Ativo</span>'
+                                : '<span class="list-item-badge badge-warning">Inativo</span>'
+                            }
+                        </div>
+                        <div class="list-item-sub">
+                            Taxa: ${f.taxa}% • ${f.descricao || "Sem descrição"}
+                        </div>
+                    </div>
+                    <div class="list-actions">
+                        <button class="action-btn editar" onclick="abrirEditarFormaPagamento(${
+                          f.id
+                        })" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        ${
+                          f.ativo
+                            ? `<button class="action-btn desativar" onclick="toggleFormaPagamentoStatus(${f.id}, false)" title="Desativar">
+                                <i class="fas fa-ban"></i>
+                            </button>`
+                            : `<button class="action-btn ativar" onclick="toggleFormaPagamentoStatus(${f.id}, true)" title="Ativar">
+                                <i class="fas fa-check"></i>
+                            </button>`
+                        }
+                    </div>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      async function adicionarFormaPagamento() {
+        const nome = document.getElementById("formaNome").value;
+        const taxa =
+          parseFloat(document.getElementById("formaTaxa").value) || 0;
+        const descricao = document.getElementById("formaDescricao").value;
+
+        if (!nome) {
+          mostrarToast("Digite o nome da forma de pagamento", "error");
+          return;
+        }
+
+        mostrarLoading();
+
+        try {
+          const { data, error } = await supabaseClient
+            .from("formas_pagamento")
+            .insert([
+              {
+                nome,
+                taxa,
+                descricao: descricao || null,
+                ativo: true,
+              },
+            ])
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          estado.dados.formas_pagamento.push(data);
+          atualizarListaFormasPagamento();
+          atualizarTotalConfiguracoes();
+
+          document.getElementById("formaNome").value = "";
+          document.getElementById("formaTaxa").value = "";
+          document.getElementById("formaDescricao").value = "";
+
+          mostrarToast("Forma de pagamento adicionada!", "success");
+        } catch (error) {
+          console.error("Erro ao adicionar forma:", error);
+          mostrarToast("Erro ao adicionar: " + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      function abrirEditarFormaPagamento(id) {
+        const forma = estado.dados.formas_pagamento.find((f) => f.id === id);
+        if (!forma) return;
+
+        document.getElementById("editFormaId").value = forma.id;
+        document.getElementById("editFormaNome").value = forma.nome;
+        document.getElementById("editFormaTaxa").value = forma.taxa;
+        document.getElementById("editFormaDescricao").value =
+          forma.descricao || "";
+        document.getElementById("editFormaAtivo").checked = forma.ativo;
+
+        document.getElementById("modalEditarForma").classList.add("show");
+      }
+
+      async function atualizarFormaPagamento() {
+        const id = parseInt(document.getElementById("editFormaId").value);
+        const nome = document.getElementById("editFormaNome").value;
+        const taxa =
+          parseFloat(document.getElementById("editFormaTaxa").value) || 0;
+        const descricao = document.getElementById("editFormaDescricao").value;
+        const ativo = document.getElementById("editFormaAtivo").checked;
+
+        if (!nome) {
+          mostrarToast("Digite o nome da forma de pagamento", "error");
+          return;
+        }
+
+        mostrarLoading();
+
+        try {
+          const { error } = await supabaseClient
+            .from("formas_pagamento")
+            .update({
+              nome,
+              taxa,
+              descricao: descricao || null,
+              ativo,
+              atualizado_em: new Date().toISOString(),
+            })
+            .eq("id", id);
+
+          if (error) throw error;
+
+          const index = estado.dados.formas_pagamento.findIndex(
+            (f) => f.id === id
+          );
+          if (index !== -1) {
+            estado.dados.formas_pagamento[index] = {
+              ...estado.dados.formas_pagamento[index],
+              nome,
+              taxa,
+              descricao,
+              ativo,
+            };
+          }
+
+          fecharModal("modalEditarForma");
+          atualizarListaFormasPagamento();
+          mostrarToast("Forma de pagamento atualizada!", "success");
+        } catch (error) {
+          console.error("Erro ao atualizar forma:", error);
+          mostrarToast("Erro ao atualizar: " + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      async function toggleFormaPagamentoStatus(id, ativo) {
+        const acao = ativo ? "ativar" : "desativar";
+        if (!confirm(`Tem certeza que deseja ${acao} esta forma de pagamento?`))
+          return;
+
+        mostrarLoading();
+
+        try {
+          const { error } = await supabaseClient
+            .from("formas_pagamento")
+            .update({
+              ativo,
+              atualizado_em: new Date().toISOString(),
+            })
+            .eq("id", id);
+
+          if (error) throw error;
+
+          const index = estado.dados.formas_pagamento.findIndex(
+            (f) => f.id === id
+          );
+          if (index !== -1) {
+            estado.dados.formas_pagamento[index].ativo = ativo;
+          }
+
+          atualizarListaFormasPagamento();
+          mostrarToast(`Forma de pagamento ${acao}da com sucesso!`, "success");
+        } catch (error) {
+          console.error(`Erro ao ${acao} forma:`, error);
+          mostrarToast(`Erro ao ${acao}: ` + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      // ============================================================
+      // CATEGORIAS DE RECEITAS
+      // ============================================================
+      function atualizarListaCategoriasReceitas() {
+        const lista = document.getElementById("listaCategoriasReceitas");
+
+        if (
+          !estado.dados.categorias_receitas ||
+          estado.dados.categorias_receitas.length === 0
+        ) {
+          lista.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-arrow-up"></i>
+                        <p>Nenhuma categoria de receita cadastrada.</p>
+                    </div>
+                `;
+          return;
+        }
+
+        lista.innerHTML = estado.dados.categorias_receitas
+          .map(
+            (c) => `
+                <div class="list-item">
+                    <div class="list-item-info">
+                        <div class="list-item-title">
+                            ${c.nome}
+                            ${
+                              c.ativo
+                                ? '<span class="list-item-badge badge-success">Ativo</span>'
+                                : '<span class="list-item-badge badge-warning">Inativo</span>'
+                            }
+                        </div>
+                    </div>
+                    <div class="list-actions">
+                        <button class="action-btn editar" onclick="abrirEditarCategoriaReceita(${
+                          c.id
+                        })" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        ${
+                          c.ativo
+                            ? `<button class="action-btn desativar" onclick="toggleCategoriaReceitaStatus(${c.id}, false)" title="Desativar">
+                                <i class="fas fa-ban"></i>
+                            </button>`
+                            : `<button class="action-btn ativar" onclick="toggleCategoriaReceitaStatus(${c.id}, true)" title="Ativar">
+                                <i class="fas fa-check"></i>
+                            </button>`
+                        }
+                    </div>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      async function adicionarCategoriaReceita() {
+        const nome = document.getElementById("categoriaReceitaNome").value;
+
+        if (!nome) {
+          mostrarToast("Digite o nome da categoria", "error");
+          return;
+        }
+
+        mostrarLoading();
+
+        try {
+          const { data, error } = await supabaseClient
+            .from("categorias_receitas")
+            .insert([
+              {
+                nome,
+                ativo: true,
+              },
+            ])
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          estado.dados.categorias_receitas.push(data);
+          atualizarListaCategoriasReceitas();
+          atualizarTotalConfiguracoes();
+
+          document.getElementById("categoriaReceitaNome").value = "";
+          mostrarToast("Categoria adicionada!", "success");
+        } catch (error) {
+          console.error("Erro ao adicionar categoria:", error);
+          mostrarToast("Erro ao adicionar: " + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      function abrirEditarCategoriaReceita(id) {
+        const cat = estado.dados.categorias_receitas.find((c) => c.id === id);
+        if (!cat) return;
+
+        document.getElementById("editCatReceitaId").value = cat.id;
+        document.getElementById("editCatReceitaNome").value = cat.nome;
+        document.getElementById("editCatReceitaAtivo").checked = cat.ativo;
+
+        document
+          .getElementById("modalEditarCategoriaReceita")
+          .classList.add("show");
+      }
+
+      async function atualizarCategoriaReceita() {
+        const id = parseInt(document.getElementById("editCatReceitaId").value);
+        const nome = document.getElementById("editCatReceitaNome").value;
+        const ativo = document.getElementById("editCatReceitaAtivo").checked;
+
+        if (!nome) {
+          mostrarToast("Digite o nome da categoria", "error");
+          return;
+        }
+
+        mostrarLoading();
+
+        try {
+          const { error } = await supabaseClient
+            .from("categorias_receitas")
+            .update({
+              nome,
+              ativo,
+              atualizado_em: new Date().toISOString(),
+            })
+            .eq("id", id);
+
+          if (error) throw error;
+
+          const index = estado.dados.categorias_receitas.findIndex(
+            (c) => c.id === id
+          );
+          if (index !== -1) {
+            estado.dados.categorias_receitas[index] = {
+              ...estado.dados.categorias_receitas[index],
+              nome,
+              ativo,
+            };
+          }
+
+          fecharModal("modalEditarCategoriaReceita");
+          atualizarListaCategoriasReceitas();
+          mostrarToast("Categoria atualizada!", "success");
+        } catch (error) {
+          console.error("Erro ao atualizar categoria:", error);
+          mostrarToast("Erro ao atualizar: " + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      async function toggleCategoriaReceitaStatus(id, ativo) {
+        const acao = ativo ? "ativar" : "desativar";
+        if (!confirm(`Tem certeza que deseja ${acao} esta categoria?`)) return;
+
+        mostrarLoading();
+
+        try {
+          const { error } = await supabaseClient
+            .from("categorias_receitas")
+            .update({
+              ativo,
+              atualizado_em: new Date().toISOString(),
+            })
+            .eq("id", id);
+
+          if (error) throw error;
+
+          const index = estado.dados.categorias_receitas.findIndex(
+            (c) => c.id === id
+          );
+          if (index !== -1) {
+            estado.dados.categorias_receitas[index].ativo = ativo;
+          }
+
+          atualizarListaCategoriasReceitas();
+          mostrarToast(`Categoria ${acao}da com sucesso!`, "success");
+        } catch (error) {
+          console.error(`Erro ao ${acao} categoria:`, error);
+          mostrarToast(`Erro ao ${acao}: ` + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      // ============================================================
+      // CATEGORIAS DE DESPESAS
+      // ============================================================
+      function atualizarListaCategoriasDespesas() {
+        const lista = document.getElementById("listaCategoriasDespesas");
+
+        if (
+          !estado.dados.categorias_despesas ||
+          estado.dados.categorias_despesas.length === 0
+        ) {
+          lista.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-arrow-down"></i>
+                        <p>Nenhuma categoria de despesa cadastrada.</p>
+                    </div>
+                `;
+          return;
+        }
+
+        lista.innerHTML = estado.dados.categorias_despesas
+          .map((c) => {
+            let tipoTexto = "";
+            if (c.tipo === "fixa") tipoTexto = "Fixa";
+            else if (c.tipo === "variavel") tipoTexto = "Variável";
+            else tipoTexto = "Eventual";
+
+            return `
+                    <div class="list-item">
+                        <div class="list-item-info">
+                            <div class="list-item-title">
+                                ${c.nome}
+                                ${
+                                  c.ativo
+                                    ? '<span class="list-item-badge badge-success">Ativo</span>'
+                                    : '<span class="list-item-badge badge-warning">Inativo</span>'
+                                }
+                            </div>
+                            <div class="list-item-sub">Tipo: ${tipoTexto}</div>
+                        </div>
+                        <div class="list-actions">
+                            <button class="action-btn editar" onclick="abrirEditarCategoriaDespesa(${
+                              c.id
+                            })" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            ${
+                              c.ativo
+                                ? `<button class="action-btn desativar" onclick="toggleCategoriaDespesaStatus(${c.id}, false)" title="Desativar">
+                                    <i class="fas fa-ban"></i>
+                                </button>`
+                                : `<button class="action-btn ativar" onclick="toggleCategoriaDespesaStatus(${c.id}, true)" title="Ativar">
+                                    <i class="fas fa-check"></i>
+                                </button>`
+                            }
+                        </div>
+                    </div>
+                `;
+          })
+          .join("");
+      }
+
+      async function adicionarCategoriaDespesa() {
+        const nome = document.getElementById("categoriaDespesaNome").value;
+        const tipo = document.getElementById("categoriaDespesaTipo").value;
+
+        if (!nome) {
+          mostrarToast("Digite o nome da categoria", "error");
+          return;
+        }
+
+        mostrarLoading();
+
+        try {
+          const { data, error } = await supabaseClient
+            .from("categorias_contas")
+            .insert([
+              {
+                nome,
+                tipo,
+                ativo: true,
+              },
+            ])
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          estado.dados.categorias_despesas.push(data);
+          atualizarListaCategoriasDespesas();
+          atualizarTotalConfiguracoes();
+
+          document.getElementById("categoriaDespesaNome").value = "";
+          document.getElementById("categoriaDespesaTipo").value = "fixa";
+          mostrarToast("Categoria adicionada!", "success");
+        } catch (error) {
+          console.error("Erro ao adicionar categoria:", error);
+          mostrarToast("Erro ao adicionar: " + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      function abrirEditarCategoriaDespesa(id) {
+        const cat = estado.dados.categorias_despesas.find((c) => c.id === id);
+        if (!cat) return;
+
+        document.getElementById("editCatDespesaId").value = cat.id;
+        document.getElementById("editCatDespesaNome").value = cat.nome;
+        document.getElementById("editCatDespesaTipo").value = cat.tipo;
+        document.getElementById("editCatDespesaAtivo").checked = cat.ativo;
+
+        document
+          .getElementById("modalEditarCategoriaDespesa")
+          .classList.add("show");
+      }
+
+      async function atualizarCategoriaDespesa() {
+        const id = parseInt(document.getElementById("editCatDespesaId").value);
+        const nome = document.getElementById("editCatDespesaNome").value;
+        const tipo = document.getElementById("editCatDespesaTipo").value;
+        const ativo = document.getElementById("editCatDespesaAtivo").checked;
+
+        if (!nome) {
+          mostrarToast("Digite o nome da categoria", "error");
+          return;
+        }
+
+        mostrarLoading();
+
+        try {
+          const { error } = await supabaseClient
+            .from("categorias_contas")
+            .update({
+              nome,
+              tipo,
+              ativo,
+              atualizado_em: new Date().toISOString(),
+            })
+            .eq("id", id);
+
+          if (error) throw error;
+
+          const index = estado.dados.categorias_despesas.findIndex(
+            (c) => c.id === id
+          );
+          if (index !== -1) {
+            estado.dados.categorias_despesas[index] = {
+              ...estado.dados.categorias_despesas[index],
+              nome,
+              tipo,
+              ativo,
+            };
+          }
+
+          fecharModal("modalEditarCategoriaDespesa");
+          atualizarListaCategoriasDespesas();
+          mostrarToast("Categoria atualizada!", "success");
+        } catch (error) {
+          console.error("Erro ao atualizar categoria:", error);
+          mostrarToast("Erro ao atualizar: " + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      async function toggleCategoriaDespesaStatus(id, ativo) {
+        const acao = ativo ? "ativar" : "desativar";
+        if (!confirm(`Tem certeza que deseja ${acao} esta categoria?`)) return;
+
+        mostrarLoading();
+
+        try {
+          const { error } = await supabaseClient
+            .from("categorias_contas")
+            .update({
+              ativo,
+              atualizado_em: new Date().toISOString(),
+            })
+            .eq("id", id);
+
+          if (error) throw error;
+
+          const index = estado.dados.categorias_despesas.findIndex(
+            (c) => c.id === id
+          );
+          if (index !== -1) {
+            estado.dados.categorias_despesas[index].ativo = ativo;
+          }
+
+          atualizarListaCategoriasDespesas();
+          mostrarToast(`Categoria ${acao}da com sucesso!`, "success");
+        } catch (error) {
+          console.error(`Erro ao ${acao} categoria:`, error);
+          mostrarToast(`Erro ao ${acao}: ` + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      // ============================================================
+      // JUROS E MULTAS
+      // ============================================================
+      function atualizarListaJurosMultas() {
+        const lista = document.getElementById("listaJurosMultas");
+
+        if (
+          !estado.dados.juros_multas ||
+          estado.dados.juros_multas.length === 0
+        ) {
+          lista.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-percent"></i>
+                        <p>Nenhuma faixa de juros/multa cadastrada.</p>
+                    </div>
+                `;
+          return;
+        }
+
+        lista.innerHTML = estado.dados.juros_multas
+          .map(
+            (j) => `
+                <div class="list-item">
+                    <div class="list-item-info">
+                        <div class="list-item-title">
+                            Até ${j.dias_atraso} dias
+                            ${
+                              j.ativo
+                                ? '<span class="list-item-badge badge-success">Ativo</span>'
+                                : '<span class="list-item-badge badge-warning">Inativo</span>'
+                            }
+                        </div>
+                        <div class="list-item-sub">
+                            Juros: ${j.percentual_juros}% • Multa: ${
+              j.percentual_multa
+            }%
+                        </div>
+                    </div>
+                    <div class="list-actions">
+                        <button class="action-btn editar" onclick="abrirEditarJurosMulta(${
+                          j.id
+                        })" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        ${
+                          j.ativo
+                            ? `<button class="action-btn desativar" onclick="toggleJurosMultaStatus(${j.id}, false)" title="Desativar">
+                                <i class="fas fa-ban"></i>
+                            </button>`
+                            : `<button class="action-btn ativar" onclick="toggleJurosMultaStatus(${j.id}, true)" title="Ativar">
+                                <i class="fas fa-check"></i>
+                            </button>`
+                        }
+                    </div>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      async function adicionarJurosMulta() {
+        const dias = parseInt(document.getElementById("jurosDias").value);
+        const juros = parseFloat(document.getElementById("jurosPercent").value);
+        const multa = parseFloat(document.getElementById("multaPercent").value);
+
+        if (!dias || !juros || !multa) {
+          mostrarToast("Preencha todos os campos obrigatórios", "error");
+          return;
+        }
+
+        if (dias <= 0 || juros < 0 || multa < 0) {
+          mostrarToast("Valores devem ser maiores ou iguais a zero", "error");
+          return;
+        }
+
+        mostrarLoading();
+
+        try {
+          const { data, error } = await supabaseClient
+            .from("config_juros")
+            .insert([
+              {
+                dias_atraso: dias,
+                percentual_juros: juros,
+                percentual_multa: multa,
+                ativo: true,
+              },
+            ])
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          estado.dados.juros_multas.push(data);
+          estado.dados.juros_multas.sort(
+            (a, b) => a.dias_atraso - b.dias_atraso
+          );
+          atualizarListaJurosMultas();
+          atualizarTotalConfiguracoes();
+
+          document.getElementById("jurosDias").value = "";
+          document.getElementById("jurosPercent").value = "";
+          document.getElementById("multaPercent").value = "";
+
+          mostrarToast("Faixa de juros/multa adicionada!", "success");
+        } catch (error) {
+          console.error("Erro ao adicionar faixa:", error);
+          mostrarToast("Erro ao adicionar: " + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      function abrirEditarJurosMulta(id) {
+        const juros = estado.dados.juros_multas.find((j) => j.id === id);
+        if (!juros) return;
+
+        document.getElementById("editJurosId").value = juros.id;
+        document.getElementById("editJurosDias").value = juros.dias_atraso;
+        document.getElementById("editJurosPercent").value =
+          juros.percentual_juros;
+        document.getElementById("editMultaPercent").value =
+          juros.percentual_multa;
+        document.getElementById("editJurosAtivo").checked = juros.ativo;
+
+        document.getElementById("modalEditarJuros").classList.add("show");
+      }
+
+      async function atualizarJurosMulta() {
+        const id = parseInt(document.getElementById("editJurosId").value);
+        const dias = parseInt(document.getElementById("editJurosDias").value);
+        const juros = parseFloat(
+          document.getElementById("editJurosPercent").value
+        );
+        const multa = parseFloat(
+          document.getElementById("editMultaPercent").value
+        );
+        const ativo = document.getElementById("editJurosAtivo").checked;
+
+        if (!dias || !juros || !multa) {
+          mostrarToast("Preencha todos os campos obrigatórios", "error");
+          return;
+        }
+
+        if (dias <= 0 || juros < 0 || multa < 0) {
+          mostrarToast("Valores devem ser maiores ou iguais a zero", "error");
+          return;
+        }
+
+        mostrarLoading();
+
+        try {
+          const { error } = await supabaseClient
+            .from("config_juros")
+            .update({
+              dias_atraso: dias,
+              percentual_juros: juros,
+              percentual_multa: multa,
+              ativo,
+              criado_em: new Date().toISOString(), // a tabela não tem updated_at, usamos criado_em para atualizar? Melhor não.
+            })
+            .eq("id", id);
+
+          if (error) throw error;
+
+          const index = estado.dados.juros_multas.findIndex((j) => j.id === id);
+          if (index !== -1) {
+            estado.dados.juros_multas[index] = {
+              ...estado.dados.juros_multas[index],
+              dias_atraso: dias,
+              percentual_juros: juros,
+              percentual_multa: multa,
+              ativo,
+            };
+          }
+
+          estado.dados.juros_multas.sort(
+            (a, b) => a.dias_atraso - b.dias_atraso
+          );
+          fecharModal("modalEditarJuros");
+          atualizarListaJurosMultas();
+          mostrarToast("Faixa de juros/multa atualizada!", "success");
+        } catch (error) {
+          console.error("Erro ao atualizar faixa:", error);
+          mostrarToast("Erro ao atualizar: " + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      async function toggleJurosMultaStatus(id, ativo) {
+        const acao = ativo ? "ativar" : "desativar";
+        if (!confirm(`Tem certeza que deseja ${acao} esta faixa?`)) return;
+
+        mostrarLoading();
+
+        try {
+          const { error } = await supabaseClient
+            .from("config_juros")
+            .update({
+              ativo,
+            })
+            .eq("id", id);
+
+          if (error) throw error;
+
+          const index = estado.dados.juros_multas.findIndex((j) => j.id === id);
+          if (index !== -1) {
+            estado.dados.juros_multas[index].ativo = ativo;
+          }
+
+          atualizarListaJurosMultas();
+          mostrarToast(`Faixa ${acao}da com sucesso!`, "success");
+        } catch (error) {
+          console.error(`Erro ao ${acao} faixa:`, error);
+          mostrarToast(`Erro ao ${acao}: ` + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      // ============================================================
+      // EVENTOS
+      // ============================================================
+      function atualizarListaEventos() {
+        const lista = document.getElementById("listaEventos");
+
+        if (!estado.dados.eventos || estado.dados.eventos.length === 0) {
+          lista.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-star"></i>
+                        <p>Nenhum evento cadastrado.</p>
+                    </div>
+                `;
+          return;
+        }
+
+        const hoje = new Date().toISOString().split("T")[0];
+
+        lista.innerHTML = estado.dados.eventos
+          .map((e) => {
+            const tipoIcone = {
+              evento: "fa-calendar",
+              feriado: "fa-umbrella-beach",
+              marco: "fa-flag",
+              aniversario: "fa-birthday-cake",
+            };
+
+            const tipoTexto = {
+              evento: "Evento",
+              feriado: "Feriado",
+              marco: "Marco",
+              aniversario: "Aniversário",
+            };
+
+            const isPassado = e.data < hoje;
+
+            return `
+                    <div class="list-item">
+                        <div class="list-item-info">
+                            <div class="list-item-title">
+                                <i class="fas ${
+                                  tipoIcone[e.tipo] || "fa-calendar"
+                                }" style="color: var(--verde-principal);"></i>
+                                ${e.titulo}
+                                ${
+                                  e.ativo
+                                    ? '<span class="list-item-badge badge-success">Ativo</span>'
+                                    : '<span class="list-item-badge badge-warning">Inativo</span>'
+                                }
+                                ${
+                                  isPassado
+                                    ? '<span class="list-item-badge badge-info">Passado</span>'
+                                    : ""
+                                }
+                                ${
+                                  e.destaque
+                                    ? '<span class="list-item-badge" style="background: gold; color: var(--grafite);">Destaque</span>'
+                                    : ""
+                                }
+                                ${
+                                  e.bloquear_agenda
+                                    ? '<span class="list-item-badge badge-warning">Bloqueia</span>'
+                                    : ""
+                                }
+                            </div>
+                            <div class="list-item-sub">
+                                ${formatarData(e.data)} • ${
+              tipoTexto[e.tipo] || e.tipo
+            }
+                                ${
+                                  e.recorrente ? " • Recorrente anualmente" : ""
+                                }
+                            </div>
+                            ${
+                              e.descricao
+                                ? `<div style="font-size:0.75rem; color:var(--grafite-claro); margin-top:0.2rem">${e.descricao}</div>`
+                                : ""
+                            }
+                        </div>
+                        <div class="list-actions">
+                            <button class="action-btn editar" onclick="abrirEditarEvento(${
+                              e.id
+                            })" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            ${
+                              e.ativo
+                                ? `<button class="action-btn desativar" onclick="toggleEventoStatus(${e.id}, false)" title="Desativar">
+                                    <i class="fas fa-ban"></i>
+                                </button>`
+                                : `<button class="action-btn ativar" onclick="toggleEventoStatus(${e.id}, true)" title="Ativar">
+                                    <i class="fas fa-check"></i>
+                                </button>`
+                            }
+                        </div>
+                    </div>
+                `;
+          })
+          .join("");
+      }
+
+      async function adicionarEvento() {
+        const titulo = document.getElementById("eventoTitulo").value;
+        const data = document.getElementById("eventoData").value;
+        const tipo = document.getElementById("eventoTipo").value;
+        const recorrente =
+          document.getElementById("eventoRecorrente").value === "true";
+        const bloquearAgenda = document.getElementById(
+          "eventoBloquearAgenda"
+        ).checked;
+        const destaque = document.getElementById("eventoDestaque").checked;
+        const descricao = document.getElementById("eventoDescricao").value;
+
+        if (!titulo || !data || !tipo) {
+          mostrarToast("Preencha os campos obrigatórios", "error");
+          return;
+        }
+
+        mostrarLoading();
+
+        try {
+          const { data: novoEvento, error } = await supabaseClient
+            .from("eventos")
+            .insert([
+              {
+                titulo,
+                data,
+                tipo,
+                recorrente,
+                bloquear_agenda: bloquearAgenda,
+                destaque,
+                descricao: descricao || null,
+                ativo: true,
+              },
+            ])
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          estado.dados.eventos.unshift(novoEvento);
+          atualizarListaEventos();
+          atualizarTotalConfiguracoes();
+
+          document.getElementById("eventoTitulo").value = "";
+          document.getElementById("eventoData").value = "";
+          document.getElementById("eventoTipo").value = "evento";
+          document.getElementById("eventoRecorrente").value = "false";
+          document.getElementById("eventoBloquearAgenda").checked = false;
+          document.getElementById("eventoDestaque").checked = false;
+          document.getElementById("eventoDescricao").value = "";
+
+          mostrarToast("Evento adicionado!", "success");
+        } catch (error) {
+          console.error("Erro ao adicionar evento:", error);
+          mostrarToast("Erro ao adicionar: " + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      function abrirEditarEvento(id) {
+        const evento = estado.dados.eventos.find((e) => e.id === id);
+        if (!evento) return;
+
+        document.getElementById("editEventoId").value = evento.id;
+        document.getElementById("editEventoTitulo").value = evento.titulo;
+        document.getElementById("editEventoData").value = evento.data;
+        document.getElementById("editEventoTipo").value = evento.tipo;
+        document.getElementById("editEventoRecorrente").value =
+          evento.recorrente ? "true" : "false";
+        document.getElementById("editEventoBloquearAgenda").checked =
+          evento.bloquear_agenda;
+        document.getElementById("editEventoDestaque").checked = evento.destaque;
+        document.getElementById("editEventoDescricao").value =
+          evento.descricao || "";
+
+        document.getElementById("modalEditarEvento").classList.add("show");
+      }
+
+      async function atualizarEvento() {
+        const id = parseInt(document.getElementById("editEventoId").value);
+        const titulo = document.getElementById("editEventoTitulo").value;
+        const data = document.getElementById("editEventoData").value;
+        const tipo = document.getElementById("editEventoTipo").value;
+        const recorrente =
+          document.getElementById("editEventoRecorrente").value === "true";
+        const bloquearAgenda = document.getElementById(
+          "editEventoBloquearAgenda"
+        ).checked;
+        const destaque = document.getElementById("editEventoDestaque").checked;
+        const descricao = document.getElementById("editEventoDescricao").value;
+
+        if (!titulo || !data || !tipo) {
+          mostrarToast("Preencha os campos obrigatórios", "error");
+          return;
+        }
+
+        mostrarLoading();
+
+        try {
+          const { error } = await supabaseClient
+            .from("eventos")
+            .update({
+              titulo,
+              data,
+              tipo,
+              recorrente,
+              bloquear_agenda: bloquearAgenda,
+              destaque,
+              descricao: descricao || null,
+              atualizado_em: new Date().toISOString(),
+            })
+            .eq("id", id);
+
+          if (error) throw error;
+
+          const index = estado.dados.eventos.findIndex((e) => e.id === id);
+          if (index !== -1) {
+            estado.dados.eventos[index] = {
+              ...estado.dados.eventos[index],
+              titulo,
+              data,
+              tipo,
+              recorrente,
+              bloquear_agenda: bloquearAgenda,
+              destaque,
+              descricao,
+            };
+          }
+
+          fecharModal("modalEditarEvento");
+          atualizarListaEventos();
+          mostrarToast("Evento atualizado!", "success");
+        } catch (error) {
+          console.error("Erro ao atualizar evento:", error);
+          mostrarToast("Erro ao atualizar: " + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      async function toggleEventoStatus(id, ativo) {
+        const acao = ativo ? "ativar" : "desativar";
+        if (!confirm(`Tem certeza que deseja ${acao} este evento?`)) return;
+
+        mostrarLoading();
+
+        try {
+          const { error } = await supabaseClient
+            .from("eventos")
+            .update({
+              ativo,
+              atualizado_em: new Date().toISOString(),
+            })
+            .eq("id", id);
+
+          if (error) throw error;
+
+          const index = estado.dados.eventos.findIndex((e) => e.id === id);
+          if (index !== -1) {
+            estado.dados.eventos[index].ativo = ativo;
+          }
+
+          atualizarListaEventos();
+          mostrarToast(`Evento ${acao}do com sucesso!`, "success");
+        } catch (error) {
+          console.error(`Erro ao ${acao} evento:`, error);
+          mostrarToast(`Erro ao ${acao}: ` + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      // ============================================================
+      // BACKUP
+      // ============================================================
+      function exportarBackup() {
+        const backup = {
+          version: "1.0",
+          data: new Date().toISOString(),
+          config_estudio: estado.dados.config_estudio,
+          planos: estado.dados.planos,
+          formas_pagamento: estado.dados.formas_pagamento,
+          categorias_receitas: estado.dados.categorias_receitas,
+          categorias_despesas: estado.dados.categorias_despesas,
+          juros_multas: estado.dados.juros_multas,
+          eventos: estado.dados.eventos,
+        };
+
+        const json = JSON.stringify(backup, null, 2);
+        const blob = new Blob([json], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `pilates-config-${
+          new Date().toISOString().split("T")[0]
+        }.json`;
+        a.click();
+        mostrarToast("Backup exportado com sucesso!", "success");
+      }
+
+      function abrirModalImportar() {
+        document.getElementById("modalImportar").classList.add("show");
+      }
+
+      async function importarBackup() {
+        const arquivo = document.getElementById("arquivoBackup").files[0];
+        if (!arquivo) {
+          mostrarToast("Selecione um arquivo!", "error");
+          return;
+        }
+
+        mostrarLoading();
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          try {
+            const backup = JSON.parse(e.target.result);
+
+            if (!backup.version || !backup.config_estudio) {
+              throw new Error("Arquivo de backup inválido");
+            }
+
+            // Atualizar config_estudio
+            if (backup.config_estudio) {
+              await supabaseClient
+                .from("config_estudio")
+                .upsert({ ...backup.config_estudio, id: 1 })
+                .eq("id", 1);
+            }
+
+            // Limpar e reinserir planos
+            if (backup.planos && backup.planos.length > 0) {
+              await supabaseClient.from("planos").delete().neq("id", 0);
+              await supabaseClient.from("planos").insert(backup.planos);
+            }
+
+            // Limpar e reinserir formas de pagamento
+            if (backup.formas_pagamento && backup.formas_pagamento.length > 0) {
+              await supabaseClient
+                .from("formas_pagamento")
+                .delete()
+                .neq("id", 0);
+              await supabaseClient
+                .from("formas_pagamento")
+                .insert(backup.formas_pagamento);
+            }
+
+            // Limpar e reinserir categorias de receitas
+            if (
+              backup.categorias_receitas &&
+              backup.categorias_receitas.length > 0
+            ) {
+              await supabaseClient
+                .from("categorias_receitas")
+                .delete()
+                .neq("id", 0);
+              await supabaseClient
+                .from("categorias_receitas")
+                .insert(backup.categorias_receitas);
+            }
+
+            // Limpar e reinserir categorias de despesas
+            if (
+              backup.categorias_despesas &&
+              backup.categorias_despesas.length > 0
+            ) {
+              await supabaseClient
+                .from("categorias_contas")
+                .delete()
+                .neq("id", 0);
+              await supabaseClient
+                .from("categorias_contas")
+                .insert(backup.categorias_despesas);
+            }
+
+            // Limpar e reinserir juros e multas
+            if (backup.juros_multas && backup.juros_multas.length > 0) {
+              await supabaseClient.from("config_juros").delete().neq("id", 0);
+              await supabaseClient
+                .from("config_juros")
+                .insert(backup.juros_multas);
+            }
+
+            // Limpar e reinserir eventos
+            if (backup.eventos && backup.eventos.length > 0) {
+              await supabaseClient.from("eventos").delete().neq("id", 0);
+              await supabaseClient.from("eventos").insert(backup.eventos);
+            }
+
+            fecharModal("modalImportar");
+            await carregarDados();
+            atualizarInterface();
+            mostrarToast("Backup importado com sucesso!", "success");
+          } catch (err) {
+            console.error("Erro ao importar:", err);
+            mostrarToast("Erro ao importar arquivo: " + err.message, "error");
+          } finally {
+            esconderLoading();
+          }
+        };
+        reader.readAsText(arquivo);
+      }
+    </script>
+  </body>
+</html>
