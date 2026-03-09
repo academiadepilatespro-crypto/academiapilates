@@ -1,0 +1,2020 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Receitas | Estúdio Rafaela Lisboa</title>
+
+    <!-- Fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Ícones -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <style>
+      /* ===== RESET E VARIÁVEIS ===== */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --verde-principal: #3a6b5c;
+        --verde-claro: #8fc1b0;
+        --verde-pastel: #d4ede4;
+        --grafite: #2c2c2c;
+        --grafite-claro: #4a4a4a;
+        --off-white: #f5f5f5;
+        --branco: #ffffff;
+
+        --vermelho-urgente: #e74c3c;
+        --vermelho-suave: #ffe5e5;
+        --laranja-atencao: #f39c12;
+        --laranja-suave: #fff3cd;
+        --roxo-celebracao: #9b59b6;
+        --roxo-suave: #f3e5f5;
+        --verde-sucesso: #27ae60;
+        --azul-info: #3498db;
+        --azul-suave: #e3f2fd;
+
+        --font-titulos: "Cormorant Garamond", serif;
+        --font-corpo: "Montserrat", sans-serif;
+
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        --shadow-hover: 0 8px 24px rgba(58, 107, 92, 0.15);
+
+        --card-padding: 20px;
+        --grid-gap: 20px;
+      }
+
+      html {
+        font-size: 14px;
+      }
+
+      body {
+        font-family: var(--font-corpo);
+        background: var(--off-white);
+        color: var(--grafite);
+        min-height: 100vh;
+      }
+
+      /* ===== HEADER ===== */
+      .header {
+        background: var(--branco);
+        box-shadow: var(--shadow);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .header-content {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 0.8rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .logo-area {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      .logo-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--verde-principal);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+      }
+
+      .logo-icon i {
+        font-size: 1.5rem;
+        color: var(--branco);
+      }
+
+      .logo-text h1 {
+        font-family: var(--font-titulos);
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--grafite);
+        line-height: 1.2;
+      }
+
+      .logo-text span {
+        font-size: 0.7rem;
+        color: var(--verde-principal);
+      }
+
+      .user-area {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      .user-info {
+        text-align: right;
+      }
+
+      .user-name {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--grafite);
+      }
+
+      .user-role {
+        font-size: 0.7rem;
+        color: var(--verde-principal);
+      }
+
+      .user-avatar {
+        width: 38px;
+        height: 38px;
+        background: var(--verde-pastel);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--verde-principal);
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+
+      .btn-icon {
+        width: 35px;
+        height: 35px;
+        border: none;
+        border-radius: 8px;
+        background: var(--off-white);
+        color: var(--grafite);
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+      }
+
+      .btn-icon:hover {
+        background: var(--verde-pastel);
+        color: var(--verde-principal);
+      }
+
+      /* ===== CONTEÚDO PRINCIPAL ===== */
+      .main-content {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 1.5rem;
+      }
+
+      .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+      }
+
+      .page-header h1 {
+        font-family: var(--font-titulos);
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--grafite);
+        margin-bottom: 0.2rem;
+      }
+
+      .page-header .subtitle {
+        color: var(--verde-principal);
+        font-size: 0.9rem;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 0.8rem;
+      }
+
+      /* ===== BOTÕES ===== */
+      .btn-primary {
+        background: var(--verde-sucesso);
+        color: var(--branco);
+        border: none;
+        padding: 0.6rem 1.5rem;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.3s;
+        text-decoration: none;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+      }
+
+      .btn-secondary {
+        background: #95a5a6;
+        color: var(--branco);
+        border: none;
+        padding: 0.5rem 1.2rem;
+        border-radius: 30px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.3s;
+      }
+
+      .btn-secondary:hover {
+        background: #7f8c8d;
+      }
+
+      .btn-outline {
+        background: none;
+        border: 1px solid var(--verde-principal);
+        color: var(--verde-principal);
+        padding: 0.5rem 1.2rem;
+        border-radius: 30px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.3s;
+        text-decoration: none;
+      }
+
+      .btn-outline:hover {
+        background: var(--verde-principal);
+        color: var(--branco);
+      }
+
+      .btn-danger {
+        background: var(--vermelho-urgente);
+        color: var(--branco);
+        border: none;
+        padding: 0.5rem 1.2rem;
+        border-radius: 30px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.3s;
+      }
+
+      .btn-danger:hover {
+        filter: brightness(1.1);
+      }
+
+      /* ===== STATS CARDS ===== */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--grid-gap);
+        margin-bottom: 1.5rem;
+      }
+
+      .stat-card {
+        background: var(--branco);
+        padding: 1.2rem;
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        transition:
+          transform 0.3s,
+          box-shadow 0.3s;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+      }
+
+      .stat-card::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--verde-principal);
+      }
+
+      .stat-card.alerta::after {
+        background: var(--laranja-atencao);
+      }
+
+      .stat-card.critico::after {
+        background: var(--vermelho-urgente);
+      }
+
+      .stat-icon {
+        width: 48px;
+        height: 48px;
+        background: var(--verde-pastel);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .stat-icon i {
+        font-size: 1.5rem;
+        color: var(--verde-principal);
+      }
+
+      .stat-icon.warning {
+        background: var(--laranja-suave);
+      }
+
+      .stat-icon.warning i {
+        color: var(--laranja-atencao);
+      }
+
+      .stat-icon.danger {
+        background: var(--vermelho-suave);
+      }
+
+      .stat-icon.danger i {
+        color: var(--vermelho-urgente);
+      }
+
+      .stat-info {
+        flex: 1;
+      }
+
+      .stat-value {
+        font-family: var(--font-titulos);
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--grafite);
+        line-height: 1.2;
+      }
+
+      .stat-label {
+        color: var(--verde-principal);
+        font-size: 0.8rem;
+        font-weight: 500;
+      }
+
+      /* ===== FILTROS ===== */
+      .filters-advanced {
+        background: var(--branco);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 1.5rem;
+      }
+
+      .filters-title {
+        font-family: var(--font-titulos);
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--grafite);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .filter-label {
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin-bottom: 0.4rem;
+        color: var(--grafite);
+      }
+
+      .filter-input {
+        width: 100%;
+        padding: 0.7rem 1rem;
+        border: 1px solid var(--verde-claro);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-family: var(--font-corpo);
+        background: var(--branco);
+        color: var(--grafite);
+        transition: all 0.3s;
+      }
+
+      .filter-input:focus {
+        outline: none;
+        border-color: var(--verde-principal);
+        box-shadow: 0 0 0 3px var(--verde-pastel);
+      }
+
+      .filter-select {
+        width: 100%;
+        padding: 0.7rem 1rem;
+        border: 1px solid var(--verde-claro);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-family: var(--font-corpo);
+        background: var(--branco);
+        color: var(--grafite);
+        transition: all 0.3s;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233a6b5c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1em;
+      }
+
+      .filter-select:focus {
+        outline: none;
+        border-color: var(--verde-principal);
+        box-shadow: 0 0 0 3px var(--verde-pastel);
+      }
+
+      .search-box {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--branco);
+        border: 1px solid var(--verde-claro);
+        border-radius: 10px;
+        padding: 0.7rem 1rem;
+        width: 100%;
+      }
+
+      .search-box i {
+        color: var(--verde-claro);
+      }
+
+      .search-box input {
+        border: none;
+        outline: none;
+        font-size: 0.9rem;
+        width: 100%;
+        font-family: var(--font-corpo);
+        background: transparent;
+      }
+
+      .date-range {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      .date-range .filter-input {
+        flex: 1;
+      }
+
+      .filter-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+      }
+
+      /* ===== TABELA ===== */
+      .table-container {
+        background: var(--branco);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 1.5rem;
+      }
+
+      .table-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+      }
+
+      .table-title {
+        font-family: var(--font-titulos);
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--grafite);
+      }
+
+      .table-responsive {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th {
+        text-align: left;
+        padding: 0.8rem 0.4rem;
+        color: var(--verde-principal);
+        font-weight: 500;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        border-bottom: 2px solid var(--verde-pastel);
+        cursor: pointer;
+        user-select: none;
+      }
+
+      th i {
+        margin-left: 0.3rem;
+        font-size: 0.7rem;
+      }
+
+      td {
+        padding: 0.8rem 0.4rem;
+        border-bottom: 1px solid var(--verde-pastel);
+        font-size: 0.85rem;
+        vertical-align: middle;
+      }
+
+      tr {
+        transition: all 0.2s;
+      }
+
+      tr.vencida td {
+        background: var(--vermelho-suave);
+      }
+
+      tr.vencida:hover td {
+        background: #ffd6d6;
+      }
+
+      tr.hoje td {
+        background: var(--laranja-suave);
+      }
+
+      tr.hoje:hover td {
+        background: #ffe0a3;
+      }
+
+      .status-badge {
+        display: inline-block;
+        padding: 0.2rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        color: white;
+      }
+
+      .status-badge.recebido {
+        background: var(--verde-sucesso);
+      }
+
+      .status-badge.pendente {
+        background: var(--laranja-atencao);
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 0.3rem;
+      }
+
+      .action-btn {
+        width: 30px;
+        height: 30px;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+      }
+
+      .action-btn.visualizar {
+        background: var(--azul-info);
+      }
+
+      .action-btn.editar {
+        background: var(--laranja-atencao);
+      }
+
+      .action-btn.receber {
+        background: var(--verde-sucesso);
+      }
+
+      .action-btn.excluir {
+        background: var(--vermelho-urgente);
+      }
+
+      .action-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .action-btn:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.1);
+      }
+
+      /* ===== MODAIS ===== */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+      }
+
+      .modal.show {
+        display: flex;
+      }
+
+      .modal-content {
+        background: var(--branco);
+        border-radius: 24px;
+        width: 100%;
+        max-width: 900px;
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: slideIn 0.3s;
+      }
+
+      .modal-content.small {
+        max-width: 450px;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateY(-50px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .modal-header {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--verde-pastel);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .modal-title {
+        font-family: var(--font-titulos);
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--grafite);
+      }
+
+      .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--grafite-claro);
+        transition: all 0.3s;
+      }
+
+      .close-modal:hover {
+        color: var(--grafite);
+        transform: rotate(90deg);
+      }
+
+      .modal-body {
+        padding: 1.5rem 2rem;
+      }
+
+      .modal-footer {
+        padding: 1.5rem 2rem;
+        border-top: 1px solid var(--verde-pastel);
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+      }
+
+      /* ===== FORMULÁRIOS ===== */
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+      }
+
+      .form-label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+        color: var(--grafite-claro);
+      }
+
+      .form-label.required::after {
+        content: " *";
+        color: var(--vermelho-urgente);
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 0.7rem 1rem;
+        border: 1px solid var(--verde-claro);
+        border-radius: 10px;
+        font-family: var(--font-corpo);
+        font-size: 0.9rem;
+        outline: none;
+        transition: all 0.3s;
+        background: var(--branco);
+      }
+
+      .form-control:focus {
+        border-color: var(--verde-principal);
+        box-shadow: 0 0 0 3px var(--verde-pastel);
+      }
+
+      .form-textarea {
+        width: 100%;
+        padding: 0.7rem 1rem;
+        border: 1px solid var(--verde-claro);
+        border-radius: 10px;
+        font-family: var(--font-corpo);
+        font-size: 0.9rem;
+        outline: none;
+        resize: vertical;
+        background: var(--branco);
+      }
+
+      .form-textarea:focus {
+        border-color: var(--verde-principal);
+        box-shadow: 0 0 0 3px var(--verde-pastel);
+      }
+
+      /* ===== TOAST ===== */
+      .toast-container {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        z-index: 2000;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .toast {
+        background: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: var(--shadow-hover);
+        border-left: 4px solid var(--verde-principal);
+        animation: slideInRight 0.3s;
+        min-width: 300px;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      .toast.success {
+        border-left-color: var(--verde-sucesso);
+      }
+
+      .toast.error {
+        border-left-color: var(--vermelho-urgente);
+      }
+
+      .toast.alerta {
+        border-left-color: var(--laranja-atencao);
+      }
+
+      @keyframes slideInRight {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      /* ===== LOADING ===== */
+      .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        z-index: 3000;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .loading-overlay.show {
+        display: flex;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid var(--verde-pastel);
+        border-top-color: var(--verde-principal);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ===== RESPONSIVIDADE ===== */
+      @media (max-width: 1200px) {
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+        .modal-content {
+          width: 100%;
+          height: 100%;
+          max-height: 100vh;
+          border-radius: 0;
+        }
+        .filters-grid {
+          grid-template-columns: 1fr;
+        }
+        .date-range {
+          flex-direction: column;
+          align-items: stretch;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Carregando...</p>
+    </div>
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-content">
+        <div class="logo-area">
+          <a href="index.html" class="logo-icon"><i class="fas fa-spa"></i></a>
+          <div class="logo-text">
+            <h1>ESTÚDIO RAFAELA LISBOA</h1>
+            <span>Outras Receitas</span>
+          </div>
+        </div>
+        <div class="user-area">
+          <div class="user-info">
+            <div class="user-name" id="userName">Carregando...</div>
+            <div class="user-role" id="userRole">Financeiro</div>
+          </div>
+          <div class="user-avatar" id="userAvatar">?</div>
+          <button class="btn-icon" onclick="fazerLogout()" title="Sair">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>Receitas</h1>
+          <div class="subtitle" id="totalReceitas">Carregando...</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn-primary" onclick="abrirModalReceita()">
+            <i class="fas fa-plus"></i> Nova Receita
+          </button>
+        </div>
+      </div>
+
+      <!-- CARDS DE RESUMO -->
+      <div class="stats-grid" id="resumoContainer">
+        <!-- Preenchido via JS -->
+      </div>
+
+      <!-- FILTROS -->
+      <div class="filters-advanced">
+        <div class="filters-title"><i class="fas fa-filter"></i> Filtros</div>
+        <div class="filters-grid">
+          <div class="filter-group">
+            <label class="filter-label">Período de Vencimento</label>
+            <div class="date-range">
+              <input
+                type="date"
+                class="filter-input"
+                id="filtroVencInicio"
+                onchange="filtrarReceitas()"
+              />
+              <span>até</span>
+              <input
+                type="date"
+                class="filter-input"
+                id="filtroVencFim"
+                onchange="filtrarReceitas()"
+              />
+            </div>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Período de Recebimento</label>
+            <div class="date-range">
+              <input
+                type="date"
+                class="filter-input"
+                id="filtroRecInicio"
+                onchange="filtrarReceitas()"
+              />
+              <span>até</span>
+              <input
+                type="date"
+                class="filter-input"
+                id="filtroRecFim"
+                onchange="filtrarReceitas()"
+              />
+            </div>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Status</label>
+            <select
+              class="filter-select"
+              id="filtroStatus"
+              onchange="filtrarReceitas()"
+            >
+              <option value="">Todos</option>
+              <option value="pendente">Pendente</option>
+              <option value="recebido">Recebido</option>
+              <option value="vencido">Vencido</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Categoria</label>
+            <select
+              class="filter-select"
+              id="filtroCategoria"
+              onchange="filtrarReceitas()"
+            >
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Buscar</label>
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input
+                type="text"
+                id="searchInput"
+                placeholder="Descrição ou cliente..."
+                oninput="filtrarReceitas()"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="filter-actions">
+          <button class="btn-outline" onclick="limparFiltros()">
+            Limpar Filtros
+          </button>
+        </div>
+      </div>
+
+      <!-- TABELA DE RECEITAS -->
+      <div class="table-container">
+        <div class="table-header">
+          <h3 class="table-title">Todas as Receitas</h3>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th onclick="ordenarPor('descricao')">
+                  Descrição <i class="fas fa-sort" id="sortDescricao"></i>
+                </th>
+                <th onclick="ordenarPor('cliente')">
+                  Cliente <i class="fas fa-sort" id="sortCliente"></i>
+                </th>
+                <th onclick="ordenarPor('valor')">
+                  Valor <i class="fas fa-sort" id="sortValor"></i>
+                </th>
+                <th onclick="ordenarPor('vencimento')">
+                  Vencimento <i class="fas fa-sort" id="sortVencimento"></i>
+                </th>
+                <th>Recebimento</th>
+                <th>Status</th>
+                <th onclick="ordenarPor('categoria')">
+                  Categoria <i class="fas fa-sort" id="sortCategoria"></i>
+                </th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaReceitas">
+              <!-- Preenchido via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <!-- MODAL CADASTRO/EDIÇÃO DE RECEITA -->
+    <div class="modal" id="modalReceita">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalReceitaTitle">Nova Receita</h2>
+          <button class="close-modal" onclick="fecharModal('modalReceita')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form
+            id="formReceita"
+            onsubmit="
+              event.preventDefault();
+              salvarReceita();
+            "
+          >
+            <input type="hidden" id="receitaId" />
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label required">Descrição</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="receitaDescricao"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Cliente</label>
+                <input type="text" class="form-control" id="receitaCliente" />
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">CPF/CNPJ</label>
+                <input type="text" class="form-control" id="receitaCpfCnpj" />
+              </div>
+              <div class="form-group">
+                <label class="form-label required">Valor (R$)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="receitaValor"
+                  step="0.01"
+                  min="0.01"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Data de Emissão</label>
+                <input type="date" class="form-control" id="receitaEmissao" />
+              </div>
+              <div class="form-group">
+                <label class="form-label required">Data de Vencimento</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="receitaVencimento"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label required">Categoria</label>
+                <select class="form-control" id="receitaCategoria" required>
+                  <!-- Preenchido via JS -->
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Forma de Recebimento</label>
+                <select class="form-control" id="receitaForma">
+                  <option value="">Selecione (se já recebido)</option>
+                  <option value="PIX">PIX</option>
+                  <option value="Cartão de Crédito">Cartão de Crédito</option>
+                  <option value="Dinheiro">Dinheiro</option>
+                  <option value="Transferência">Transferência</option>
+                </select>
+              </div>
+            </div>
+            <div
+              class="form-grid"
+              id="receitaRecebimentoGroup"
+              style="display: none"
+            >
+              <div class="form-group">
+                <label class="form-label">Data de Recebimento</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="receitaDataRecebimento"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Valor Recebido</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="receitaValorRecebido"
+                  step="0.01"
+                  min="0.01"
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Observações</label>
+              <textarea
+                class="form-textarea"
+                id="receitaObs"
+                rows="2"
+              ></textarea>
+            </div>
+            <div class="form-group checkbox-group">
+              <input
+                type="checkbox"
+                id="receitaJaRecebido"
+                onchange="toggleRecebido()"
+              />
+              <label for="receitaJaRecebido">Marcar como já recebido</label>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalReceita')">
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="salvarReceita()">
+            <i class="fas fa-save"></i> Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL RECEBIMENTO (BAIXA) -->
+    <div class="modal" id="modalRecebimento">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h2 class="modal-title">Registrar Recebimento</h2>
+          <button class="close-modal" onclick="fecharModal('modalRecebimento')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form
+            id="formRecebimento"
+            onsubmit="
+              event.preventDefault();
+              registrarRecebimento();
+            "
+          >
+            <input type="hidden" id="recebimentoReceitaId" />
+            <div class="form-group">
+              <label class="form-label required">Data do Recebimento</label>
+              <input
+                type="date"
+                class="form-control"
+                id="recebimentoData"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Valor Recebido (R$)</label>
+              <input
+                type="number"
+                class="form-control"
+                id="recebimentoValor"
+                step="0.01"
+                min="0.01"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Forma de Recebimento</label>
+              <select class="form-control" id="recebimentoForma" required>
+                <option value="PIX">PIX</option>
+                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Transferência">Transferência</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Observações</label>
+              <textarea
+                class="form-textarea"
+                id="recebimentoObs"
+                rows="2"
+              ></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalRecebimento')"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="registrarRecebimento()">
+            <i class="fas fa-check"></i> Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DETALHES DA RECEITA -->
+    <div class="modal" id="modalDetalhes">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Detalhes da Receita</h2>
+          <button class="close-modal" onclick="fecharModal('modalDetalhes')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body" id="detalhesBody">
+          <!-- Conteúdo dinâmico -->
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalDetalhes')">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL CONFIRMAR EXCLUSÃO -->
+    <div class="modal" id="modalConfirmar">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h2 class="modal-title">Confirmar Exclusão</h2>
+          <button class="close-modal" onclick="fecharModal('modalConfirmar')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p
+            id="confirmarMensagem"
+            style="font-size: 0.95rem; line-height: 1.6"
+          ></p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalConfirmar')">
+            Cancelar
+          </button>
+          <button class="btn-danger" id="confirmarBotao">
+            <i class="fas fa-trash"></i> Excluir
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script>
+      // ============================================================
+      // CONFIGURAÇÃO SUPABASE
+      // ============================================================
+      const SUPABASE_URL = "https://mputdowrhzrvqslslubk.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wdXRkb3dyaHpydnFzbHNsdWJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxNjY1NDEsImV4cCI6MjA4NDc0MjU0MX0.1TlAIzCd7896EBOeYIYy3B5Czt41l-XcWYboaspEizc";
+
+      const supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY,
+      );
+
+      // ============================================================
+      // ESTADO GLOBAL
+      // ============================================================
+      const estado = {
+        usuario: null,
+        dados: {
+          receitas: [],
+          categorias: [],
+        },
+        filtros: {
+          vencInicio: "",
+          vencFim: "",
+          recInicio: "",
+          recFim: "",
+          status: "",
+          categoria: "",
+          busca: "",
+        },
+        ordenacao: {
+          coluna: "vencimento",
+          direcao: "asc",
+        },
+      };
+
+      // ============================================================
+      // FUNÇÕES UTILITÁRIAS
+      // ============================================================
+      function mostrarLoading() {
+        document.getElementById("loadingOverlay").classList.add("show");
+      }
+
+      function esconderLoading() {
+        document.getElementById("loadingOverlay").classList.remove("show");
+      }
+
+      function mostrarToast(msg, tipo = "info") {
+        const container = document.getElementById("toastContainer");
+        const toast = document.createElement("div");
+        toast.className = `toast ${tipo}`;
+        let icone = "fa-info-circle";
+        if (tipo === "success") icone = "fa-check-circle";
+        if (tipo === "error") icone = "fa-exclamation-circle";
+        if (tipo === "alerta") icone = "fa-exclamation-triangle";
+        toast.innerHTML = `<i class="fas ${icone}"></i> ${msg}`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+      }
+
+      function fmtValor(v) {
+        return new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }).format(v || 0);
+      }
+
+      function fmtData(d) {
+        if (!d) return "-";
+        return new Date(d + "T12:00:00").toLocaleDateString("pt-BR");
+      }
+
+      function hoje() {
+        return new Date().toISOString().split("T")[0];
+      }
+
+      function fecharModal(id) {
+        document.getElementById(id).classList.remove("show");
+      }
+
+      // ============================================================
+      // AUTENTICAÇÃO
+      // ============================================================
+      async function verificarLogin() {
+        const usuarioSalvo = localStorage.getItem("usuario");
+        if (usuarioSalvo) {
+          estado.usuario = JSON.parse(usuarioSalvo);
+          atualizarInterfaceUsuario();
+          return true;
+        } else {
+          window.location.href = "index.html";
+          return false;
+        }
+      }
+
+      function atualizarInterfaceUsuario() {
+        if (!estado.usuario) return;
+        document.getElementById("userName").textContent = estado.usuario.nome;
+        document.getElementById("userRole").textContent =
+          estado.usuario.role === "admin" ? "Administrador" : "Financeiro";
+        const iniciais = estado.usuario.nome
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .substring(0, 2)
+          .toUpperCase();
+        document.getElementById("userAvatar").textContent = iniciais;
+      }
+
+      async function fazerLogout() {
+        await supabaseClient.auth.signOut();
+        localStorage.removeItem("usuario");
+        window.location.href = "index.html";
+      }
+
+      // ============================================================
+      // CARREGAMENTO DE DADOS
+      // ============================================================
+      async function carregarDados() {
+        try {
+          const [receitas, categorias] = await Promise.all([
+            supabaseClient
+              .from("outras_receitas")
+              .select("*")
+              .order("data_vencimento", { ascending: true }),
+            supabaseClient
+              .from("categorias_financeiras")
+              .select("*")
+              .eq("tipo", "receita"),
+          ]);
+
+          if (receitas.error) throw receitas.error;
+          if (categorias.error) throw categorias.error;
+
+          estado.dados.receitas = receitas.data || [];
+          estado.dados.categorias = categorias.data || [];
+
+          document.getElementById("totalReceitas").textContent =
+            `${estado.dados.receitas.length} receitas cadastradas`;
+
+          // Preencher selects de categoria
+          const filtroCat = document.getElementById("filtroCategoria");
+          const modalCat = document.getElementById("receitaCategoria");
+          const options = estado.dados.categorias
+            .map((c) => `<option value="${c.nome}">${c.nome}</option>`)
+            .join("");
+          filtroCat.innerHTML = '<option value="">Todas</option>' + options;
+          modalCat.innerHTML = options;
+        } catch (error) {
+          console.error("Erro ao carregar dados:", error);
+          mostrarToast("Erro ao carregar dados: " + error.message, "error");
+        }
+      }
+
+      // ============================================================
+      // FUNÇÕES DE RESUMO
+      // ============================================================
+      function calcularResumo() {
+        const hojeStr = hoje();
+        const mesAtual = hojeStr.substring(0, 7); // YYYY-MM
+
+        const totalPendente = estado.dados.receitas
+          .filter((r) => r.status === "pendente")
+          .reduce((acc, r) => acc + (r.valor || 0), 0);
+
+        const recebidoMes = estado.dados.receitas
+          .filter(
+            (r) =>
+              r.status === "recebido" &&
+              r.data_recebimento &&
+              r.data_recebimento.substring(0, 7) === mesAtual,
+          )
+          .reduce((acc, r) => acc + (r.valor_recebido || r.valor || 0), 0);
+
+        const vencidas = estado.dados.receitas.filter(
+          (r) => r.status === "pendente" && r.data_vencimento < hojeStr,
+        ).length;
+
+        return { totalPendente, recebidoMes, vencidas };
+      }
+
+      function renderizarResumo() {
+        const resumo = calcularResumo();
+        const container = document.getElementById("resumoContainer");
+        container.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value">${fmtValor(resumo.totalPendente)}</div>
+                        <div class="stat-label">Total a Receber</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value">${fmtValor(resumo.recebidoMes)}</div>
+                        <div class="stat-label">Recebido no Mês</div>
+                    </div>
+                </div>
+                <div class="stat-card ${resumo.vencidas > 0 ? "critico" : ""}">
+                    <div class="stat-icon ${resumo.vencidas > 0 ? "danger" : ""}"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value">${resumo.vencidas}</div>
+                        <div class="stat-label">Receitas Vencidas</div>
+                    </div>
+                </div>
+            `;
+      }
+
+      // ============================================================
+      // FUNÇÕES DA TABELA
+      // ============================================================
+      function aplicarFiltros() {
+        estado.filtros = {
+          vencInicio: document.getElementById("filtroVencInicio")?.value || "",
+          vencFim: document.getElementById("filtroVencFim")?.value || "",
+          recInicio: document.getElementById("filtroRecInicio")?.value || "",
+          recFim: document.getElementById("filtroRecFim")?.value || "",
+          status: document.getElementById("filtroStatus")?.value || "",
+          categoria: document.getElementById("filtroCategoria")?.value || "",
+          busca: document.getElementById("searchInput")?.value || "",
+        };
+        renderizarTabela();
+      }
+
+      function filtrarReceitas() {
+        aplicarFiltros();
+      }
+
+      function limparFiltros() {
+        document.getElementById("filtroVencInicio").value = "";
+        document.getElementById("filtroVencFim").value = "";
+        document.getElementById("filtroRecInicio").value = "";
+        document.getElementById("filtroRecFim").value = "";
+        document.getElementById("filtroStatus").value = "";
+        document.getElementById("filtroCategoria").value = "";
+        document.getElementById("searchInput").value = "";
+        aplicarFiltros();
+      }
+
+      function ordenarPor(coluna) {
+        if (estado.ordenacao.coluna === coluna) {
+          estado.ordenacao.direcao =
+            estado.ordenacao.direcao === "asc" ? "desc" : "asc";
+        } else {
+          estado.ordenacao.coluna = coluna;
+          estado.ordenacao.direcao = "asc";
+        }
+        // Atualizar ícones
+        document
+          .querySelectorAll("th i")
+          .forEach((i) => (i.className = "fas fa-sort"));
+        const icone = document.getElementById(
+          `sort${coluna.charAt(0).toUpperCase() + coluna.slice(1)}`,
+        );
+        if (icone)
+          icone.className = `fas fa-sort-${estado.ordenacao.direcao === "asc" ? "up" : "down"}`;
+        renderizarTabela();
+      }
+
+      function aplicarOrdenacao(lista) {
+        if (!estado.ordenacao.coluna) return lista;
+        const col = estado.ordenacao.coluna;
+        const dir = estado.ordenacao.direcao;
+        return [...lista].sort((a, b) => {
+          let valA, valB;
+          if (col === "descricao") {
+            valA = a.descricao || "";
+            valB = b.descricao || "";
+          } else if (col === "cliente") {
+            valA = a.cliente || "";
+            valB = b.cliente || "";
+          } else if (col === "valor") {
+            valA = a.valor || 0;
+            valB = b.valor || 0;
+          } else if (col === "vencimento") {
+            valA = a.data_vencimento || "9999-99-99";
+            valB = b.data_vencimento || "9999-99-99";
+          } else if (col === "categoria") {
+            valA = a.categoria || "";
+            valB = b.categoria || "";
+          }
+          if (typeof valA === "string") {
+            return dir === "asc"
+              ? valA.localeCompare(valB)
+              : valB.localeCompare(valA);
+          } else {
+            return dir === "asc" ? valA - valB : valB - valA;
+          }
+        });
+      }
+
+      function renderizarTabela() {
+        let lista = [...estado.dados.receitas];
+
+        // Aplicar filtros
+        const {
+          vencInicio,
+          vencFim,
+          recInicio,
+          recFim,
+          status,
+          categoria,
+          busca,
+        } = estado.filtros;
+        if (vencInicio)
+          lista = lista.filter((r) => r.data_vencimento >= vencInicio);
+        if (vencFim) lista = lista.filter((r) => r.data_vencimento <= vencFim);
+        if (recInicio)
+          lista = lista.filter((r) => r.data_recebimento >= recInicio);
+        if (recFim) lista = lista.filter((r) => r.data_recebimento <= recFim);
+        if (status === "pendente")
+          lista = lista.filter((r) => r.status === "pendente");
+        else if (status === "recebido")
+          lista = lista.filter((r) => r.status === "recebido");
+        else if (status === "vencido") {
+          const hojeStr = hoje();
+          lista = lista.filter(
+            (r) => r.status === "pendente" && r.data_vencimento < hojeStr,
+          );
+        }
+        if (categoria) lista = lista.filter((r) => r.categoria === categoria);
+        if (busca) {
+          const bus = busca.toLowerCase();
+          lista = lista.filter(
+            (r) =>
+              (r.descricao && r.descricao.toLowerCase().includes(bus)) ||
+              (r.cliente && r.cliente.toLowerCase().includes(bus)),
+          );
+        }
+
+        // Aplicar ordenação
+        lista = aplicarOrdenacao(lista);
+
+        const tbody = document.getElementById("tabelaReceitas");
+        if (lista.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="8" style="text-align:center; padding:2rem;">Nenhuma receita encontrada</td></tr>';
+          return;
+        }
+
+        const hojeStr = hoje();
+        tbody.innerHTML = lista
+          .map((r) => {
+            const classeLinha =
+              r.status === "pendente" && r.data_vencimento < hojeStr
+                ? "vencida"
+                : r.status === "pendente" && r.data_vencimento === hojeStr
+                  ? "hoje"
+                  : "";
+            return `
+                    <tr class="${classeLinha}">
+                        <td><strong>${r.descricao}</strong></td>
+                        <td>${r.cliente || "-"}</td>
+                        <td>${fmtValor(r.valor)}</td>
+                        <td>${fmtData(r.data_vencimento)}</td>
+                        <td>${r.data_recebimento ? fmtData(r.data_recebimento) : "-"}</td>
+                        <td><span class="status-badge ${r.status === "recebido" ? "recebido" : "pendente"}">${r.status === "recebido" ? "Recebido" : "Pendente"}</span></td>
+                        <td>${r.categoria || "-"}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn visualizar" onclick="verDetalhes(${r.id})" data-tooltip="Ver detalhes">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                ${
+                                  r.status === "pendente"
+                                    ? `
+                                    <button class="action-btn receber" onclick="abrirModalRecebimento(${r.id}, ${r.valor})" data-tooltip="Registrar recebimento">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="action-btn editar" onclick="editarReceita(${r.id})" data-tooltip="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn excluir" onclick="confirmarExclusao(${r.id})" data-tooltip="Excluir">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                `
+                                    : ""
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                `;
+          })
+          .join("");
+      }
+
+      // ============================================================
+      // FUNÇÕES DO MODAL DE RECEITA (CADASTRO/EDIÇÃO)
+      // ============================================================
+      function toggleRecebido() {
+        const checked = document.getElementById("receitaJaRecebido").checked;
+        const group = document.getElementById("receitaRecebimentoGroup");
+        group.style.display = checked ? "grid" : "none";
+        if (checked) {
+          document.getElementById("receitaDataRecebimento").value = hoje();
+          document.getElementById("receitaValorRecebido").value =
+            document.getElementById("receitaValor").value;
+        } else {
+          document.getElementById("receitaDataRecebimento").value = "";
+          document.getElementById("receitaValorRecebido").value = "";
+        }
+      }
+
+      function abrirModalReceita() {
+        document.getElementById("modalReceitaTitle").textContent =
+          "Nova Receita";
+        document.getElementById("formReceita").reset();
+        document.getElementById("receitaId").value = "";
+        document.getElementById("receitaEmissao").value = hoje();
+        document.getElementById("receitaVencimento").value = hoje();
+        document.getElementById("receitaJaRecebido").checked = false;
+        document.getElementById("receitaRecebimentoGroup").style.display =
+          "none";
+        document.getElementById("modalReceita").classList.add("show");
+      }
+
+      function editarReceita(id) {
+        const rec = estado.dados.receitas.find((r) => r.id === id);
+        if (!rec) return;
+        if (rec.status === "recebido") {
+          mostrarToast(
+            "Receitas já recebidas não podem ser editadas",
+            "alerta",
+          );
+          return;
+        }
+
+        document.getElementById("modalReceitaTitle").textContent =
+          "Editar Receita";
+        document.getElementById("receitaId").value = rec.id;
+        document.getElementById("receitaDescricao").value = rec.descricao || "";
+        document.getElementById("receitaCliente").value = rec.cliente || "";
+        document.getElementById("receitaCpfCnpj").value = rec.cpf_cnpj || "";
+        document.getElementById("receitaValor").value = rec.valor;
+        document.getElementById("receitaEmissao").value =
+          rec.data_emissao || hoje();
+        document.getElementById("receitaVencimento").value =
+          rec.data_vencimento;
+        document.getElementById("receitaCategoria").value = rec.categoria || "";
+        document.getElementById("receitaObs").value = rec.observacoes || "";
+        document.getElementById("receitaJaRecebido").checked = false;
+        document.getElementById("receitaRecebimentoGroup").style.display =
+          "none";
+
+        document.getElementById("modalReceita").classList.add("show");
+      }
+
+      async function salvarReceita() {
+        const id = document.getElementById("receitaId").value;
+        const descricao = document
+          .getElementById("receitaDescricao")
+          .value.trim();
+        const valor = parseFloat(document.getElementById("receitaValor").value);
+        const vencimento = document.getElementById("receitaVencimento").value;
+        const categoria = document.getElementById("receitaCategoria").value;
+        const emissao =
+          document.getElementById("receitaEmissao").value || hoje();
+        const cliente =
+          document.getElementById("receitaCliente").value.trim() || null;
+        const cpfCnpj =
+          document.getElementById("receitaCpfCnpj").value.trim() || null;
+        const observacoes =
+          document.getElementById("receitaObs").value.trim() || null;
+        const jaRecebido = document.getElementById("receitaJaRecebido").checked;
+
+        if (
+          !descricao ||
+          isNaN(valor) ||
+          valor <= 0 ||
+          !vencimento ||
+          !categoria
+        ) {
+          mostrarToast("Preencha todos os campos obrigatórios", "error");
+          return;
+        }
+
+        let dataRecebimento = null;
+        let forma = null;
+        let valorRecebido = null;
+        let status = "pendente";
+
+        if (jaRecebido) {
+          dataRecebimento =
+            document.getElementById("receitaDataRecebimento").value || hoje();
+          forma = document.getElementById("receitaForma").value;
+          valorRecebido =
+            parseFloat(document.getElementById("receitaValorRecebido").value) ||
+            valor;
+          if (!forma) {
+            mostrarToast("Selecione a forma de recebimento", "error");
+            return;
+          }
+          status = "recebido";
+        }
+
+        const receitaData = {
+          descricao,
+          cliente,
+          cpf_cnpj: cpfCnpj,
+          valor,
+          data_emissao: emissao,
+          data_vencimento: vencimento,
+          categoria,
+          observacoes,
+          status,
+        };
+        if (jaRecebido) {
+          receitaData.data_recebimento = dataRecebimento;
+          receitaData.forma = forma;
+          receitaData.valor_recebido = valorRecebido;
+        }
+
+        mostrarLoading();
+
+        try {
+          if (id) {
+            const { error } = await supabaseClient
+              .from("outras_receitas")
+              .update(receitaData)
+              .eq("id", id);
+            if (error) throw error;
+            mostrarToast("Receita atualizada!", "success");
+          } else {
+            const { error } = await supabaseClient
+              .from("outras_receitas")
+              .insert([receitaData]);
+            if (error) throw error;
+            mostrarToast("Receita cadastrada!", "success");
+          }
+
+          fecharModal("modalReceita");
+          await carregarDados();
+          renderizarResumo();
+          renderizarTabela();
+        } catch (error) {
+          console.error("Erro ao salvar receita:", error);
+          mostrarToast("Erro: " + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      // ============================================================
+      // FUNÇÕES DE RECEBIMENTO (BAIXA)
+      // ============================================================
+      function abrirModalRecebimento(id, valor) {
+        document.getElementById("recebimentoReceitaId").value = id;
+        document.getElementById("recebimentoData").value = hoje();
+        document.getElementById("recebimentoValor").value = valor.toFixed(2);
+        document.getElementById("recebimentoForma").value = "PIX";
+        document.getElementById("recebimentoObs").value = "";
+        document.getElementById("modalRecebimento").classList.add("show");
+      }
+
+      async function registrarRecebimento() {
+        const id = parseInt(
+          document.getElementById("recebimentoReceitaId").value,
+        );
+        const data = document.getElementById("recebimentoData").value;
+        const valor = parseFloat(
+          document.getElementById("recebimentoValor").value,
+        );
+        const forma = document.getElementById("recebimentoForma").value;
+        const obs =
+          document.getElementById("recebimentoObs").value.trim() || null;
+
+        if (!data || isNaN(valor) || valor <= 0 || !forma) {
+          mostrarToast("Preencha todos os campos obrigatórios", "error");
+          return;
+        }
+
+        mostrarLoading();
+
+        try {
+          const { error } = await supabaseClient
+            .from("outras_receitas")
+            .update({
+              status: "recebido",
+              data_recebimento: data,
+              forma: forma,
+              valor_recebido: valor,
+              observacoes_recebimento: obs,
+            })
+            .eq("id", id);
+
+          if (error) throw error;
+
+          mostrarToast("Recebimento registrado!", "success");
+          fecharModal("modalRecebimento");
+          await carregarDados();
+          renderizarResumo();
+          renderizarTabela();
+        } catch (error) {
+          console.error("Erro ao registrar recebimento:", error);
+          mostrarToast("Erro: " + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      // ============================================================
+      // FUNÇÕES DE DETALHES
+      // ============================================================
+      function verDetalhes(id) {
+        const rec = estado.dados.receitas.find((r) => r.id === id);
+        if (!rec) return;
+
+        const html = `
+                <div style="margin-bottom:1rem;">
+                    <h3 style="color:var(--verde-principal);">${rec.descricao}</h3>
+                    <p><strong>Cliente:</strong> ${rec.cliente || "-"}</p>
+                    <p><strong>CPF/CNPJ:</strong> ${rec.cpf_cnpj || "-"}</p>
+                    <p><strong>Valor:</strong> ${fmtValor(rec.valor)}</p>
+                    <p><strong>Emissão:</strong> ${fmtData(rec.data_emissao)}</p>
+                    <p><strong>Vencimento:</strong> ${fmtData(rec.data_vencimento)}</p>
+                    <p><strong>Categoria:</strong> ${rec.categoria || "-"}</p>
+                    <p><strong>Observações:</strong> ${rec.observacoes || "-"}</p>
+                    ${
+                      rec.status === "recebido"
+                        ? `
+                        <hr style="margin:1rem 0;">
+                        <p><strong>Recebido em:</strong> ${fmtData(rec.data_recebimento)}</p>
+                        <p><strong>Valor recebido:</strong> ${fmtValor(rec.valor_recebido || rec.valor)}</p>
+                        <p><strong>Forma:</strong> ${rec.forma || "-"}</p>
+                        <p><strong>Observações recebimento:</strong> ${rec.observacoes_recebimento || "-"}</p>
+                    `
+                        : ""
+                    }
+                </div>
+            `;
+        document.getElementById("detalhesBody").innerHTML = html;
+        document.getElementById("modalDetalhes").classList.add("show");
+      }
+
+      // ============================================================
+      // FUNÇÕES DE EXCLUSÃO
+      // ============================================================
+      function confirmarExclusao(id) {
+        const rec = estado.dados.receitas.find((r) => r.id === id);
+        if (!rec) return;
+        if (rec.status === "recebido") {
+          mostrarToast(
+            "Receitas já recebidas não podem ser excluídas",
+            "error",
+          );
+          return;
+        }
+        document.getElementById("confirmarMensagem").textContent =
+          `Tem certeza que deseja excluir a receita "${rec.descricao}"?`;
+        document.getElementById("confirmarBotao").onclick = () =>
+          excluirReceita(id);
+        document.getElementById("modalConfirmar").classList.add("show");
+      }
+
+      async function excluirReceita(id) {
+        mostrarLoading();
+        fecharModal("modalConfirmar");
+
+        try {
+          const { error } = await supabaseClient
+            .from("outras_receitas")
+            .delete()
+            .eq("id", id);
+          if (error) throw error;
+
+          mostrarToast("Receita excluída!", "success");
+          await carregarDados();
+          renderizarResumo();
+          renderizarTabela();
+        } catch (error) {
+          console.error("Erro ao excluir receita:", error);
+          mostrarToast("Erro: " + error.message, "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      // ============================================================
+      // INICIALIZAÇÃO
+      // ============================================================
+      document.addEventListener("DOMContentLoaded", async () => {
+        await verificarLogin();
+        mostrarLoading();
+        await carregarDados();
+        renderizarResumo();
+        renderizarTabela();
+        esconderLoading();
+      });
+    </script>
+  </body>
+</html>
