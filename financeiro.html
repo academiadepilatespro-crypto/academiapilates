@@ -254,10 +254,17 @@
         color: var(--branco);
       }
 
-      /* ===== STATS GRID ===== */
+      /* ===== GRIDS ===== */
       .stats-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
+        gap: var(--grid-gap);
+        margin-bottom: 1.5rem;
+      }
+
+      .stats-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: var(--grid-gap);
         margin-bottom: 1.5rem;
       }
@@ -365,6 +372,88 @@
         color: var(--vermelho-urgente);
       }
 
+      /* ===== LISTAS DE ITENS (substituem cards secundários) ===== */
+      .lista-container {
+        background: var(--branco);
+        border-radius: 16px;
+        padding: 1.2rem;
+        box-shadow: var(--shadow);
+      }
+
+      .lista-titulo {
+        font-family: var(--font-titulos);
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--grafite);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .lista-titulo a {
+        font-size: 0.8rem;
+        color: var(--verde-principal);
+        text-decoration: none;
+        font-weight: normal;
+      }
+
+      .lista-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid var(--verde-pastel);
+      }
+
+      .lista-item:last-child {
+        border-bottom: none;
+      }
+
+      .lista-item-info {
+        flex: 1;
+      }
+
+      .lista-item-descricao {
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-bottom: 0.2rem;
+      }
+
+      .lista-item-meta {
+        font-size: 0.75rem;
+        color: var(--grafite-claro);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .lista-item-valor {
+        font-weight: 600;
+        font-size: 0.95rem;
+        white-space: nowrap;
+        margin-left: 1rem;
+      }
+
+      .badge-dias {
+        padding: 0.2rem 0.5rem;
+        border-radius: 20px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        background: var(--verde-pastel);
+        color: var(--verde-principal);
+      }
+
+      .badge-dias.urgente {
+        background: var(--vermelho-suave);
+        color: var(--vermelho-urgente);
+      }
+
+      .badge-dias.atencao {
+        background: var(--laranja-suave);
+        color: var(--laranja-atencao);
+      }
+
       /* ===== ALERTAS ===== */
       .alertas-container {
         margin-bottom: 1.5rem;
@@ -425,6 +514,13 @@
       .charts-grid {
         display: grid;
         grid-template-columns: 2fr 1fr;
+        gap: var(--grid-gap);
+        margin-bottom: 1.5rem;
+      }
+
+      .charts-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: var(--grid-gap);
         margin-bottom: 1.5rem;
       }
@@ -631,7 +727,13 @@
         .stats-grid {
           grid-template-columns: repeat(2, 1fr);
         }
+        .stats-grid-2 {
+          grid-template-columns: 1fr;
+        }
         .charts-grid {
+          grid-template-columns: 1fr;
+        }
+        .charts-grid-2 {
           grid-template-columns: 1fr;
         }
         .modulos-grid {
@@ -708,12 +810,17 @@
         </div>
       </div>
 
-      <!-- CARDS DE ESTATÍSTICAS -->
+      <!-- CARDS DE ESTATÍSTICAS PRINCIPAIS -->
       <div class="stats-grid" id="statsContainer">
         <!-- Serão preenchidos via JS -->
       </div>
 
-      <!-- ALERTAS -->
+      <!-- LISTAS DE PRÓXIMOS RECEBIMENTOS E CONTAS (substituem os cards secundários) -->
+      <div class="stats-grid-2" id="listasContainer">
+        <!-- Serão preenchidas via JS -->
+      </div>
+
+      <!-- ALERTAS CRÍTICOS -->
       <div class="alertas-container" id="alertasContainer"></div>
 
       <!-- GRÁFICOS -->
@@ -744,6 +851,35 @@
           </div>
           <div class="chart-wrapper">
             <canvas id="graficoFormas"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEGUNDA LINHA DE GRÁFICOS -->
+      <div class="charts-grid-2">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">
+              <i class="fas fa-chart-bar" style="color: var(--azul-info)"></i>
+              Receitas vs Despesas por Categoria
+            </h3>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="graficoCat"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">
+              <i
+                class="fas fa-exclamation-triangle"
+                style="color: var(--laranja-atencao)"
+              ></i>
+              Evolução da Inadimplência
+            </h3>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="graficoInadimplencia"></canvas>
           </div>
         </div>
       </div>
@@ -990,6 +1126,16 @@
         return new Date().toISOString().split("T")[0];
       }
 
+      function diasAte(data) {
+        if (!data) return null;
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+        const venc = new Date(data + "T12:00:00");
+        venc.setHours(0, 0, 0, 0);
+        const diff = Math.ceil((venc - hoje) / (1000 * 60 * 60 * 24));
+        return diff;
+      }
+
       function fecharModal(id) {
         document.getElementById(id).style.display = "none";
       }
@@ -1030,7 +1176,7 @@
       }
 
       // ============================================================
-      // CARREGAMENTO DE DADOS (APENAS REAIS, SEM MOCK)
+      // CARREGAMENTO DE DADOS
       // ============================================================
       async function carregarDados() {
         try {
@@ -1064,7 +1210,6 @@
         } catch (error) {
           console.error("Erro ao carregar dados:", error);
           mostrarToast("Erro ao carregar dados: " + error.message, "error");
-          // Não usar fallback com dados vazios – já estamos usando array vazio, mas mantemos o erro visível
         }
       }
 
@@ -1118,12 +1263,11 @@
       }
 
       // ============================================================
-      // CÁLCULOS DOS INDICADORES
+      // CÁLCULOS DOS INDICADORES PRINCIPAIS
       // ============================================================
       function calcularIndicadores() {
         const { inicio, fim } = estado.periodo;
 
-        // Receitas do período (mensalidades pagas + outras receitas recebidas)
         const receitasMensalidades = estado.dados.parcelas
           .filter(
             (p) =>
@@ -1146,7 +1290,6 @@
 
         const receitas = receitasMensalidades + receitasOutras;
 
-        // Despesas pagas no período
         const despesas = estado.dados.contasPagar
           .filter(
             (c) =>
@@ -1157,10 +1300,8 @@
           )
           .reduce((acc, c) => acc + (c.valor || 0), 0);
 
-        // Saldo do período
         const saldo = receitas - despesas;
 
-        // Inadimplência: parcelas pendentes + atrasadas / total de parcelas que venceram no período
         const parcelasVencidas = estado.dados.parcelas.filter(
           (p) =>
             p.vencimento >= inicio &&
@@ -1175,7 +1316,6 @@
             ? (parcelasVencidas.length / totalParcelasPeriodo) * 100
             : 0;
 
-        // Ticket médio (valor médio das parcelas pagas no período)
         const parcelasPagas = estado.dados.parcelas.filter(
           (p) =>
             p.status === "pago" &&
@@ -1189,32 +1329,71 @@
               parcelasPagas.length
             : 0;
 
-        // Contas a pagar pendentes (próximos 30 dias)
-        const hojeStr = hoje();
-        const trintaDias = new Date();
-        trintaDias.setDate(trintaDias.getDate() + 30);
-        const trintaDiasStr = trintaDias.toISOString().split("T")[0];
-        const contasPendentes = estado.dados.contasPagar
-          .filter(
-            (c) =>
-              c.status === "pendente" &&
-              c.data_vencimento >= hojeStr &&
-              c.data_vencimento <= trintaDiasStr,
-          )
-          .reduce((acc, c) => acc + (c.valor || 0), 0);
-
         return {
           receitas,
           despesas,
           saldo,
           inadimplencia,
           ticketMedio,
-          contasPendentes,
         };
       }
 
       // ============================================================
-      // RENDERIZAÇÃO DOS CARDS
+      // FUNÇÕES PARA AS LISTAS DE PRÓXIMOS ITENS
+      // ============================================================
+      function obterProximosRecebimentos(limite = 5) {
+        const hojeStr = hoje();
+        const recebimentos = [];
+
+        // Parcelas a receber (pendentes ou atrasadas)
+        estado.dados.parcelas.forEach((p) => {
+          if (p.status !== "pago" && p.vencimento) {
+            const aluno = estado.dados.alunos.find((a) => a.id === p.aluno_id);
+            recebimentos.push({
+              descricao: `Mensalidade - ${aluno?.nome || "Aluno"}`,
+              valor: p.valor,
+              data: p.vencimento,
+              tipo: "mensalidade",
+              dias: diasAte(p.vencimento),
+            });
+          }
+        });
+
+        // Outras receitas a receber
+        estado.dados.outrasReceitas.forEach((r) => {
+          if (r.status !== "recebido" && r.data_vencimento) {
+            recebimentos.push({
+              descricao: r.descricao,
+              valor: r.valor,
+              data: r.data_vencimento,
+              tipo: "outra",
+              dias: diasAte(r.data_vencimento),
+            });
+          }
+        });
+
+        // Ordenar por data (mais próximo primeiro) e limitar
+        return recebimentos.sort((a, b) => a.dias - b.dias).slice(0, limite);
+      }
+
+      function obterProximasContas(limite = 5) {
+        const hojeStr = hoje();
+        const contas = estado.dados.contasPagar
+          .filter((c) => c.status === "pendente" && c.data_vencimento)
+          .map((c) => ({
+            descricao: c.descricao,
+            valor: c.valor,
+            data: c.data_vencimento,
+            dias: diasAte(c.data_vencimento),
+          }))
+          .sort((a, b) => a.dias - b.dias)
+          .slice(0, limite);
+
+        return contas;
+      }
+
+      // ============================================================
+      // RENDERIZAÇÃO DOS CARDS PRINCIPAIS
       // ============================================================
       function renderizarCards(indicadores) {
         const statsContainer = document.getElementById("statsContainer");
@@ -1224,7 +1403,7 @@
                     <div class="stat-info">
                         <div class="stat-value">${fmtValor(indicadores.receitas)}</div>
                         <div class="stat-label">Receitas do Período</div>
-                        <div class="stat-trend up"><i class="fas fa-arrow-up"></i> entrada</div>
+                        <div class="stat-trend up"><i class="fas fa-arrow-up"></i> Total recebido</div>
                     </div>
                 </div>
                 <div class="stat-card">
@@ -1232,17 +1411,16 @@
                     <div class="stat-info">
                         <div class="stat-value">${fmtValor(indicadores.despesas)}</div>
                         <div class="stat-label">Despesas Pagas</div>
-                        <div class="stat-trend down"><i class="fas fa-arrow-down"></i> saída</div>
+                        <div class="stat-trend down"><i class="fas fa-arrow-down"></i> Total de saídas</div>
                     </div>
                 </div>
                 <div class="stat-card ${indicadores.saldo >= 0 ? "" : "critico"}">
                     <div class="stat-icon"><i class="fas fa-balance-scale"></i></div>
                     <div class="stat-info">
                         <div class="stat-value">${fmtValor(indicadores.saldo)}</div>
-                        <div class="stat-label">Saldo do Período</div>
+                        <div class="stat-label">Resultado Líquido</div>
                         <div class="stat-trend ${indicadores.saldo >= 0 ? "up" : "down"}">
-                            <i class="fas fa-${indicadores.saldo >= 0 ? "arrow-up" : "arrow-down"}"></i> 
-                            ${indicadores.saldo >= 0 ? "positivo" : "negativo"}
+                            ${indicadores.saldo >= 0 ? "Superávit" : "Déficit"}
                         </div>
                     </div>
                 </div>
@@ -1253,8 +1431,90 @@
                     <div class="stat-info">
                         <div class="stat-value">${indicadores.inadimplencia.toFixed(1)}%</div>
                         <div class="stat-label">Inadimplência</div>
-                        <div class="stat-trend down"><i class="fas fa-clock"></i> ticket médio ${fmtValor(indicadores.ticketMedio)}</div>
+                        <div class="stat-trend down"><i class="fas fa-clock"></i> Ticket médio: ${fmtValor(indicadores.ticketMedio)}</div>
                     </div>
+                </div>
+            `;
+      }
+
+      // ============================================================
+      // RENDERIZAÇÃO DAS LISTAS DE ITENS
+      // ============================================================
+      function renderizarListas() {
+        const recebimentos = obterProximosRecebimentos(5);
+        const contas = obterProximasContas(5);
+
+        const container = document.getElementById("listasContainer");
+        container.innerHTML = `
+                <div class="lista-container">
+                    <div class="lista-titulo">
+                        <span><i class="fas fa-arrow-down" style="color: var(--verde-sucesso); margin-right: 0.5rem;"></i>Próximos Recebimentos</span>
+                        <a href="receber.html">Ver todos</a>
+                    </div>
+                    ${recebimentos.length === 0 ? '<p style="text-align:center; padding:1rem; color: var(--grafite-claro);">Nenhum recebimento previsto.</p>' : ""}
+                    ${recebimentos
+                      .map((item) => {
+                        const badgeClass =
+                          item.dias < 0
+                            ? "urgente"
+                            : item.dias <= 3
+                              ? "atencao"
+                              : "";
+                        const diasTexto =
+                          item.dias < 0
+                            ? `Vencido há ${Math.abs(item.dias)} dias`
+                            : item.dias === 0
+                              ? "Hoje"
+                              : `Em ${item.dias} dias`;
+                        return `
+                            <div class="lista-item">
+                                <div class="lista-item-info">
+                                    <div class="lista-item-descricao">${item.descricao}</div>
+                                    <div class="lista-item-meta">
+                                        <span>${fmtData(item.data)}</span>
+                                        <span class="badge-dias ${badgeClass}">${diasTexto}</span>
+                                    </div>
+                                </div>
+                                <div class="lista-item-valor">${fmtValor(item.valor)}</div>
+                            </div>
+                        `;
+                      })
+                      .join("")}
+                </div>
+                <div class="lista-container">
+                    <div class="lista-titulo">
+                        <span><i class="fas fa-arrow-up" style="color: var(--vermelho-urgente); margin-right: 0.5rem;"></i>Próximas Contas a Pagar</span>
+                        <a href="pagar.html">Ver todas</a>
+                    </div>
+                    ${contas.length === 0 ? '<p style="text-align:center; padding:1rem; color: var(--grafite-claro);">Nenhuma conta a pagar prevista.</p>' : ""}
+                    ${contas
+                      .map((item) => {
+                        const badgeClass =
+                          item.dias < 0
+                            ? "urgente"
+                            : item.dias <= 3
+                              ? "atencao"
+                              : "";
+                        const diasTexto =
+                          item.dias < 0
+                            ? `Vencido há ${Math.abs(item.dias)} dias`
+                            : item.dias === 0
+                              ? "Hoje"
+                              : `Em ${item.dias} dias`;
+                        return `
+                            <div class="lista-item">
+                                <div class="lista-item-info">
+                                    <div class="lista-item-descricao">${item.descricao}</div>
+                                    <div class="lista-item-meta">
+                                        <span>${fmtData(item.data)}</span>
+                                        <span class="badge-dias ${badgeClass}">${diasTexto}</span>
+                                    </div>
+                                </div>
+                                <div class="lista-item-valor">${fmtValor(item.valor)}</div>
+                            </div>
+                        `;
+                      })
+                      .join("")}
                 </div>
             `;
       }
@@ -1272,40 +1532,53 @@
         );
         if (atrasadas.length > 0) {
           const total = atrasadas.reduce((acc, p) => acc + (p.valor || 0), 0);
+          const diasAtraso = atrasadas.map((p) => {
+            const venc = new Date(p.vencimento + "T12:00:00");
+            const hoje = new Date();
+            return Math.floor((hoje - venc) / (1000 * 60 * 60 * 24));
+          });
+          const maxDias = Math.max(...diasAtraso);
           alertas.push({
             tipo: "urgente",
             icone: "exclamation-triangle",
-            titulo: "Parcelas atrasadas",
-            mensagem: `${atrasadas.length} parcela(s) no valor total de ${fmtValor(total)}`,
-            acao: "Ver mensalidades",
+            titulo: `⚠️ ${atrasadas.length} parcela(s) atrasada(s)`,
+            mensagem: `Total: ${fmtValor(total)}. A maior com ${maxDias} dias de atraso.`,
+            acao: "Regularizar",
             link: "mensalidades.html",
           });
         }
 
-        // Contas a vencer nos próximos 3 dias
-        const amanha = new Date();
-        amanha.setDate(amanha.getDate() + 1);
-        const em3dias = new Date();
-        em3dias.setDate(em3dias.getDate() + 3);
-        const amanhaStr = amanha.toISOString().split("T")[0];
-        const em3diasStr = em3dias.toISOString().split("T")[0];
-        const contasProximas = estado.dados.contasPagar.filter(
-          (c) =>
-            c.status === "pendente" &&
-            c.data_vencimento >= amanhaStr &&
-            c.data_vencimento <= em3diasStr,
+        // Contas vencidas (status pendente com vencimento < hoje)
+        const contasVencidas = estado.dados.contasPagar.filter(
+          (c) => c.status === "pendente" && c.data_vencimento < hojeStr,
         );
-        if (contasProximas.length > 0) {
-          const total = contasProximas.reduce(
+        if (contasVencidas.length > 0) {
+          const total = contasVencidas.reduce(
             (acc, c) => acc + (c.valor || 0),
             0,
           );
           alertas.push({
+            tipo: "urgente",
+            icone: "calendar-times",
+            titulo: `🔴 ${contasVencidas.length} conta(s) vencida(s)`,
+            mensagem: `Total: ${fmtValor(total)}. Pagamento urgente!`,
+            acao: "Pagar",
+            link: "pagar.html",
+          });
+        }
+
+        // Contas a vencer hoje
+        const contasHoje = estado.dados.contasPagar.filter(
+          (c) => c.status === "pendente" && c.data_vencimento === hojeStr,
+        );
+        if (contasHoje.length > 0) {
+          const total = contasHoje.reduce((acc, c) => acc + (c.valor || 0), 0);
+          alertas.push({
             tipo: "atencao",
-            icone: "calendar-alt",
-            titulo: "Contas a pagar próximas",
-            mensagem: `${contasProximas.length} conta(s) vencem nos próximos 3 dias - Total ${fmtValor(total)}`,
-            acao: "Ver contas",
+            icone: "calendar-day",
+            titulo: `📅 ${contasHoje.length} conta(s) vence(m) hoje`,
+            mensagem: `Total: ${fmtValor(total)}. Não deixe para amanhã.`,
+            acao: "Pagar agora",
             link: "pagar.html",
           });
         }
@@ -1345,15 +1618,16 @@
       // ============================================================
       // GRÁFICOS
       // ============================================================
-      let graficoFluxo, graficoFormas;
+      let graficoFluxo, graficoFormas, graficoCat, graficoInadimplencia;
 
       function destruirGraficos() {
         if (graficoFluxo) graficoFluxo.destroy();
         if (graficoFormas) graficoFormas.destroy();
+        if (graficoCat) graficoCat.destroy();
+        if (graficoInadimplencia) graficoInadimplencia.destroy();
       }
 
       function gerarDadosFluxo() {
-        // Últimos 30 dias
         const labels = [];
         const entradas = [];
         const saidas = [];
@@ -1414,10 +1688,79 @@
         return formas;
       }
 
+      function gerarDadosCategorias() {
+        const receitasCat = {};
+        const despesasCat = {};
+        const inicio = estado.periodo.inicio;
+        const fim = estado.periodo.fim;
+
+        estado.dados.outrasReceitas.forEach((r) => {
+          if (
+            r.status === "recebido" &&
+            r.data_recebimento &&
+            r.data_recebimento >= inicio &&
+            r.data_recebimento <= fim
+          ) {
+            const cat = r.categoria || "Outros";
+            receitasCat[cat] = (receitasCat[cat] || 0) + (r.valor || 0);
+          }
+        });
+
+        estado.dados.contasPagar.forEach((c) => {
+          if (
+            c.status === "pago" &&
+            c.data_pagamento &&
+            c.data_pagamento >= inicio &&
+            c.data_pagamento <= fim
+          ) {
+            const cat = c.categoria || "Outros";
+            despesasCat[cat] = (despesasCat[cat] || 0) + (c.valor || 0);
+          }
+        });
+
+        const todasCats = new Set([
+          ...Object.keys(receitasCat),
+          ...Object.keys(despesasCat),
+        ]);
+        const labels = Array.from(todasCats).sort();
+        const receitasData = labels.map((cat) => receitasCat[cat] || 0);
+        const despesasData = labels.map((cat) => despesasCat[cat] || 0);
+
+        return { labels, receitasData, despesasData };
+      }
+
+      function gerarDadosInadimplencia() {
+        const labels = [];
+        const valores = [];
+        const hoje = new Date();
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+          const mes = d.getMonth() + 1;
+          const ano = d.getFullYear();
+          const inicioMes = new Date(ano, mes - 1, 1)
+            .toISOString()
+            .split("T")[0];
+          const fimMes = new Date(ano, mes, 0).toISOString().split("T")[0];
+          labels.push(`${mes}/${ano}`);
+
+          const totalParcelas = estado.dados.parcelas.filter(
+            (p) => p.vencimento >= inicioMes && p.vencimento <= fimMes,
+          ).length;
+          const vencidas = estado.dados.parcelas.filter(
+            (p) =>
+              p.vencimento >= inicioMes &&
+              p.vencimento <= fimMes &&
+              p.status !== "pago",
+          ).length;
+          const inad = totalParcelas > 0 ? (vencidas / totalParcelas) * 100 : 0;
+          valores.push(inad);
+        }
+        return { labels, valores };
+      }
+
       function renderizarGraficos() {
         destruirGraficos();
 
-        // Gráfico de fluxo
         const ctxFluxo = document
           .getElementById("graficoFluxo")
           ?.getContext("2d");
@@ -1457,7 +1800,6 @@
           });
         }
 
-        // Gráfico de formas
         const ctxFormas = document
           .getElementById("graficoFormas")
           ?.getContext("2d");
@@ -1496,6 +1838,70 @@
             },
           });
         }
+
+        const ctxCat = document.getElementById("graficoCat")?.getContext("2d");
+        if (ctxCat) {
+          const { labels, receitasData, despesasData } = gerarDadosCategorias();
+          graficoCat = new Chart(ctxCat, {
+            type: "bar",
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: "Receitas",
+                  data: receitasData,
+                  backgroundColor: "#27AE60",
+                },
+                {
+                  label: "Despesas",
+                  data: despesasData,
+                  backgroundColor: "#E74C3C",
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                tooltip: { callbacks: { label: (c) => fmtValor(c.raw) } },
+              },
+              scales: { y: { ticks: { callback: (v) => fmtValor(v) } } },
+            },
+          });
+        }
+
+        const ctxInad = document
+          .getElementById("graficoInadimplencia")
+          ?.getContext("2d");
+        if (ctxInad) {
+          const { labels, valores } = gerarDadosInadimplencia();
+          graficoInadimplencia = new Chart(ctxInad, {
+            type: "line",
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: "Inadimplência %",
+                  data: valores,
+                  borderColor: "#F39C12",
+                  backgroundColor: "rgba(243,156,18,0.1)",
+                  tension: 0.4,
+                  fill: true,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                tooltip: {
+                  callbacks: { label: (c) => c.raw.toFixed(1) + "%" },
+                },
+              },
+              scales: { y: { ticks: { callback: (v) => v + "%" } } },
+            },
+          });
+        }
       }
 
       // ============================================================
@@ -1514,9 +1920,10 @@
       // ============================================================
       async function renderizarDashboard() {
         mostrarLoading();
-        await carregarDados(); // sempre recarrega dados reais
+        await carregarDados();
         const indicadores = calcularIndicadores();
         renderizarCards(indicadores);
+        renderizarListas();
         renderizarAlertas();
         renderizarGraficos();
         esconderLoading();
@@ -1527,7 +1934,6 @@
       // ============================================================
       document.addEventListener("DOMContentLoaded", async () => {
         await verificarLogin();
-        // Preencher anos no modal
         const anoSelect = document.getElementById("anoSelecionado");
         const anoAtual = new Date().getFullYear();
         for (let a = anoAtual - 2; a <= anoAtual + 2; a++) {
