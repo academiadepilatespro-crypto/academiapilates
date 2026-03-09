@@ -459,7 +459,7 @@
         min-height: 100vh;
       }
 
-      /* PAGE HEADER */
+      /* PAGE HEADER - SIMPLIFICADO */
       .page-header {
         margin-bottom: 2rem;
         display: flex;
@@ -482,36 +482,19 @@
         font-size: 0.9rem;
       }
 
-      .refresh-btn {
-        background: white;
-        border: 1px solid var(--verde-claro);
+      .welcome-message {
         color: var(--verde-principal);
-        padding: 0.5rem 1rem;
+        font-size: 0.95rem;
+        background: var(--verde-pastel);
+        padding: 0.5rem 1.2rem;
         border-radius: 30px;
-        font-size: 0.85rem;
-        cursor: pointer;
-        transition: all 0.3s;
         display: flex;
         align-items: center;
         gap: 0.5rem;
       }
 
-      .refresh-btn:hover {
-        background: var(--verde-principal);
-        color: white;
-        border-color: var(--verde-principal);
-      }
-
-      .refresh-btn i {
-        font-size: 0.9rem;
-      }
-
-      .cache-indicator {
-        font-size: 0.75rem;
-        color: var(--grafite-claro);
-        background: var(--verde-pastel);
-        padding: 0.2rem 0.8rem;
-        border-radius: 20px;
+      .welcome-message i {
+        font-size: 1rem;
       }
 
       /* STATS GRID */
@@ -552,6 +535,19 @@
       .stat-icon i {
         font-size: 1.6rem;
         color: var(--verde-principal);
+      }
+
+      .stat-icon.warning {
+        background: var(--laranja-suave);
+      }
+      .stat-icon.warning i {
+        color: var(--laranja-atencao);
+      }
+      .stat-icon.danger {
+        background: var(--vermelho-suave);
+      }
+      .stat-icon.danger i {
+        color: var(--vermelho-urgente);
       }
 
       .stat-info {
@@ -653,7 +649,7 @@
         color: white;
       }
 
-      /* LISTA DE AULAS */
+      /* LISTA DE AULAS - MELHORADA */
       .aula-item {
         display: flex;
         align-items: center;
@@ -690,7 +686,9 @@
 
       .aula-status {
         font-size: 0.8rem;
-        color: var(--grafite-claro);
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
       }
 
       .aula-status.presente {
@@ -701,7 +699,16 @@
         color: var(--vermelho-urgente);
       }
 
-      /* ANIVERSARIANTES */
+      .aula-status.cancelada {
+        color: var(--grafite-claro);
+        text-decoration: line-through;
+      }
+
+      .aula-status.pendente {
+        color: var(--laranja-atencao);
+      }
+
+      /* ANIVERSARIANTES - MELHORADO */
       .aniversariante-item {
         display: flex;
         align-items: center;
@@ -752,9 +759,20 @@
       .aniversariante-data {
         font-size: 0.8rem;
         color: var(--roxo-celebracao);
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
       }
 
-      /* CONTAS */
+      .aniversariante-dia {
+        background: var(--roxo-suave);
+        padding: 0.1rem 0.4rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+      }
+
+      /* CONTAS - MELHORADO */
       .conta-item {
         display: flex;
         align-items: center;
@@ -802,9 +820,22 @@
         padding: 0.2rem 0.6rem;
         border-radius: 20px;
         font-size: 0.7rem;
+        white-space: nowrap;
+      }
+
+      .badge-danger {
         background: var(--vermelho-suave);
         color: var(--vermelho-urgente);
-        white-space: nowrap;
+      }
+
+      .badge-warning {
+        background: var(--laranja-suave);
+        color: var(--laranja-atencao);
+      }
+
+      .badge-info {
+        background: var(--verde-pastel);
+        color: var(--verde-principal);
       }
 
       /* GRÁFICOS */
@@ -1224,12 +1255,27 @@
             >
               <i class="fas fa-chart-bar"></i> Relatórios
             </a>
+            <!-- NOVO ITEM: AVALIAÇÃO DETALHADA -->
+            <a
+              href="#"
+              class="nav-item"
+              onclick="abrirModulo('avaliacao'); return false;"
+            >
+              <i class="fas fa-notes-medical"></i> Avaliação Detalhada
+            </a>
             <a
               href="#"
               class="nav-item"
               onclick="abrirModulo('configuracoes'); return false;"
             >
               <i class="fas fa-cog"></i> Configurações
+            </a>
+            <a
+              href="#"
+              class="nav-item"
+              onclick="abrirModulo('ajuda'); return false;"
+            >
+              <i class="fas fa-question-circle"></i> Central de Ajuda
             </a>
           </nav>
         </aside>
@@ -1241,13 +1287,8 @@
               <h1>Olá, seja Bem-vindo(a)!</h1>
               <div class="date" id="dataAtual"></div>
             </div>
-            <div style="display: flex; gap: 1rem; align-items: center">
-              <span class="cache-indicator" id="cacheIndicator">
-                <i class="fas fa-database"></i> <span id="cacheTime">-</span>
-              </span>
-              <button class="refresh-btn" onclick="recarregarDados(true)">
-                <i class="fas fa-sync-alt"></i> Atualizar
-              </button>
+            <div class="welcome-message">
+              <i class="fas fa-smile"></i> Tenha um ótimo dia!
             </div>
           </div>
 
@@ -1319,7 +1360,6 @@
       const CACHE_KEYS = {
         ALUNOS: "cache_alunos",
         AULAS: "cache_aulas",
-        MENSALIDADES: "cache_mensalidades",
         PARCELAS: "cache_parcelas",
         CONTAS: "cache_contas",
         LAST_UPDATE: "cache_last_update",
@@ -1373,48 +1413,8 @@
             timestamp: Date.now(),
           };
           localStorage.setItem(key, JSON.stringify(cacheData));
-
-          // Atualizar timestamp global
-          estado.cache.lastUpdate = Date.now();
-          localStorage.setItem(
-            CACHE_KEYS.LAST_UPDATE,
-            JSON.stringify({
-              timestamp: Date.now(),
-            })
-          );
-
-          atualizarIndicadorCache();
         } catch (error) {
           console.warn("Erro ao salvar cache:", error);
-        }
-      }
-
-      function limparCache() {
-        Object.values(CACHE_KEYS).forEach((key) => {
-          localStorage.removeItem(key);
-        });
-        estado.cache.lastUpdate = null;
-        atualizarIndicadorCache();
-      }
-
-      function atualizarIndicadorCache() {
-        const cacheTimeEl = document.getElementById("cacheTime");
-        if (!cacheTimeEl) return;
-
-        const lastUpdate = estado.cache.lastUpdate;
-        if (!lastUpdate) {
-          cacheTimeEl.textContent = "Sem cache";
-          return;
-        }
-
-        const diff = Date.now() - lastUpdate;
-        const minutos = Math.floor(diff / 60000);
-        const segundos = Math.floor((diff % 60000) / 1000);
-
-        if (minutos > 0) {
-          cacheTimeEl.textContent = `${minutos} min atrás`;
-        } else {
-          cacheTimeEl.textContent = `${segundos} seg atrás`;
         }
       }
 
@@ -1490,13 +1490,12 @@
       }
 
       // ============================================================
-      // FUNÇÕES DE CARREGAMENTO DE DADOS (múltiplas queries)
+      // FUNÇÕES DE CARREGAMENTO DE DADOS (CORRIGIDAS)
       // ============================================================
 
       async function carregarAlunos(forceRefresh = false) {
         const cacheKey = CACHE_KEYS.ALUNOS;
 
-        // Tentar cache primeiro
         if (!forceRefresh && estado.cache.enabled) {
           const cached = getFromCache(cacheKey);
           if (cached) {
@@ -1532,11 +1531,25 @@
 
         estado.dados.aulas.loading = true;
 
+        // Query corrigida com os campos exatos do banco
         const data = await safeQuery(
           () =>
             supabaseClient
               .from("aulas")
-              .select("*, alunos(id, nome)")
+              .select(
+                `
+              id,
+              aluno_id,
+              data,
+              horario,
+              status,
+              presenca,
+              alunos!inner (
+                id,
+                nome
+              )
+            `
+              )
               .order("data", { ascending: true }),
           [],
           "Erro ao carregar aulas"
@@ -1580,62 +1593,34 @@
 
         estado.dados.parcelas.loading = true;
 
-        // 1. Buscar parcelas
-        const parcelas = await safeQuery(
-          () => supabaseClient.from("parcelas").select("*"),
+        // Query otimizada que já traz o nome do aluno
+        const data = await safeQuery(
+          () =>
+            supabaseClient.from("parcelas").select(`
+              *,
+              mensalidades!inner (
+                aluno_id,
+                alunos!inner (
+                  nome
+                )
+              )
+            `),
           [],
           "Erro ao carregar parcelas"
         );
 
-        if (!parcelas.length) {
-          estado.dados.parcelas = { data: [], loading: false, error: null };
-          return [];
-        }
-
-        // 2. Buscar mensalidades relacionadas
-        const mensalidadesIds = [
-          ...new Set(parcelas.map((p) => p.mensalidade_id)),
-        ];
-        const mensalidades = await safeQuery(
-          () =>
-            supabaseClient
-              .from("mensalidades")
-              .select("id, aluno_id")
-              .in("id", mensalidadesIds),
-          [],
-          "Erro ao carregar mensalidades"
-        );
-
-        // 3. Buscar alunos relacionados
-        const alunosIds = [...new Set(mensalidades.map((m) => m.aluno_id))];
-        const alunos = await safeQuery(
-          () =>
-            supabaseClient
-              .from("alunos")
-              .select("id, nome")
-              .in("id", alunosIds),
-          [],
-          "Erro ao carregar alunos"
-        );
-
-        // 4. Relacionar em memória
-        const parcelasProcessadas = parcelas.map((parcela) => {
-          const mensalidade = mensalidades.find(
-            (m) => m.id === parcela.mensalidade_id
-          );
-          const aluno = alunos.find((a) => a.id === mensalidade?.aluno_id);
-          return {
-            id: parcela.id,
-            mensalidade_id: parcela.mensalidade_id,
-            aluno_id: mensalidade?.aluno_id,
-            alunoNome: aluno?.nome || "Aluno não encontrado",
-            valor: parcela.valor,
-            vencimento: parcela.vencimento,
-            status: parcela.status,
-            numero: parcela.numero,
-            data_pagamento: parcela.data_pagamento,
-          };
-        });
+        // Processar dados para formato amigável
+        const parcelasProcessadas = (data || []).map((p) => ({
+          id: p.id,
+          mensalidade_id: p.mensalidade_id,
+          aluno_id: p.mensalidades?.aluno_id,
+          alunoNome: p.mensalidades?.alunos?.nome || "Aluno não encontrado",
+          valor: p.valor,
+          vencimento: p.vencimento,
+          data_pagamento: p.data_pagamento,
+          status: p.status,
+          numero: p.numero,
+        }));
 
         estado.dados.parcelas = {
           data: parcelasProcessadas,
@@ -1660,6 +1645,7 @@
 
         estado.dados.contas.loading = true;
 
+        // Query corrigida com o campo correto data_vencimento
         const data = await safeQuery(
           () =>
             supabaseClient
@@ -1674,7 +1660,8 @@
           id: c.id,
           descricao: c.descricao,
           valor: c.valor,
-          vencimento: c.data_vencimento,
+          data_vencimento: c.data_vencimento,
+          data_pagamento: c.data_pagamento,
           status: c.status,
           categoria: c.categoria,
         }));
@@ -1693,7 +1680,6 @@
         mostrarLoading();
 
         try {
-          // Executar todas as queries em paralelo para melhor performance
           await Promise.all([
             carregarAlunos(forceRefresh),
             carregarAulas(forceRefresh),
@@ -1712,302 +1698,387 @@
       }
 
       // ============================================================
-      // TEMPLATES DO DASHBOARD (componentização)
+      // FUNÇÕES DE CÁLCULO (CORRIGIDAS)
       // ============================================================
 
-      const Templates = {
-        statsCards: (stats) => `
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-users"></i></div>
-                        <div class="stat-info">
-                            <div class="stat-value">${stats.totalAlunos}</div>
-                            <div class="stat-label">Total de Alunos</div>
-                            <div class="stat-trend up"><i class="fas fa-arrow-up"></i> ${
-                              stats.alunosAtivos
-                            } ativos</div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
-                        <div class="stat-info">
-                            <div class="stat-value">${
-                              stats.aulasHojeCount
-                            }</div>
-                            <div class="stat-label">Aulas Hoje</div>
-                            <div class="stat-trend ${
-                              stats.aulasSemPresenca > 0 ? "down" : "up"
-                            }">
-                                <i class="fas ${
-                                  stats.aulasSemPresenca > 0
-                                    ? "fa-exclamation-triangle"
-                                    : "fa-check"
-                                }"></i> 
-                                ${stats.aulasSemPresenca} sem presença
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
-                        <div class="stat-info">
-                            <div class="stat-value">${formatarValor(
-                              stats.valorPendente
-                            )}</div>
-                            <div class="stat-label">Mensalidades Pendentes</div>
-                            <div class="stat-trend down"><i class="fas fa-clock"></i> ${
-                              stats.mensalidadesPendentes
-                            } pendências</div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-file-invoice"></i></div>
-                        <div class="stat-info">
-                            <div class="stat-value">${formatarValor(
-                              stats.valorContas
-                            )}</div>
-                            <div class="stat-label">Contas a Pagar</div>
-                            <div class="stat-trend down"><i class="fas fa-exclamation-triangle"></i> ${
-                              stats.contasPendentes
-                            } contas</div>
-                        </div>
-                    </div>
-                </div>
-            `,
+      function calcularDiasConta(dataVencimento) {
+        if (!dataVencimento)
+          return {
+            dias: 0,
+            status: "normal",
+            texto: "Vencimento não informado",
+          };
 
-        graficos: () => `
-                <div class="charts-grid">
-                    <div class="chart-card">
-                        <div class="card-header"><h3 class="card-title">Aulas por Horário</h3></div>
-                        <div class="chart-container"><canvas id="graficoHorarios"></canvas></div>
-                    </div>
-                    <div class="chart-card">
-                        <div class="card-header"><h3 class="card-title">Status Financeiro</h3></div>
-                        <div class="chart-container"><canvas id="graficoFinanceiro"></canvas></div>
-                    </div>
-                </div>
-            `,
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
 
-        aulasHoje: (aulas) => `
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h3 class="card-title">Aulas de Hoje</h3>
-                        <a href="#" class="card-link" onclick="abrirModulo('agenda'); return false;">Ver todas <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                    <div>
-                        ${
-                          aulas.length > 0
-                            ? aulas
-                                .sort((a, b) =>
-                                  (a.horario || "").localeCompare(
-                                    b.horario || ""
-                                  )
-                                )
-                                .map(
-                                  (aula) => `
-                                <div class="aula-item">
-                                    <div class="aula-horario">${
-                                      aula.horario
-                                        ? aula.horario.substring(0, 5)
-                                        : "--:--"
-                                    }</div>
-                                    <div class="aula-info">
-                                        <div class="aula-nome">${
-                                          aula.alunoNome || "Aluno"
-                                        }</div>
-                                        <div class="aula-status ${
-                                          aula.presenca || "pendente"
-                                        }">
-                                            ${
-                                              aula.presenca
-                                                ? aula.presenca === "presente"
-                                                  ? "✅ Presente"
-                                                  : "❌ Ausente"
-                                                : "⏳ Pendente"
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                            `
-                                )
-                                .join("")
-                            : '<p style="text-align:center; padding:1rem;">Nenhuma aula hoje</p>'
-                        }
-                    </div>
-                </div>
-            `,
+        const venc = new Date(dataVencimento + "T12:00:00");
+        venc.setHours(0, 0, 0, 0);
 
-        aniversariantes: (aniversariantes, hoje) => `
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h3 class="card-title">Aniversariantes do Mês</h3>
-                        <a href="#" class="card-link" onclick="abrirModulo('alunos'); return false;">Ver todos <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                    <div>
-                        ${
-                          aniversariantes.length > 0
-                            ? aniversariantes
-                                .map((a) => {
-                                  const dia = parseInt(
-                                    a.nascimento?.split("-")[2] || "0"
-                                  );
-                                  const isHoje = dia === hoje.getDate();
-                                  return `
-                                    <div class="aniversariante-item ${
-                                      isHoje ? "hoje" : ""
-                                    }">
-                                        <div class="aniversariante-avatar">${(
-                                          a.nome || "A"
-                                        ).charAt(0)}</div>
-                                        <div class="aniversariante-info">
-                                            <div class="aniversariante-nome">${
-                                              a.nome
-                                            }</div>
-                                            <div class="aniversariante-data">
-                                                ${formatarData(a.nascimento)}
-                                                ${isHoje ? "🎉 Hoje!" : ""}
-                                            </div>
-                                        </div>
-                                    </div>
-                                `;
-                                })
-                                .join("")
-                            : '<p style="text-align:center; padding:1rem;">Nenhum aniversariante</p>'
-                        }
-                    </div>
-                </div>
-            `,
+        const diffTime = venc - hoje;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        contasProximas: (contas) => `
-                <div class="dashboard-card" style="margin-bottom: var(--grid-gap);">
-                    <div class="card-header">
-                        <h3 class="card-title">Contas a Pagar - Próximos 7 dias</h3>
-                        <a href="#" class="card-link" onclick="abrirModulo('financeiro'); return false;">Ver todas <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                    <div>
-                        ${
-                          contas.length > 0
-                            ? contas
-                                .map((conta) => {
-                                  const diasRestantes = Math.ceil(
-                                    (new Date(conta.vencimento) - new Date()) /
-                                      (1000 * 60 * 60 * 24)
-                                  );
-                                  let badgeText =
-                                    diasRestantes < 0
-                                      ? "Atrasada"
-                                      : diasRestantes <= 3
-                                      ? "Urgente"
-                                      : `${diasRestantes} dias`;
-                                  return `
-                                    <div class="conta-item">
-                                        <div class="conta-info">
-                                            <div class="conta-descricao">${
-                                              conta.descricao || "Sem descrição"
-                                            }</div>
-                                            <div class="conta-vencimento">Vence ${formatarData(
-                                              conta.vencimento
-                                            )}</div>
-                                        </div>
-                                        <div class="conta-valor">
-                                            ${formatarValor(
-                                              conta.valor
-                                            )} <span class="conta-badge">${badgeText}</span>
-                                        </div>
-                                    </div>
-                                `;
-                                })
-                                .join("")
-                            : '<p style="text-align:center; padding:1rem;">Nenhuma conta a pagar</p>'
-                        }
-                    </div>
-                </div>
-            `,
+        let status = "normal";
+        let texto = "";
 
-        acessoRapido: (stats) => `
-                <div class="dashboard-card">
-                    <div class="card-header"><h3 class="card-title">Acesso Rápido</h3></div>
-                    <div class="modulos-grid">
-                        <a href="#" class="modulo-card" onclick="abrirModulo('alunos'); return false;">
-                            <div class="modulo-icon"><i class="fas fa-users"></i></div>
-                            <div class="modulo-nome">Alunos</div>
-                            <div class="modulo-count">${stats.totalAlunos} cadastrados</div>
-                        </a>
-                        <a href="#" class="modulo-card" onclick="abrirModulo('agenda'); return false;">
-                            <div class="modulo-icon"><i class="fas fa-calendar-alt"></i></div>
-                            <div class="modulo-nome">Agenda</div>
-                            <div class="modulo-count">${stats.totalAulas} aulas</div>
-                        </a>
-                        <a href="#" class="modulo-card" onclick="abrirModulo('financeiro'); return false;">
-                            <div class="modulo-icon"><i class="fas fa-credit-card"></i></div>
-                            <div class="modulo-nome">Financeiro</div>
-                            <div class="modulo-count">${stats.mensalidadesPendentes} pendências</div>
-                        </a>
-                        <a href="#" class="modulo-card" onclick="abrirModulo('relatorios'); return false;">
-                            <div class="modulo-icon"><i class="fas fa-chart-bar"></i></div>
-                            <div class="modulo-nome">Relatórios</div>
-                            <div class="modulo-count">Análises</div>
-                        </a>
-                    </div>
-                </div>
-            `,
-      };
+        if (diffDays < 0) {
+          status = "vencida";
+          texto = `${Math.abs(diffDays)} dias atrasada`;
+        } else if (diffDays === 0) {
+          status = "hoje";
+          texto = "Vence hoje";
+        } else if (diffDays <= 3) {
+          status = "urgente";
+          texto = `${diffDays} dias`;
+        } else if (diffDays <= 7) {
+          status = "proxima";
+          texto = `${diffDays} dias`;
+        } else {
+          texto = `${diffDays} dias`;
+        }
 
-      // ============================================================
-      // FUNÇÕES DE CÁLCULO PARA O DASHBOARD
-      // ============================================================
+        return { dias: diffDays, status, texto };
+      }
 
       function calcularStats() {
-        const hoje = new Date();
-        const hojeStr = hoje.toISOString().split("T")[0];
-        const mesAtual = hoje.getMonth() + 1;
-
         const alunos = estado.dados.alunos.data || [];
         const aulas = estado.dados.aulas.data || [];
         const parcelas = estado.dados.parcelas.data || [];
         const contas = estado.dados.contas.data || [];
 
+        // Total de alunos
         const totalAlunos = alunos.length;
+
+        // Alunos ativos (campo 'ativo' boolean)
         const alunosAtivos = alunos.filter((a) => a.ativo === true).length;
 
+        // Aulas de hoje
+        const hojeStr = new Date().toISOString().split("T")[0];
         const aulasHoje = aulas.filter((a) => a.data === hojeStr);
         const aulasHojeCount = aulasHoje.length;
-        const aulasSemPresenca = aulas.filter(
-          (a) => a.data < hojeStr && a.presenca !== "presente"
-        ).length;
 
+        // Mensalidades pendentes (status = 'pendente' ou 'atrasado')
         const mensalidadesPendentes = parcelas.filter(
-          (m) => m.status === "pendente" || m.status === "atrasado"
+          (p) => p.status === "pendente" || p.status === "atrasado"
         );
         const valorPendente = mensalidadesPendentes.reduce(
-          (acc, m) => acc + (Number(m.valor) || 0),
+          (acc, p) => acc + (Number(p.valor) || 0),
           0
         );
 
+        // Contas a pagar pendentes
         const contasPendentes = contas.filter((c) => c.status === "pendente");
         const valorContas = contasPendentes.reduce(
           (acc, c) => acc + (Number(c.valor) || 0),
           0
         );
 
-        const aniversariantes = alunos.filter((a) => {
-          if (!a.nascimento) return false;
-          const mes = parseInt(a.nascimento.split("-")[1]);
-          return mes === mesAtual;
-        });
+        // Aniversariantes do mês (ordenados por dia)
+        const mesAtual = new Date().getMonth() + 1;
+        const aniversariantes = alunos
+          .filter((a) => {
+            if (!a.nascimento) return false;
+            const mes = parseInt(a.nascimento.split("-")[1]);
+            return mes === mesAtual;
+          })
+          .sort((a, b) => {
+            const diaA = parseInt(a.nascimento.split("-")[2]);
+            const diaB = parseInt(b.nascimento.split("-")[2]);
+            return diaA - diaB;
+          });
 
         return {
           totalAlunos,
           alunosAtivos,
           aulasHojeCount,
-          aulasSemPresenca,
           valorPendente,
           mensalidadesPendentes: mensalidadesPendentes.length,
           valorContas,
           contasPendentes: contasPendentes.length,
           aniversariantes,
-          totalAulas: aulas.length,
         };
       }
+
+      // ============================================================
+      // TEMPLATES DO DASHBOARD
+      // ============================================================
+
+      const Templates = {
+        statsCards: (stats) => `
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon"><i class="fas fa-users"></i></div>
+              <div class="stat-info">
+                <div class="stat-value">${stats.totalAlunos}</div>
+                <div class="stat-label">Total de Alunos</div>
+                <div class="stat-trend up"><i class="fas fa-arrow-up"></i> ${
+                  stats.alunosAtivos
+                } ativos</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+              <div class="stat-info">
+                <div class="stat-value">${stats.aulasHojeCount}</div>
+                <div class="stat-label">Aulas Hoje</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon ${
+                stats.valorPendente > 0 ? "warning" : ""
+              }">
+                <i class="fas fa-dollar-sign"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-value">${formatarValor(
+                  stats.valorPendente
+                )}</div>
+                <div class="stat-label">Mensalidades Pendentes</div>
+                <div class="stat-trend down"><i class="fas fa-clock"></i> ${
+                  stats.mensalidadesPendentes
+                } pendências</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon ${stats.valorContas > 0 ? "danger" : ""}">
+                <i class="fas fa-file-invoice"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-value">${formatarValor(
+                  stats.valorContas
+                )}</div>
+                <div class="stat-label">Contas a Pagar</div>
+                <div class="stat-trend down"><i class="fas fa-exclamation-triangle"></i> ${
+                  stats.contasPendentes
+                } contas</div>
+              </div>
+            </div>
+          </div>
+        `,
+
+        graficos: () => `
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="card-header"><h3 class="card-title">Aulas por Horário</h3></div>
+              <div class="chart-container"><canvas id="graficoHorarios"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <div class="card-header"><h3 class="card-title">Status Financeiro</h3></div>
+              <div class="chart-container"><canvas id="graficoFinanceiro"></canvas></div>
+            </div>
+          </div>
+        `,
+
+        aulasHoje: (aulas) => {
+          if (aulas.length === 0) {
+            return `
+              <div class="dashboard-card">
+                <div class="card-header">
+                  <h3 class="card-title">Aulas de Hoje</h3>
+                  <a href="#" class="card-link" onclick="abrirModulo('agenda'); return false;">Ver agenda <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <p style="text-align:center; padding:2rem; color:var(--grafite-claro);">
+                  <i class="fas fa-calendar-check" style="font-size:2rem; margin-bottom:0.5rem; display:block; opacity:0.5;"></i>
+                  Nenhuma aula hoje
+                </p>
+              </div>
+            `;
+          }
+
+          return `
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3 class="card-title">Aulas de Hoje</h3>
+                <a href="#" class="card-link" onclick="abrirModulo('agenda'); return false;">Ver todas <i class="fas fa-arrow-right"></i></a>
+              </div>
+              <div>
+                ${aulas
+                  .sort((a, b) =>
+                    (a.horario || "").localeCompare(b.horario || "")
+                  )
+                  .map((aula) => {
+                    let statusIcone = "";
+                    let statusClass = "";
+                    let statusTexto = "";
+
+                    if (aula.presenca === "presente") {
+                      statusIcone = "✅";
+                      statusClass = "presente";
+                      statusTexto = "Presente";
+                    } else if (aula.presenca === "ausente") {
+                      statusIcone = "❌";
+                      statusClass = "ausente";
+                      statusTexto = "Ausente";
+                    } else if (aula.status === "cancelada") {
+                      statusIcone = "🚫";
+                      statusClass = "cancelada";
+                      statusTexto = "Cancelada";
+                    } else {
+                      statusIcone = "⏳";
+                      statusClass = "pendente";
+                      statusTexto = "Pendente";
+                    }
+
+                    const horarioFormatado = aula.horario
+                      ? aula.horario.substring(0, 5)
+                      : "--:--";
+
+                    return `
+                      <div class="aula-item">
+                        <div class="aula-horario">${horarioFormatado}</div>
+                        <div class="aula-info">
+                          <div class="aula-nome">${
+                            aula.alunoNome || "Aluno"
+                          }</div>
+                          <div class="aula-status ${statusClass}">
+                            ${statusIcone} ${statusTexto}
+                          </div>
+                        </div>
+                      </div>
+                    `;
+                  })
+                  .join("")}
+              </div>
+            </div>
+          `;
+        },
+
+        aniversariantes: (aniversariantes) => {
+          if (aniversariantes.length === 0) {
+            return `
+              <div class="dashboard-card">
+                <div class="card-header">
+                  <h3 class="card-title">Aniversariantes do Mês</h3>
+                  <a href="#" class="card-link" onclick="abrirModulo('alunos'); return false;">Ver todos <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <p style="text-align:center; padding:2rem; color:var(--grafite-claro);">
+                  <i class="fas fa-birthday-cake" style="font-size:2rem; margin-bottom:0.5rem; display:block; opacity:0.5;"></i>
+                  Nenhum aniversariante este mês
+                </p>
+              </div>
+            `;
+          }
+
+          const hoje = new Date();
+          const diaHoje = hoje.getDate();
+
+          return `
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3 class="card-title">Aniversariantes do Mês</h3>
+                <a href="#" class="card-link" onclick="abrirModulo('alunos'); return false;">Ver todos <i class="fas fa-arrow-right"></i></a>
+              </div>
+              <div>
+                ${aniversariantes
+                  .map((a) => {
+                    const dia = parseInt(a.nascimento.split("-")[2]);
+                    const isHoje = dia === diaHoje;
+                    const idade =
+                      new Date().getFullYear() -
+                      new Date(a.nascimento).getFullYear();
+
+                    return `
+                    <div class="aniversariante-item ${isHoje ? "hoje" : ""}">
+                      <div class="aniversariante-avatar">${(
+                        a.nome || "A"
+                      ).charAt(0)}</div>
+                      <div class="aniversariante-info">
+                        <div class="aniversariante-nome">${a.nome}</div>
+                        <div class="aniversariante-data">
+                          <span class="aniversariante-dia">${dia
+                            .toString()
+                            .padStart(2, "0")}</span>
+                          ${formatarData(a.nascimento)} • ${idade} anos
+                          ${isHoje ? "🎉 Hoje!" : ""}
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                  })
+                  .join("")}
+              </div>
+            </div>
+          `;
+        },
+
+        contasProximas: (contas) => {
+          if (contas.length === 0) {
+            return "";
+          }
+
+          return `
+            <div class="dashboard-card" style="margin-bottom: var(--grid-gap);">
+              <div class="card-header">
+                <h3 class="card-title">Contas a Pagar - Próximos 7 dias</h3>
+                <a href="#" class="card-link" onclick="abrirModulo('financeiro'); return false;">Ver todas <i class="fas fa-arrow-right"></i></a>
+              </div>
+              <div>
+                ${contas
+                  .map((conta) => {
+                    const diasInfo = calcularDiasConta(conta.data_vencimento);
+                    let badgeClass = "badge-info";
+
+                    if (diasInfo.status === "vencida")
+                      badgeClass = "badge-danger";
+                    else if (
+                      diasInfo.status === "hoje" ||
+                      diasInfo.status === "urgente"
+                    )
+                      badgeClass = "badge-warning";
+
+                    return `
+                    <div class="conta-item">
+                      <div class="conta-info">
+                        <div class="conta-descricao">${
+                          conta.descricao || "Sem descrição"
+                        }</div>
+                        <div class="conta-vencimento">Vence ${formatarData(
+                          conta.data_vencimento
+                        )}</div>
+                      </div>
+                      <div class="conta-valor">
+                        ${formatarValor(conta.valor)}
+                        <span class="conta-badge ${badgeClass}">${
+                      diasInfo.texto
+                    }</span>
+                      </div>
+                    </div>
+                  `;
+                  })
+                  .join("")}
+              </div>
+            </div>
+          `;
+        },
+
+        acessoRapido: (stats) => `
+          <div class="dashboard-card">
+            <div class="card-header"><h3 class="card-title">Acesso Rápido</h3></div>
+            <div class="modulos-grid">
+              <a href="#" class="modulo-card" onclick="abrirModulo('alunos'); return false;">
+                <div class="modulo-icon"><i class="fas fa-users"></i></div>
+                <div class="modulo-nome">Alunos</div>
+                <div class="modulo-count">${stats.totalAlunos} cadastrados</div>
+              </a>
+              <a href="#" class="modulo-card" onclick="abrirModulo('agenda'); return false;">
+                <div class="modulo-icon"><i class="fas fa-calendar-alt"></i></div>
+                <div class="modulo-nome">Agenda</div>
+                <div class="modulo-count">${stats.aulasHojeCount} hoje</div>
+              </a>
+              <a href="#" class="modulo-card" onclick="abrirModulo('financeiro'); return false;">
+                <div class="modulo-icon"><i class="fas fa-credit-card"></i></div>
+                <div class="modulo-nome">Financeiro</div>
+                <div class="modulo-count">${stats.mensalidadesPendentes} pendências</div>
+              </a>
+              <a href="#" class="modulo-card" onclick="abrirModulo('relatorios'); return false;">
+                <div class="modulo-icon"><i class="fas fa-chart-bar"></i></div>
+                <div class="modulo-nome">Relatórios</div>
+                <div class="modulo-count">Análises</div>
+              </a>
+            </div>
+          </div>
+        `,
+      };
 
       // ============================================================
       // RENDERIZAÇÃO DO DASHBOARD
@@ -2034,24 +2105,29 @@
 
         const contasProximas = (estado.dados.contas.data || [])
           .filter((c) => c.status === "pendente")
-          .sort((a, b) => new Date(a.vencimento) - new Date(b.vencimento))
+          .filter((c) => {
+            const diasInfo = calcularDiasConta(c.data_vencimento);
+            return diasInfo.dias <= 7;
+          })
+          .sort(
+            (a, b) => new Date(a.data_vencimento) - new Date(b.data_vencimento)
+          )
           .slice(0, 5);
 
         const html = `
-                ${Templates.statsCards(stats)}
-                ${Templates.graficos()}
-                <div class="dashboard-grid">
-                    ${Templates.aulasHoje(aulasHoje)}
-                    ${Templates.aniversariantes(stats.aniversariantes, hoje)}
-                </div>
-                ${Templates.contasProximas(contasProximas)}
-                ${Templates.acessoRapido(stats)}
-            `;
+          ${Templates.statsCards(stats)}
+          ${Templates.graficos()}
+          <div class="dashboard-grid">
+            ${Templates.aulasHoje(aulasHoje)}
+            ${Templates.aniversariantes(stats.aniversariantes)}
+          </div>
+          ${Templates.contasProximas(contasProximas)}
+          ${Templates.acessoRapido(stats)}
+        `;
 
         document.getElementById("dashboardContent").innerHTML = html;
         document.getElementById("statsLoading").style.display = "none";
 
-        // Inicializar gráficos após renderizar
         setTimeout(() => inicializarGraficos(), 100);
       }
 
@@ -2110,11 +2186,11 @@
           ?.getContext("2d");
         if (ctxFinanceiro) {
           const totalPago = parcelas
-            .filter((m) => m.status === "pago")
-            .reduce((acc, m) => acc + (Number(m.valor) || 0), 0);
+            .filter((p) => p.status === "pago")
+            .reduce((acc, p) => acc + (Number(p.valor) || 0), 0);
           const totalPendente = parcelas
-            .filter((m) => m.status === "pendente" || m.status === "atrasado")
-            .reduce((acc, m) => acc + (Number(m.valor) || 0), 0);
+            .filter((p) => p.status === "pendente" || p.status === "atrasado")
+            .reduce((acc, p) => acc + (Number(p.valor) || 0), 0);
 
           new Chart(ctxFinanceiro, {
             type: "doughnut",
@@ -2144,7 +2220,7 @@
       }
 
       // ============================================================
-      // FUNÇÕES DE AUTENTICAÇÃO (Supabase Auth)
+      // FUNÇÕES DE AUTENTICAÇÃO
       // ============================================================
 
       async function fazerLogin() {
@@ -2163,19 +2239,14 @@
           '<i class="fas fa-spinner fa-spin"></i> Entrando...';
 
         try {
-          // Usar Supabase Auth para login
           const { data, error } = await supabaseClient.auth.signInWithPassword({
             email: email,
             password: senha,
           });
 
           if (error) throw error;
+          if (!data.user) throw new Error("Usuário não encontrado");
 
-          if (!data.user) {
-            throw new Error("Usuário não encontrado");
-          }
-
-          // Buscar informações adicionais do usuário na tabela 'usuarios'
           const { data: usuarioData, error: usuarioError } =
             await supabaseClient
               .from("usuarios")
@@ -2185,17 +2256,12 @@
 
           if (usuarioError) throw usuarioError;
 
-          // Login bem-sucedido
           estado.usuario = usuarioData;
-
-          // Salvar no localStorage
           localStorage.setItem("usuario", JSON.stringify(usuarioData));
 
-          // Esconder login e mostrar sistema
           document.getElementById("loginPage").classList.add("hidden");
           document.getElementById("mainSystem").classList.add("show");
 
-          // Atualizar sidebar
           document.getElementById("sidebarUserName").textContent =
             usuarioData.nome;
           document.getElementById("sidebarUserRole").textContent =
@@ -2213,9 +2279,7 @@
             .toUpperCase();
           document.getElementById("sidebarUserAvatar").textContent = iniciais;
 
-          // Carregar dados
           await carregarTodosDados();
-
           mostrarToast(`Bem-vindo(a), ${usuarioData.nome}!`, "success");
         } catch (error) {
           console.error("Erro no login:", error);
@@ -2230,22 +2294,13 @@
       function fazerLogout() {
         estado.usuario = null;
         localStorage.removeItem("usuario");
-        limparCache();
         document.getElementById("loginPage").classList.remove("hidden");
         document.getElementById("mainSystem").classList.remove("show");
         mostrarToast("Logout realizado!", "info");
       }
 
       // ============================================================
-      // FUNÇÕES DE RECARREGAMENTO
-      // ============================================================
-
-      async function recarregarDados(forceRefresh = true) {
-        await carregarTodosDados(forceRefresh);
-      }
-
-      // ============================================================
-      // ABRIR MÓDULOS EM NOVA ABA
+      // FUNÇÕES DE NAVEGAÇÃO (ATUALIZADA COM AVALIAÇÃO)
       // ============================================================
 
       function abrirModulo(modulo) {
@@ -2255,6 +2310,8 @@
           financeiro: "financeiro.html",
           relatorios: "relatorios.html",
           configuracoes: "configuracoes.html",
+          avaliacao: "avaliacao.html",
+          ajuda: "central_ajuda.html", // NOVA OPÇÃO
         };
 
         if (urls[modulo]) {
@@ -2269,13 +2326,11 @@
       // ============================================================
 
       window.onload = async function () {
-        // Verificar usuário salvo
         const usuarioSalvo = localStorage.getItem("usuario");
         if (usuarioSalvo) {
           try {
             estado.usuario = JSON.parse(usuarioSalvo);
 
-            // Verificar se o usuário ainda está autenticado no Supabase
             const {
               data: { user },
             } = await supabaseClient.auth.getUser();
@@ -2304,7 +2359,6 @@
 
               await carregarTodosDados();
             } else {
-              // Usuário não está mais autenticado
               localStorage.removeItem("usuario");
             }
           } catch (e) {
@@ -2312,7 +2366,6 @@
           }
         }
 
-        // Data atual no header
         const hoje = new Date();
         const dataFormatada = hoje.toLocaleDateString("pt-BR", {
           weekday: "long",
@@ -2323,15 +2376,20 @@
         document.getElementById("dataAtual").textContent =
           dataFormatada.charAt(0).toUpperCase() + dataFormatada.slice(1);
 
-        // Inicializar indicador de cache
-        const lastUpdate = localStorage.getItem(CACHE_KEYS.LAST_UPDATE);
-        if (lastUpdate) {
-          try {
-            const { timestamp } = JSON.parse(lastUpdate);
-            estado.cache.lastUpdate = timestamp;
-            atualizarIndicadorCache();
-          } catch (e) {}
-        }
+        // Fechar sidebar ao clicar fora (mobile)
+        document.addEventListener("click", function (event) {
+          const sidebar = document.getElementById("sidebar");
+          const menuToggle = document.getElementById("menuToggle");
+
+          if (
+            window.innerWidth <= 768 &&
+            sidebar.classList.contains("open") &&
+            !sidebar.contains(event.target) &&
+            !menuToggle.contains(event.target)
+          ) {
+            sidebar.classList.remove("open");
+          }
+        });
       };
     </script>
   </body>
