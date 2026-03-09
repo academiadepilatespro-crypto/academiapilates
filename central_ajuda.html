@@ -1,0 +1,3720 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Central de Ajuda Turbinada - Estúdio Rafaela Lisboa</title>
+
+    <!-- Fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Ícones -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Supabase (opcional) -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <style>
+      /* ===== VARIÁVEIS ===== */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      :root {
+        --verde-principal: #3a6b5c;
+        --verde-claro: #8fc1b0;
+        --verde-pastel: #d4ede4;
+        --grafite: #2c2c2c;
+        --grafite-claro: #4a4a4a;
+        --off-white: #faf9f6;
+        --branco: #ffffff;
+        --vermelho-urgente: #e74c3c;
+        --laranja-atencao: #f39c12;
+        --roxo-celebracao: #9b59b6;
+        --azul-info: #3498db;
+        --font-titulos: "Cormorant Garamond", serif;
+        --font-corpo: "Montserrat", sans-serif;
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        --shadow-hover: 0 8px 24px rgba(58, 107, 92, 0.15);
+      }
+      html {
+        font-size: 14px;
+      }
+      body {
+        font-family: var(--font-corpo);
+        background: var(--off-white);
+        color: var(--grafite);
+        min-height: 100vh;
+      }
+
+      /* ===== HEADER ===== */
+      .header {
+        background: var(--branco);
+        box-shadow: var(--shadow);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .header-content {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 0.8rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .logo-area {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+      .logo-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--verde-principal);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+      }
+      .logo-icon i {
+        font-size: 1.5rem;
+        color: var(--branco);
+      }
+      .logo-text h1 {
+        font-family: var(--font-titulos);
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--grafite);
+        line-height: 1.2;
+        text-transform: uppercase;
+      }
+      .logo-text span {
+        font-size: 0.7rem;
+        color: var(--verde-principal);
+      }
+      .user-area {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+      .user-info {
+        text-align: right;
+      }
+      .user-name {
+        font-weight: 600;
+        font-size: 0.85rem;
+      }
+      .user-role {
+        font-size: 0.7rem;
+        color: var(--verde-principal);
+      }
+      .user-avatar {
+        width: 38px;
+        height: 38px;
+        background: var(--verde-pastel);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--verde-principal);
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+      .btn-icon {
+        width: 35px;
+        height: 35px;
+        border: none;
+        border-radius: 8px;
+        background: var(--off-white);
+        color: var(--grafite);
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        text-decoration: none;
+      }
+      .btn-icon:hover {
+        background: var(--verde-pastel);
+        color: var(--verde-principal);
+      }
+
+      /* ===== MAIN ===== */
+      .main-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        position: relative;
+      }
+
+      /* ===== BANNER BEM-VINDO ===== */
+      .welcome-banner {
+        background: linear-gradient(
+          135deg,
+          var(--verde-principal) 0%,
+          var(--verde-claro) 100%
+        );
+        color: white;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      .welcome-text h2 {
+        font-family: var(--font-titulos);
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+      }
+      .welcome-text p {
+        font-size: 1rem;
+        opacity: 0.9;
+      }
+      .welcome-icon i {
+        font-size: 4rem;
+        opacity: 0.8;
+      }
+
+      /* ===== PESQUISA ===== */
+      .search-section {
+        background: var(--branco);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+      }
+      .search-title {
+        font-family: var(--font-titulos);
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .search-box {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        background: var(--off-white);
+        border: 1px solid var(--verde-claro);
+        border-radius: 50px;
+        padding: 0.3rem 0.3rem 0.3rem 1rem;
+      }
+      .search-box i {
+        color: var(--verde-principal);
+        font-size: 1rem;
+      }
+      .search-box input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        padding: 0.6rem 0;
+        font-size: 0.95rem;
+        outline: none;
+      }
+      .search-box button {
+        background: var(--verde-principal);
+        border: none;
+        color: white;
+        padding: 0.6rem 1.8rem;
+        border-radius: 50px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+      .search-box button:hover {
+        background: var(--grafite);
+      }
+
+      /* ===== SUGESTÕES RÁPIDAS ===== */
+      .quick-suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+      .suggestion-chip {
+        background: var(--verde-pastel);
+        color: var(--verde-principal);
+        padding: 0.3rem 1rem;
+        border-radius: 30px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .suggestion-chip:hover {
+        background: var(--verde-claro);
+        color: white;
+      }
+
+      /* ===== RESULTADOS DA PESQUISA ===== */
+      .results-section {
+        background: var(--branco);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+        display: none;
+      }
+      .results-section.show {
+        display: block;
+      }
+      .results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+      .results-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+      }
+      .result-item {
+        border: 1px solid var(--verde-pastel);
+        border-radius: 12px;
+        padding: 1rem;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+      .result-item:hover {
+        background: var(--verde-pastel);
+        transform: translateX(5px);
+      }
+      .result-item h3 {
+        font-size: 1rem;
+        margin-bottom: 0.3rem;
+        color: var(--verde-principal);
+      }
+      .result-item p {
+        font-size: 0.85rem;
+        color: var(--grafite-claro);
+      }
+      .result-tags {
+        margin-top: 0.3rem;
+        display: flex;
+        gap: 0.3rem;
+        flex-wrap: wrap;
+      }
+
+      /* ===== ÍNDICE CATEGORIAS ===== */
+      .categorias-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+      .categoria-card {
+        background: var(--branco);
+        border-radius: 16px;
+        padding: 1.5rem 0.5rem;
+        box-shadow: var(--shadow);
+        text-align: center;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+      .categoria-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-hover);
+        background: var(--verde-pastel);
+      }
+      .categoria-card i {
+        font-size: 2.5rem;
+        color: var(--verde-principal);
+        margin-bottom: 0.5rem;
+      }
+      .categoria-card span {
+        font-weight: 600;
+      }
+
+      /* ===== TUTORIAL EXPANDIDO ===== */
+      .tutorial-section {
+        background: var(--branco);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+        display: none;
+      }
+      .tutorial-section.show {
+        display: block;
+      }
+      .tutorial-title {
+        font-family: var(--font-titulos);
+        font-size: 1.6rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .tutorial-meta {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        font-size: 0.8rem;
+        color: var(--grafite-claro);
+      }
+      .step-container {
+        margin: 1.5rem 0;
+      }
+      .step-item {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.2rem;
+        align-items: flex-start;
+      }
+      .step-number {
+        width: 32px;
+        height: 32px;
+        background: var(--verde-principal);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      .step-content {
+        flex: 1;
+      }
+      .step-content strong {
+        display: block;
+        margin-bottom: 0.3rem;
+      }
+      .step-content p {
+        font-size: 0.9rem;
+        color: var(--grafite-claro);
+      }
+      .example {
+        background: var(--verde-pastel);
+        padding: 0.5rem;
+        border-radius: 8px;
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        border-left: 3px solid var(--verde-principal);
+      }
+      .example strong {
+        color: var(--verde-principal);
+      }
+
+      /* ===== BOTÕES DE AÇÃO DIRETA ===== */
+      .action-buttons {
+        display: flex;
+        gap: 0.8rem;
+        margin: 1.5rem 0 0.5rem;
+        flex-wrap: wrap;
+      }
+      .btn-action {
+        background: var(--verde-principal);
+        color: white;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: 0.3s;
+        text-decoration: none;
+      }
+      .btn-action:hover {
+        background: var(--grafite);
+        transform: translateY(-2px);
+      }
+      .btn-outline-action {
+        background: transparent;
+        border: 1px solid var(--verde-principal);
+        color: var(--verde-principal);
+        padding: 0.6rem 1.2rem;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: 0.3s;
+        text-decoration: none;
+      }
+      .btn-outline-action:hover {
+        background: var(--verde-pastel);
+      }
+
+      /* ===== GLOSSÁRIO ===== */
+      .glossario-section {
+        background: var(--branco);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+      }
+      .glossario-title {
+        font-family: var(--font-titulos);
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .glossario-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+      }
+      .glossario-item {
+        background: var(--off-white);
+        border-radius: 12px;
+        padding: 1rem;
+        border-left: 4px solid var(--verde-principal);
+      }
+      .glossario-termo {
+        font-weight: 700;
+        color: var(--verde-principal);
+        margin-bottom: 0.3rem;
+      }
+      .glossario-definicao {
+        font-size: 0.9rem;
+        color: var(--grafite-claro);
+      }
+
+      /* ===== ASSISTENTE VIRTUAL (CHATBOT) ===== */
+      .chatbot-button {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        width: 60px;
+        height: 60px;
+        background: var(--verde-principal);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.8rem;
+        box-shadow: var(--shadow-hover);
+        cursor: pointer;
+        transition: 0.3s;
+        z-index: 1000;
+        border: none;
+      }
+      .chatbot-button:hover {
+        transform: scale(1.1);
+        background: var(--grafite);
+      }
+      .chatbot-window {
+        position: fixed;
+        bottom: 5rem;
+        right: 2rem;
+        width: 380px;
+        max-width: 90vw;
+        background: var(--branco);
+        border-radius: 20px;
+        box-shadow: var(--shadow-hover);
+        display: none;
+        flex-direction: column;
+        z-index: 1001;
+        overflow: hidden;
+        animation: slideUp 0.3s;
+      }
+      .chatbot-window.open {
+        display: flex;
+      }
+      .chatbot-header {
+        background: var(--verde-principal);
+        color: white;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .chatbot-header h3 {
+        font-size: 1.1rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .chatbot-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+      .chatbot-messages {
+        height: 350px;
+        overflow-y: auto;
+        padding: 1rem;
+        background: var(--off-white);
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .message {
+        padding: 0.6rem 1rem;
+        border-radius: 18px;
+        max-width: 80%;
+        word-wrap: break-word;
+        font-size: 0.85rem;
+        line-height: 1.4;
+      }
+      .message.user {
+        background: var(--verde-pastel);
+        align-self: flex-end;
+        border-bottom-right-radius: 4px;
+      }
+      .message.bot {
+        background: var(--branco);
+        align-self: flex-start;
+        border-bottom-left-radius: 4px;
+        border: 1px solid var(--verde-claro);
+      }
+      .message.bot .typing {
+        display: inline-block;
+        animation: blink 1s infinite;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+      .message-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        flex-wrap: wrap;
+      }
+      .message-action-btn {
+        background: var(--verde-pastel);
+        border: none;
+        padding: 0.2rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        cursor: pointer;
+        color: var(--verde-principal);
+        transition: 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.2rem;
+      }
+      .message-action-btn:hover {
+        background: var(--verde-claro);
+        color: white;
+      }
+      .chatbot-input {
+        display: flex;
+        padding: 0.8rem;
+        border-top: 1px solid var(--verde-claro);
+      }
+      .chatbot-input input {
+        flex: 1;
+        border: 1px solid var(--verde-claro);
+        border-radius: 30px;
+        padding: 0.5rem 1rem;
+        outline: none;
+      }
+      .chatbot-input button {
+        background: var(--verde-principal);
+        border: none;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-left: 0.5rem;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .chatbot-input button:hover {
+        background: var(--grafite);
+      }
+
+      @keyframes slideUp {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      /* ===== UTILITÁRIOS ===== */
+      .tag {
+        display: inline-block;
+        background: var(--verde-pastel);
+        color: var(--verde-principal);
+        padding: 0.2rem 0.8rem;
+        border-radius: 30px;
+        font-size: 0.7rem;
+        font-weight: 500;
+      }
+      .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: var(--grafite-claro);
+      }
+
+      /* ===== RESPONSIVIDADE ===== */
+      @media (max-width: 768px) {
+        .main-content {
+          padding: 1rem;
+        }
+        .search-box {
+          flex-wrap: wrap;
+        }
+        .search-box button {
+          width: 100%;
+        }
+        .categorias-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .welcome-banner {
+          flex-direction: column;
+          text-align: center;
+        }
+        .chatbot-window {
+          width: 300px;
+          bottom: 5rem;
+          right: 1rem;
+        }
+      }
+      @media (max-width: 480px) {
+        .categorias-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <div class="header-content">
+        <div class="logo-area">
+          <a href="index.html" class="logo-icon"><i class="fas fa-spa"></i></a>
+          <div class="logo-text">
+            <h1>ESTÚDIO RAFAELA LISBOA</h1>
+            <span>Central de Ajuda</span>
+          </div>
+        </div>
+        <div class="user-area">
+          <div class="user-info">
+            <div class="user-name" id="userName">Carregando...</div>
+            <div class="user-role" id="userRole">Ajuda</div>
+          </div>
+          <div class="user-avatar" id="userAvatar">?</div>
+          <a href="index.html" class="btn-icon" title="Voltar ao Dashboard"
+            ><i class="fas fa-home"></i
+          ></a>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- BANNER DE BOAS-VINDAS -->
+      <div class="welcome-banner">
+        <div class="welcome-text">
+          <h2>Olá, como podemos ajudar?</h2>
+          <p>
+            Pergunte ao nosso assistente virtual. Ele digita como se fosse
+            humano!
+          </p>
+        </div>
+        <div class="welcome-icon">
+          <i class="fas fa-robot"></i>
+        </div>
+      </div>
+
+      <!-- SEÇÃO DE PESQUISA -->
+      <div class="search-section">
+        <div class="search-title"><i class="fas fa-search"></i> Pesquisar</div>
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Ex: Como cadastrar um aluno, emitir relatório..."
+            autofocus
+          />
+          <button onclick="performSearch()">Buscar</button>
+        </div>
+        <div class="quick-suggestions" id="suggestions">
+          <span class="suggestion-chip" onclick="quickSearch('Cadastrar Aluno')"
+            >📘 Cadastrar Aluno</span
+          >
+          <span
+            class="suggestion-chip"
+            onclick="quickSearch('Gerar Mensalidade')"
+            >💰 Gerar Mensalidade</span
+          >
+          <span class="suggestion-chip" onclick="quickSearch('Agendar Aula')"
+            >📅 Agendar Aula</span
+          >
+          <span
+            class="suggestion-chip"
+            onclick="quickSearch('Relatório Financeiro')"
+            >📊 Relatório Financeiro</span
+          >
+          <span
+            class="suggestion-chip"
+            onclick="quickSearch('Configurar Plano')"
+            >⚙️ Configurar Plano</span
+          >
+          <span class="suggestion-chip" onclick="quickSearch('Importar OFX')"
+            >🏦 Importar OFX</span
+          >
+          <span
+            class="suggestion-chip"
+            onclick="quickSearch('Avaliação Detalhada')"
+            >🩺 Avaliação Detalhada</span
+          >
+          <span class="suggestion-chip" onclick="quickSearch('Portal do Aluno')"
+            >🎓 Portal do Aluno</span
+          >
+        </div>
+      </div>
+
+      <!-- RESULTADOS DA PESQUISA -->
+      <div class="results-section" id="resultsSection">
+        <div class="results-header">
+          <div class="results-title" id="resultsTitle">
+            Resultados para "<span id="searchTerm"></span>"
+          </div>
+          <button class="btn-icon" onclick="clearSearch()" title="Limpar">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="results-list" id="resultsList"></div>
+      </div>
+
+      <!-- ÍNDICE POR CATEGORIA -->
+      <div class="categorias-grid" id="categoriasGrid"></div>
+
+      <!-- TUTORIAL EM DESTAQUE (inicialmente oculto) -->
+      <div class="tutorial-section" id="tutorialSection">
+        <div class="tutorial-title" id="tutorialTitle"></div>
+        <div class="tutorial-meta" id="tutorialMeta"></div>
+        <div id="tutorialContent"></div>
+        <div class="action-buttons" id="tutorialActions"></div>
+        <div class="feedback-section" style="margin-top: 1rem">
+          <span>Este artigo foi útil?</span>
+          <button class="btn-outline-action" onclick="feedbackUtil(true)">
+            <i class="fas fa-thumbs-up"></i> Sim
+          </button>
+          <button class="btn-outline-action" onclick="feedbackUtil(false)">
+            <i class="fas fa-thumbs-down"></i> Não
+          </button>
+        </div>
+      </div>
+
+      <!-- GLOSSÁRIO -->
+      <div class="glossario-section">
+        <div class="glossario-title">
+          <i class="fas fa-book"></i> Glossário de Termos
+        </div>
+        <div class="glossario-grid" id="glossarioGrid"></div>
+      </div>
+    </main>
+
+    <!-- ASSISTENTE VIRTUAL -->
+    <div class="chatbot-button" id="chatbotButton" onclick="toggleChatbot()">
+      <i class="fas fa-comment-dots"></i>
+    </div>
+    <div class="chatbot-window" id="chatbotWindow">
+      <div class="chatbot-header">
+        <h3><i class="fas fa-robot"></i> Assistente Virtual</h3>
+        <button class="chatbot-close" onclick="toggleChatbot()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="chatbot-messages" id="chatbotMessages">
+        <div class="message bot">
+          Olá! Sou o assistente virtual. Pergunte-me algo sobre o sistema (ex:
+          "como cadastrar aluno", "o que é DRE"). Vou digitar as respostas para
+          você! 😊
+        </div>
+      </div>
+      <div class="chatbot-input">
+        <input
+          type="text"
+          id="chatbotInput"
+          placeholder="Digite sua pergunta..."
+          onkeypress="if(event.key==='Enter') sendMessage()"
+        />
+        <button onclick="sendMessage()">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+      // ============================================================
+      // BASE DE CONHECIMENTO ENRIQUECIDA COM O FAQ COMPLETO
+      // INCLUINDO OS MÓDULOS: DASHBOARD, ALUNOS, AGENDA, FINANCEIRO,
+      // RELATÓRIOS, CONFIGURAÇÕES, AVALIAÇÃO E PORTAL DO ALUNO
+      // ============================================================
+      const conhecimento = {
+        categorias: [
+          {
+            id: "dashboard",
+            nome: "Dashboard",
+            icone: "fa-tachometer-alt",
+            cor: "#3a6b5c",
+          },
+          { id: "alunos", nome: "Alunos", icone: "fa-users", cor: "#3a6b5c" },
+          {
+            id: "agenda",
+            nome: "Agenda",
+            icone: "fa-calendar-alt",
+            cor: "#3498db",
+          },
+          {
+            id: "financeiro",
+            nome: "Financeiro",
+            icone: "fa-dollar-sign",
+            cor: "#27ae60",
+          },
+          {
+            id: "relatorios",
+            nome: "Relatórios",
+            icone: "fa-chart-bar",
+            cor: "#9b59b6",
+          },
+          {
+            id: "configuracoes",
+            nome: "Configurações",
+            icone: "fa-cog",
+            cor: "#e67e22",
+          },
+          {
+            id: "avaliacao",
+            nome: "Avaliação",
+            icone: "fa-stethoscope",
+            cor: "#9b59b6",
+          },
+          {
+            id: "portal",
+            nome: "Portal do Aluno",
+            icone: "fa-graduation-cap",
+            cor: "#3498db",
+          },
+        ],
+        tutoriais: [
+          // ===== DASHBOARD =====
+          {
+            id: "dashboard-visao-geral",
+            titulo: "📊 Visão Geral do Dashboard",
+            descricao:
+              "O Dashboard é a tela inicial do sistema, oferecendo uma visão geral do estúdio: números de alunos, aulas do dia, faturamento, inadimplência, aniversariantes, gráficos de desempenho e alertas importantes.",
+            categoria: "dashboard",
+            tags: ["dashboard", "visão geral", "acesso", "cards", "gráficos"],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Acessando o Dashboard",
+                texto:
+                  "Após o login, você já está no Dashboard. Se estiver em outro módulo, clique no ícone da casa 🏠 no menu lateral ou no logo do estúdio.",
+                exemplos: [
+                  "Exemplo: No menu lateral esquerdo, o primeiro ícone (casa) leva ao Dashboard.",
+                ],
+              },
+              {
+                titulo: "Informações disponíveis",
+                texto:
+                  "O Dashboard exibe cards com totais (alunos, aulas hoje, mensalidades pendentes, contas a pagar), gráficos (aulas por horário e status financeiro), listas (aulas de hoje, aniversariantes, contas próximas) e atalhos para os módulos.",
+                exemplos: [
+                  "Os cards são atualizados em tempo real e podem ser clicados para acessar detalhes.",
+                ],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "dashboard-cards",
+            titulo: "📇 Cards de Estatísticas do Dashboard",
+            descricao:
+              "Entenda o significado de cada card e suas cores de alerta.",
+            categoria: "dashboard",
+            tags: [
+              "cards",
+              "estatísticas",
+              "total alunos",
+              "aulas hoje",
+              "mensalidades pendentes",
+              "contas a pagar",
+              "cores alerta",
+            ],
+            tempoLeitura: "4 min",
+            passos: [
+              {
+                titulo: "Total de Alunos",
+                texto:
+                  "Mostra o número total de alunos cadastrados (ativos + inativos). Abaixo, você vê a quantidade de alunos ativos.",
+                exemplos: ["Exemplo: 150 total, 120 ativos."],
+              },
+              {
+                titulo: "Aulas Hoje",
+                texto:
+                  "Exibe quantas aulas estão agendadas para o dia atual. Clicando nele, você vai direto para a agenda do dia.",
+                exemplos: ["Exemplo: 18 aulas hoje."],
+              },
+              {
+                titulo: "Mensalidades Pendentes",
+                texto:
+                  "Mostra o valor total de mensalidades em aberto (pendentes + atrasadas) e a quantidade de pendências. A cor do ícone muda para alerta se houver valores significativos.",
+                exemplos: [
+                  "Verde: normal; Amarelo: alerta; Vermelho: crítico.",
+                ],
+              },
+              {
+                titulo: "Contas a Pagar",
+                texto:
+                  "Apresenta o total de contas a pagar pendentes e a quantidade. Ajuda a acompanhar despesas futuras.",
+                exemplos: ["Exemplo: R$ 3.500,00 em 5 contas."],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "dashboard-graficos",
+            titulo: "📈 Gráficos do Dashboard",
+            descricao:
+              "Como interpretar os gráficos de Aulas por Horário e Status Financeiro.",
+            categoria: "dashboard",
+            tags: [
+              "gráficos",
+              "aulas por horário",
+              "status financeiro",
+              "interpretação",
+            ],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Aulas por Horário",
+                texto:
+                  "É um gráfico de barras com a distribuição das aulas ao longo do dia. A altura da barra indica a quantidade de aulas naquele horário, ajudando a identificar picos e ociosidade.",
+                exemplos: [
+                  "Clique em uma barra para ver a agenda naquele horário.",
+                ],
+              },
+              {
+                titulo: "Status Financeiro",
+                texto:
+                  "É um gráfico de rosca (donut) que compara o total recebido (verde) com o total pendente (amarelo). Dá uma visão rápida da saúde financeira.",
+                exemplos: [
+                  "Clique no gráfico para ir à lista de mensalidades filtrada.",
+                ],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "dashboard-listas",
+            titulo:
+              "📋 Listas do Dashboard (Aulas de Hoje, Aniversariantes, Contas a Pagar)",
+            descricao: "Saiba como usar as listas rápidas do Dashboard.",
+            categoria: "dashboard",
+            tags: [
+              "aulas de hoje",
+              "aniversariantes",
+              "contas a pagar",
+              "próximos 7 dias",
+            ],
+            tempoLeitura: "5 min",
+            passos: [
+              {
+                titulo: "Aulas de Hoje",
+                texto:
+                  "Lista todas as aulas agendadas para hoje, ordenadas por horário. Cada linha mostra horário, nome do aluno e status (✅ presente, ❌ ausente, ⏳ pendente, 🚫 cancelada).",
+                exemplos: [
+                  "Clique sobre a aula para marcar presença (check-in/check-out).",
+                  "Clique em 'Ver todas' para ir à agenda do dia.",
+                ],
+              },
+              {
+                titulo: "Aniversariantes do Mês",
+                texto:
+                  "Alunos que fazem aniversário no mês corrente, ordenados pelo dia. Aniversariantes do dia são destacados com borda roxa e o texto 'Hoje! 🎉'.",
+                exemplos: ["Clique no nome para abrir o dossiê do aluno."],
+              },
+              {
+                titulo: "Contas a Pagar (Próximos 7 Dias)",
+                texto:
+                  "Lista as despesas com vencimento nos próximos 7 dias, incluindo as já vencidas. Cores dos badges: 🔴 vencida, 🟡 vence hoje/até 3 dias, 🔵 normal.",
+                exemplos: ["Clique sobre a conta para registrar pagamento."],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "dashboard-acesso-rapido",
+            titulo: "⚡ Acesso Rápido aos Módulos",
+            descricao: "Atalhos para Alunos, Agenda, Financeiro e Relatórios.",
+            categoria: "dashboard",
+            tags: ["acesso rápido", "atalhos", "módulos"],
+            tempoLeitura: "2 min",
+            passos: [
+              {
+                titulo: "Cards de Acesso Rápido",
+                texto:
+                  "Cada card mostra um resumo (total de alunos, aulas hoje, pendências) e leva diretamente para a lista do módulo correspondente.",
+                exemplos: ["Clique em 'Alunos' para ir ao módulo Alunos."],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "dashboard-alertas",
+            titulo: "🔔 Alertas e Notificações no Dashboard",
+            descricao: "Como visualizar e gerenciar alertas importantes.",
+            categoria: "dashboard",
+            tags: ["alertas", "notificações", "sino"],
+            tempoLeitura: "2 min",
+            passos: [
+              {
+                titulo: "Banner de alerta",
+                texto:
+                  "Acima dos gráficos pode aparecer um banner de alerta (ex: inadimplência elevada).",
+                exemplos: [],
+              },
+              {
+                titulo: "Ícone do sino",
+                texto:
+                  "O ícone de sino 🔔 no canto superior direito mostra notificações não lidas. O número vermelho indica a quantidade. Clique para ver e marcar como lidas.",
+                exemplos: [
+                  "Notificações comuns: parcelas atrasadas, contas a vencer.",
+                ],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "dashboard-personalizacao",
+            titulo: "🛠️ Personalização e Ações no Dashboard",
+            descricao: "Atualizar dados, minimizar cards e outras ações.",
+            categoria: "dashboard",
+            tags: ["personalizar", "atualizar", "minimizar"],
+            tempoLeitura: "2 min",
+            passos: [
+              {
+                titulo: "Atualizar dados",
+                texto:
+                  "Clique no botão 'Atualizar' (ícone de seta circular) no canto superior direito da área de filtros, ou aguarde a atualização automática a cada 30 segundos.",
+                exemplos: [],
+              },
+              {
+                titulo: "Clique em gráficos",
+                texto:
+                  "Clicar em um gráfico geralmente leva a uma tela com mais detalhes (agenda ou financeiro).",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "dashboard-problemas",
+            titulo: "⚠️ Problemas Comuns no Dashboard",
+            descricao:
+              "Soluções para falhas no carregamento, lentidão e dados incorretos.",
+            categoria: "dashboard",
+            tags: ["problemas", "erro", "lento", "atualizar"],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Dados não aparecem",
+                texto:
+                  "Pode ser falta de dados no período ou cache desatualizado. Tente atualizar a página ou clicar em 'Atualizar'.",
+                exemplos: [],
+              },
+              {
+                titulo: "Dashboard lento",
+                texto:
+                  "Verifique sua conexão. Muitos dados podem levar alguns segundos. Se persistir, contate o suporte.",
+                exemplos: [],
+              },
+              {
+                titulo: "Erro ao carregar dados",
+                texto:
+                  "Recarregue a página. Se o erro continuar, pode ser problema de conexão com o banco. Contate o administrador.",
+                exemplos: [],
+              },
+              {
+                titulo: "Valores desatualizados",
+                texto:
+                  "Verifique a data/hora da última atualização no canto superior. O sistema atualiza automaticamente após ações como cadastrar um aluno.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          // ===== ALUNOS =====
+          {
+            id: "alunos-visao-geral",
+            titulo: "👥 Módulo Alunos - Visão Geral",
+            descricao:
+              "Gerencie todo o cadastro dos alunos: dossiê completo, dados pessoais, saúde, documentos e evolução.",
+            categoria: "alunos",
+            tags: ["alunos", "visão geral", "acesso", "cards alerta"],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Acessar o módulo",
+                texto:
+                  "No menu lateral, clique em 'Alunos'. A página exibe a lista de alunos, cards de alerta e filtros.",
+                exemplos: [],
+              },
+              {
+                titulo: "Cards de alerta",
+                texto:
+                  "No topo: 🔴 Financeiro atrasado, 🟡 Planos a vencer, 🔵 Inativos há 30+ dias. Clique para filtrar a lista.",
+                exemplos: [
+                  "Clicar em 'Financeiro atrasado' mostra apenas alunos com parcelas em atraso.",
+                ],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "alunos-cadastro",
+            titulo: "📝 Cadastro de Aluno (Dossiê Completo)",
+            descricao:
+              "Passo a passo para cadastrar um novo aluno, incluindo dados pessoais, endereço, saúde, documentos e evolução.",
+            categoria: "alunos",
+            tags: [
+              "cadastrar aluno",
+              "novo aluno",
+              "dossiê",
+              "foto",
+              "documentos",
+              "saúde",
+              "evolução",
+            ],
+            tempoLeitura: "8 min",
+            passos: [
+              {
+                titulo: "Acessar cadastro",
+                texto:
+                  "Clique no botão verde 'Novo Aluno' no canto superior direito. Um modal com abas será aberto.",
+                exemplos: [],
+              },
+              {
+                titulo: "Dados Pessoais",
+                texto:
+                  "Preencha os campos obrigatórios: Nome Completo, Data de Nascimento e Telefone Principal. A idade é calculada automaticamente. O CPF é validado e não pode ser duplicado.",
+                exemplos: [
+                  "Máscaras: CPF 000.000.000-00, Telefone (00) 00000-0000, CEP 00000-000.",
+                ],
+              },
+              {
+                titulo: "Adicionar foto",
+                texto:
+                  "Clique em 'Escolher foto' e selecione uma imagem (JPG/PNG, até 5MB). O sistema redimensiona automaticamente.",
+                exemplos: ["Para remover, clique em 'Remover'."],
+              },
+              {
+                titulo: "Endereço",
+                texto:
+                  "Digite o CEP e saia do campo. O sistema consulta a API ViaCEP e preenche automaticamente.",
+                exemplos: [
+                  "Se o CEP não for encontrado, preencha manualmente.",
+                ],
+              },
+              {
+                titulo: "Saúde",
+                texto:
+                  "Campos opcionais: tipo sanguíneo, plano de saúde, alergias, medicamentos, contato de emergência. Recomenda-se preencher para segurança.",
+                exemplos: [],
+              },
+              {
+                titulo: "Documentos",
+                texto:
+                  "Após salvar o aluno, vá à aba 'Documentos'. Clique para selecionar arquivos ou arraste. É possível adicionar observações e excluir.",
+                exemplos: [
+                  "Arquivos aceitos: PDF, imagens, documentos Office.",
+                ],
+              },
+              {
+                titulo: "Evolução",
+                texto:
+                  "Registre anotações sobre o progresso do aluno. Preencha título, data (padrão hoje) e descrição. Clique em 'Registrar Evolução'. O histórico é exibido abaixo.",
+                exemplos: ["Exemplo: '1ª aula - boa mobilidade'."],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "alunos-lista",
+            titulo: "📋 Lista de Alunos e Filtros",
+            descricao:
+              "Como usar a tabela de alunos, buscar, filtrar e entender as colunas.",
+            categoria: "alunos",
+            tags: [
+              "lista alunos",
+              "filtros",
+              "busca",
+              "status",
+              "financeiro",
+              "ações",
+            ],
+            tempoLeitura: "5 min",
+            passos: [
+              {
+                titulo: "Busca",
+                texto:
+                  "Use o campo de busca por nome, CPF ou telefone. A busca ignora acentos e maiúsculas.",
+                exemplos: [],
+              },
+              {
+                titulo: "Filtro por status",
+                texto:
+                  "Selecione 'Ativos', 'Inativos' ou 'Todos' no menu ao lado da busca.",
+                exemplos: [],
+              },
+              {
+                titulo: "Colunas da tabela",
+                texto:
+                  "Foto, Nome (com telefone), Status (Ativo/Inativo), Financeiro (✅ em dia, ⏳ pendente, ❌ atrasado), Documentos (quantidade), Última Aula, Próxima Aula, Ações.",
+                exemplos: [
+                  "Clique no número de documentos para visualizá-los.",
+                ],
+              },
+              {
+                titulo: "Ações individuais",
+                texto:
+                  "👁️ Visualizar dossiê, ✏️ Editar, 🩺 Avaliação, 📅 Agenda do aluno, 💰 Financeiro, 👤 Ativar/Desativar.",
+                exemplos: [
+                  "Desativar mantém o histórico mas o aluno não aparece como ativo.",
+                ],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "alunos-dossie",
+            titulo: "📂 Visualização do Dossiê do Aluno",
+            descricao:
+              "Acesse todas as informações consolidadas de um aluno em um único modal.",
+            categoria: "alunos",
+            tags: ["dossiê", "visualizar aluno", "exportar pdf"],
+            tempoLeitura: "2 min",
+            passos: [
+              {
+                titulo: "Abrir dossiê",
+                texto:
+                  "Na linha do aluno, clique no botão de 'olho' 👁️. O modal exibe dados pessoais, endereço, saúde, financeiro, agenda, documentos e evoluções.",
+                exemplos: ["O botão 'Exportar PDF' está em desenvolvimento."],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "alunos-problemas",
+            titulo: "❓ Problemas Comuns no Módulo Alunos",
+            descricao:
+              "Soluções para CPF duplicado, CEP não preenchido, foto não aceita, lentidão.",
+            categoria: "alunos",
+            tags: ["problemas", "cpf duplicado", "cep", "foto", "carregamento"],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Aluno não encontrado",
+                texto:
+                  "Verifique filtros ativos (busca ou status). Clique em 'Limpar' para remover filtros.",
+                exemplos: [],
+              },
+              {
+                titulo: "CPF já cadastrado",
+                texto:
+                  "Já existe outro aluno com esse CPF. Verifique a digitação ou busque o aluno existente.",
+                exemplos: [],
+              },
+              {
+                titulo: "CEP não preenchido",
+                texto:
+                  "Certifique-se de que o CEP tem 8 dígitos. Se a API ViaCEP falhar, preencha manualmente.",
+                exemplos: [],
+              },
+              {
+                titulo: "Foto não aceita",
+                texto:
+                  "O arquivo deve ter menos de 5MB e ser JPG ou PNG. Reduza o tamanho se necessário.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          // ===== AGENDA =====
+          {
+            id: "agenda-visao-geral",
+            titulo: "📅 Módulo Agenda Inteligente - Visão Geral",
+            descricao:
+              "Gerencie todos os agendamentos, visualize ocupação, registre presença e use lista de espera.",
+            categoria: "agenda",
+            tags: ["agenda", "visão geral", "timeline", "filtros"],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Acessar agenda",
+                texto:
+                  "No menu lateral, clique em 'Agenda'. A página exibe a timeline do dia atual, com filtros e opções de visualização (dia, semana, mês).",
+                exemplos: [],
+              },
+              {
+                titulo: "Informações principais",
+                texto:
+                  "Timeline horizontal com cards de alunos por horário, indicadores de ocupação (cores), lista de espera e relatórios.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "agenda-visoes",
+            titulo: "📆 Visões Dia, Semana e Mês na Agenda",
+            descricao: "Como alternar e usar cada visão.",
+            categoria: "agenda",
+            tags: [
+              "visão dia",
+              "visão semana",
+              "visão mês",
+              "timeline",
+              "calendário",
+            ],
+            tempoLeitura: "5 min",
+            passos: [
+              {
+                titulo: "Visão Dia",
+                texto:
+                  "Timeline horizontal com blocos para cada horário. Cada bloco mostra os alunos, ocupação e barra de progresso. Cores indicam lotação.",
+                exemplos: [
+                  "Clique em um card de aula para abrir detalhes, check-in, reagendar.",
+                ],
+              },
+              {
+                titulo: "Visão Semana",
+                texto:
+                  "Tabela com dias nas colunas e horários nas linhas. Cada célula contém os cards das aulas.",
+                exemplos: [
+                  "Use 'Semana Anterior', 'Hoje', 'Próxima Semana' para navegar.",
+                ],
+              },
+              {
+                titulo: "Visão Mês",
+                texto:
+                  "Calendário mensal com miniaturas de até 3 aulas por dia. Dias com feriado/evento bloqueado são marcados.",
+                exemplos: [
+                  "Clique em um dia para ir à visão dia correspondente.",
+                ],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "agenda-agendamento",
+            titulo: "➕ Criar Agendamentos (Plano, Aula Avulsa, Lote)",
+            descricao:
+              "Instruções detalhadas para criar agendamentos contínuos, por sessões, por período, aulas avulsas e lotes.",
+            categoria: "agenda",
+            tags: [
+              "agendar aula",
+              "novo agendamento",
+              "nova aula",
+              "lote",
+              "plano",
+            ],
+            tempoLeitura: "8 min",
+            passos: [
+              {
+                titulo: "Novo Agendamento (Plano)",
+                texto:
+                  "Clique em 'Novo Agendamento'. Escolha o aluno, o tipo (Contínuo, Por Sessões, Por Período), horário fixo, dias da semana. Pré-visualize e clique em 'Gerar Agendamento'.",
+                exemplos: [
+                  "Contínuo: aulas recorrentes com renovação automática.",
+                  "Por Sessões: número limitado de aulas.",
+                  "Por Período: intervalo de datas.",
+                ],
+              },
+              {
+                titulo: "Nova Aula (Avulsa)",
+                texto:
+                  "Clique no botão '+' ou em um horário vago na timeline. Na aba 'Dados da Aula', preencha aluno, data, horário, duração, status, foco e observações.",
+                exemplos: [],
+              },
+              {
+                titulo: "Agendamento em Lote",
+                texto:
+                  "No modal 'Nova Aula', vá à aba 'Agendamento em Lote'. Defina total de aulas, vezes por semana, horário fixo, data de início e dias. O sistema gera as datas automaticamente.",
+                exemplos: ["Pausas podem ser configuradas (ex: férias)."],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "agenda-detalhes-aula",
+            titulo:
+              "🔍 Detalhes da Aula e Ações (Check-in, Reagendar, Cancelar)",
+            descricao:
+              "Como registrar presença, reagendar ou cancelar uma aula.",
+            categoria: "agenda",
+            tags: [
+              "check-in",
+              "check-out",
+              "presença",
+              "reagendar",
+              "cancelar aula",
+            ],
+            tempoLeitura: "4 min",
+            passos: [
+              {
+                titulo: "Abrir detalhes",
+                texto:
+                  "Clique em um card de aula na agenda. Abre um modal com informações do aluno, check-in/out, botões de ação.",
+                exemplos: [],
+              },
+              {
+                titulo: "Check-in/Check-out",
+                texto:
+                  "Use os botões 'Check-in' (entrada) e 'Check-out' (saída) para registrar horário automático. Também é possível inserir manualmente.",
+                exemplos: ["Disponível apenas no dia da aula."],
+              },
+              {
+                titulo: "Reagendar",
+                texto:
+                  "Clique em 'Reagendar', escolha nova data/horário. A aula original fica como 'reagendada' e uma nova é criada.",
+                exemplos: [],
+              },
+              {
+                titulo: "Cancelar",
+                texto:
+                  "Clique em 'Cancelar Aula' e confirme. A aula terá status 'cancelada'.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "agenda-lista-espera",
+            titulo: "⏳ Lista de Espera na Agenda",
+            descricao: "Gerencie alunos aguardando vaga em horários lotados.",
+            categoria: "agenda",
+            tags: ["lista de espera", "fila", "notificar"],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Entrar na lista",
+                texto:
+                  "Ao tentar agendar um horário lotado, o sistema oferece a opção 'Lista de Espera'.",
+                exemplos: [],
+              },
+              {
+                titulo: "Visualizar lista",
+                texto:
+                  "Na seção 'Lista de Espera', veja alunos, horário de interesse e posição. O número total é exibido.",
+                exemplos: [],
+              },
+              {
+                titulo: "Notificar vaga",
+                texto:
+                  "Clique no botão de sino ao lado do aluno para enviar notificação interna sobre a vaga.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "agenda-relatorios",
+            titulo: "📊 Relatórios Inteligentes da Agenda",
+            descricao:
+              "Aulas Hoje, Ocupação Média, Taxa de Faltas e Lista de Espera.",
+            categoria: "agenda",
+            tags: ["relatórios", "ocupação", "faltas", "lista espera"],
+            tempoLeitura: "4 min",
+            passos: [
+              {
+                titulo: "Cards dinâmicos",
+                texto:
+                  "Na parte inferior da agenda, há cards com totais, ocupação média, taxa de faltas e lista de espera.",
+                exemplos: ["Cada card tem um ícone de PDF para exportação."],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "agenda-disponibilidade",
+            titulo: "🔎 Consulta de Disponibilidade",
+            descricao: "Ferramenta rápida para ver vagas por data/horário.",
+            categoria: "agenda",
+            tags: ["disponibilidade", "vagas", "consulta"],
+            tempoLeitura: "2 min",
+            passos: [
+              {
+                titulo: "Acessar",
+                texto:
+                  "Na seção 'Consultar Disponibilidade', escolha data e opcionalmente horário. O sistema mostra ocupação e lista de alunos agendados.",
+                exemplos: [
+                  "Cores: Verde (livre), Amarelo (alerta), Vermelho (lotado).",
+                ],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "agenda-feriados",
+            titulo: "📅 Feriados e Eventos na Agenda",
+            descricao:
+              "Como o sistema lida com dias bloqueados e eventos recorrentes.",
+            categoria: "agenda",
+            tags: ["feriados", "eventos", "bloquear agenda", "recorrente"],
+            tempoLeitura: "2 min",
+            passos: [
+              {
+                titulo: "Configuração",
+                texto:
+                  "Feriados são cadastrados no módulo Configurações > Eventos. Podem bloquear a agenda e aparecem com ícone de guarda-sol.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          // ===== FINANCEIRO =====
+          {
+            id: "financeiro-visao-geral",
+            titulo: "💰 Módulo Financeiro - Visão Geral",
+            descricao:
+              "Centro de gestão financeira: mensalidades, receitas, despesas, conciliação, DRE, metas.",
+            categoria: "financeiro",
+            tags: ["financeiro", "visão geral", "abas"],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Acessar",
+                texto:
+                  "No menu lateral, clique em 'Financeiro'. A página é dividida em abas: Dashboard, Mensalidades, Receitas, Despesas, Análise, DRE, Conciliação, Metas.",
+                exemplos: [],
+              },
+              {
+                titulo: "Ações no topo",
+                texto:
+                  "Botões para exportar relatórios (PDF, Excel, CSV), criar nova mensalidade e importar OFX.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "financeiro-dashboard",
+            titulo: "📉 Dashboard Financeiro",
+            descricao:
+              "Visão executiva com previsão de saldo, cards, alertas e gráficos.",
+            categoria: "financeiro",
+            tags: [
+              "dashboard financeiro",
+              "previsão saldo",
+              "inadimplência",
+              "fluxo de caixa",
+            ],
+            tempoLeitura: "4 min",
+            passos: [
+              {
+                titulo: "Previsão de saldo",
+                texto:
+                  "Card gradiente com saldo atual + receitas previstas - despesas previstas para os próximos 30 dias.",
+                exemplos: [],
+              },
+              {
+                titulo: "Cards",
+                texto:
+                  "Receita do período, Inadimplência (percentual e valor), Ticket Médio, Saldo do período.",
+                exemplos: [],
+              },
+              {
+                titulo: "Gráficos",
+                texto:
+                  "Fluxo de Caixa (entradas vs saídas diárias) e Receitas por Forma de Pagamento.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "financeiro-mensalidades",
+            titulo: "📄 Aba Mensalidades",
+            descricao: "Criar, visualizar e gerenciar mensalidades e parcelas.",
+            categoria: "financeiro",
+            tags: ["mensalidades", "nova mensalidade", "parcelas", "status"],
+            tempoLeitura: "5 min",
+            passos: [
+              {
+                titulo: "Criar nova mensalidade",
+                texto:
+                  "Clique em 'Nova Mensalidade'. Busque o aluno, selecione plano, número de parcelas (1-12), valores, desconto, data do primeiro vencimento. Uma prévia é exibida. Clique em 'Gerar Mensalidade'.",
+                exemplos: ["O sistema calcula parcelas iguais."],
+              },
+              {
+                titulo: "Visualizar parcelas",
+                texto:
+                  "Na tabela, clique no olho 👁️ para ver detalhes e lista de parcelas.",
+                exemplos: [
+                  "Status: Pago (verde), Pendente (amarelo), Atrasado (vermelho).",
+                ],
+              },
+              {
+                titulo: "Excluir mensalidade",
+                texto:
+                  "Clique na lixeira e confirme. Remove todas as parcelas associadas.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "financeiro-receitas-despesas",
+            titulo: "💵 Abas Receitas e Despesas",
+            descricao: "Cadastro de outras receitas e contas a pagar.",
+            categoria: "financeiro",
+            tags: ["receitas", "despesas", "contas a pagar", "recorrente"],
+            tempoLeitura: "4 min",
+            passos: [
+              {
+                titulo: "Nova receita",
+                texto:
+                  "Em 'Receitas', clique em 'Nova Receita'. Preencha descrição, cliente, valor, categoria, vencimento, status. Se recebido, informe data e forma.",
+                exemplos: [],
+              },
+              {
+                titulo: "Nova conta a pagar",
+                texto:
+                  "Em 'Despesas', clique em 'Nova Conta'. Preencha descrição, fornecedor, valor, vencimento. Pode marcar como recorrente (frequência).",
+                exemplos: ["Para pagar, clique no ícone de check na linha."],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "financeiro-analise",
+            titulo: "📊 Aba Análise",
+            descricao:
+              "Indicadores avançados: ticket médio, inadimplência, margem de contribuição.",
+            categoria: "financeiro",
+            tags: ["análise", "ticket médio", "margem", "inadimplência"],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Indicadores",
+                texto:
+                  "Ticket Médio, Inadimplência (%), Margem de Contribuição, Saldo do período. Gráfico de evolução diária de receitas e despesas.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "financeiro-dre",
+            titulo: "📋 Aba DRE (Demonstrativo de Resultados)",
+            descricao: "Relatório de receitas, despesas e resultado líquido.",
+            categoria: "financeiro",
+            tags: ["dre", "resultado líquido", "lucro", "prejuízo"],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Estrutura",
+                texto:
+                  "Receitas totais (mensalidades + outras), despesas fixas e variáveis, resultado líquido. É possível exportar.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "financeiro-conciliacao",
+            titulo: "🔄 Aba Conciliação Bancária",
+            descricao: "Importar OFX e conciliar transações bancárias.",
+            categoria: "financeiro",
+            tags: ["conciliação", "ofx", "importar", "conciliar"],
+            tempoLeitura: "4 min",
+            passos: [
+              {
+                titulo: "Importar OFX",
+                texto:
+                  "Clique em 'Importar OFX' e selecione o arquivo .ofx do banco. As transações aparecem na tabela.",
+                exemplos: [],
+              },
+              {
+                titulo: "Conciliar",
+                texto:
+                  "Marque os itens não conciliados e clique em 'Conciliar Selecionados'. O status muda para 'Conciliado'.",
+                exemplos: [],
+              },
+              {
+                titulo: "Notificar inadimplentes",
+                texto:
+                  "O botão 'Notificar Inadimplentes' envia notificações internas para alunos com parcelas em atraso, com cálculo de juros/multa se configurado.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "financeiro-metas",
+            titulo: "🎯 Aba Metas",
+            descricao: "Definir e acompanhar metas de faturamento.",
+            categoria: "financeiro",
+            tags: ["metas", "faturamento", "progresso"],
+            tempoLeitura: "2 min",
+            passos: [
+              {
+                titulo: "Cadastrar meta",
+                texto:
+                  "Clique em 'Nova Meta' e informe o valor. O realizado é atualizado automaticamente com receitas pagas.",
+                exemplos: ["Ícone dourado se atingida."],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "financeiro-problemas",
+            titulo: "⚠️ Problemas Comuns no Financeiro",
+            descricao: "Erros ao criar mensalidade, importar OFX, etc.",
+            categoria: "financeiro",
+            tags: ["problemas", "mensalidade", "ofx", "inadimplência"],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Aluno não encontrado na busca",
+                texto:
+                  "Digite pelo menos 2 caracteres. Verifique se o aluno está cadastrado.",
+                exemplos: [],
+              },
+              {
+                titulo: "Erro ao importar OFX",
+                texto:
+                  "O arquivo pode estar em formato não suportado. Tente gerar um OFX padrão do banco.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          // ===== RELATÓRIOS =====
+          {
+            id: "relatorios-visao-geral",
+            titulo: "📈 Módulo Relatórios - Visão Geral",
+            descricao:
+              "Análises consolidadas de alunos, agenda, financeiro e performance.",
+            categoria: "relatorios",
+            tags: ["relatórios", "visão geral", "filtros", "favoritos"],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Acessar",
+                texto:
+                  "No menu lateral, clique em 'Relatórios'. Abas: Dashboard Executivo, Alunos, Agenda, Financeiro, Performance.",
+                exemplos: [],
+              },
+              {
+                titulo: "Filtro de período",
+                texto:
+                  "Botões predefinidos (Hoje, Este mês, etc.) ou Personalizado. Aplica a todas as abas.",
+                exemplos: [],
+              },
+              {
+                titulo: "Favoritos",
+                texto:
+                  "Clique na estrela ao lado do título para favoritar. Acesse rapidamente pelo menu de estrelas.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "relatorios-dashboard-executivo",
+            titulo: "📊 Dashboard Executivo",
+            descricao:
+              "Cards com estatísticas, gráficos de fluxo de caixa e status de alunos.",
+            categoria: "relatorios",
+            tags: [
+              "dashboard executivo",
+              "cards",
+              "fluxo caixa",
+              "status alunos",
+            ],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Cards",
+                texto:
+                  "Total de Alunos, Aulas no Mês, Faturamento, Inadimplência. Variação vs período anterior.",
+                exemplos: [],
+              },
+              {
+                titulo: "Tabelas",
+                texto:
+                  "Aulas de Hoje e Aniversariantes do Mês (5 primeiros, com link 'Ver todos').",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "relatorios-alunos",
+            titulo: "👥 Relatórios de Alunos",
+            descricao:
+              "Geral, aniversariantes, inativos, indicações, retenção, antiguidade, por plano.",
+            categoria: "relatorios",
+            tags: [
+              "alunos",
+              "aniversariantes",
+              "inativos",
+              "indicações",
+              "retenção",
+            ],
+            tempoLeitura: "5 min",
+            passos: [
+              {
+                titulo: "Geral",
+                texto: "Lista completa com filtro por plano. Exportação CSV.",
+                exemplos: [],
+              },
+              {
+                titulo: "Aniversariantes",
+                texto: "Alunos que fazem aniversário no mês atual.",
+                exemplos: [],
+              },
+              {
+                titulo: "Inativos",
+                texto:
+                  "Alunos sem aula nos últimos 30 dias, com contador de dias.",
+                exemplos: [],
+              },
+              {
+                titulo: "Indicações",
+                texto: "Gráfico de pizza com origem (como conheceu).",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "relatorios-agenda",
+            titulo: "📅 Relatórios de Agenda",
+            descricao: "Ocupação, presenças, horários de pico.",
+            categoria: "relatorios",
+            tags: ["agenda", "ocupação", "presenças", "horários pico"],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Ocupação",
+                texto:
+                  "Lista de horários com quantidade de aulas e percentual de ocupação.",
+                exemplos: [],
+              },
+              {
+                titulo: "Presenças",
+                texto:
+                  "Total de presentes, ausentes e pendentes com gráfico de rosca.",
+                exemplos: [],
+              },
+              {
+                titulo: "Horários Pico",
+                texto: "Barras com horários de maior demanda.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "relatorios-financeiros",
+            titulo: "💰 Relatórios Financeiros",
+            descricao:
+              "Receitas, despesas, inadimplência, fluxo de caixa, DRE.",
+            categoria: "relatorios",
+            tags: [
+              "receitas",
+              "despesas",
+              "inadimplência",
+              "fluxo caixa",
+              "dre",
+            ],
+            tempoLeitura: "4 min",
+            passos: [
+              {
+                titulo: "Receitas",
+                texto: "Lista de receitas pagas no período.",
+                exemplos: [],
+              },
+              {
+                titulo: "Despesas",
+                texto: "Contas pagas no período.",
+                exemplos: [],
+              },
+              {
+                titulo: "Inadimplência",
+                texto: "Parcelas em atraso com dias e valor.",
+                exemplos: [],
+              },
+              {
+                titulo: "Fluxo de Caixa",
+                texto: "Entradas, saídas e saldo.",
+                exemplos: [],
+              },
+              {
+                titulo: "DRE",
+                texto: "Demonstrativo com resultado líquido e margem.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "relatorios-performance",
+            titulo: "📈 Relatórios de Performance",
+            descricao: "Crescimento, metas, previsão (forecast).",
+            categoria: "relatorios",
+            tags: ["crescimento", "metas", "previsão", "forecast"],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Crescimento",
+                texto: "Novos alunos por mês (últimos 12 meses).",
+                exemplos: [],
+              },
+              {
+                titulo: "Metas",
+                texto:
+                  "Meta de faturamento (R$ 15.000) e novos alunos (5) com barras de progresso.",
+                exemplos: [],
+              },
+              {
+                titulo: "Previsão",
+                texto: "Média dos últimos 3 meses projetada para o próximo.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "relatorios-exportacao",
+            titulo: "📤 Exportação de Relatórios",
+            descricao: "PDF, CSV e Excel.",
+            categoria: "relatorios",
+            tags: ["exportar", "pdf", "csv", "excel"],
+            tempoLeitura: "2 min",
+            passos: [
+              {
+                titulo: "Botões de exportação",
+                texto:
+                  "No canto superior direito, clique em PDF, CSV ou Excel. A tabela atual é exportada com cabeçalho e período.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          // ===== CONFIGURAÇÕES =====
+          {
+            id: "configuracoes-visao-geral",
+            titulo: "⚙️ Módulo Configurações - Visão Geral",
+            descricao:
+              "Parâmetros globais do sistema: estúdio, planos, formas de pagamento, categorias, frequências, eventos.",
+            categoria: "configuracoes",
+            tags: ["configurações", "visão geral", "abas"],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Acessar",
+                texto:
+                  "No menu lateral, clique em 'Configurações'. Abas: Estúdio, Planos, Formas Pagamento, Cat. Receitas, Cat. Despesas, Frequências, Eventos.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "configuracoes-estudio",
+            titulo: "🏢 Aba Estúdio",
+            descricao:
+              "Dados do estúdio, horários de funcionamento, capacidade máxima.",
+            categoria: "configuracoes",
+            tags: ["estúdio", "dados", "horários", "capacidade"],
+            tempoLeitura: "4 min",
+            passos: [
+              {
+                titulo: "Dados do estúdio",
+                texto:
+                  "Preencha nome, e-mail, telefone, CNPJ (opcional), endereço. Campos obrigatórios com *.",
+                exemplos: [],
+              },
+              {
+                titulo: "Horários",
+                texto:
+                  "Defina hora de abertura e fechamento, e marque os dias de funcionamento (quadrados).",
+                exemplos: ["É obrigatório selecionar pelo menos um dia."],
+              },
+              {
+                titulo: "Capacidade",
+                texto:
+                  "Capacidade máxima por horário (padrão 5) e duração padrão da aula (padrão 60 min).",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "configuracoes-planos",
+            titulo: "📦 Aba Planos",
+            descricao: "Cadastro e gerenciamento dos planos de mensalidade.",
+            categoria: "configuracoes",
+            tags: ["planos", "novo plano", "editar", "ativar", "desativar"],
+            tempoLeitura: "4 min",
+            passos: [
+              {
+                titulo: "Novo plano",
+                texto:
+                  "Preencha nome, valor, duração (dias), aulas por semana, descrição. Clique em 'Salvar Plano'.",
+                exemplos: [],
+              },
+              {
+                titulo: "Lista de planos",
+                texto:
+                  "Exibe nome, status, valor, duração, aulas. Botões para editar (lápis) e ativar/desativar.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "configuracoes-formas-pagamento",
+            titulo: "💳 Aba Formas de Pagamento",
+            descricao: "Meios de pagamento aceitos e suas taxas.",
+            categoria: "configuracoes",
+            tags: ["formas pagamento", "taxa"],
+            tempoLeitura: "2 min",
+            passos: [
+              {
+                titulo: "Nova forma",
+                texto: "Nome, taxa (%), descrição (opcional).",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "configuracoes-categorias",
+            titulo: "📂 Abas Categorias de Receitas e Despesas",
+            descricao: "Classificações para outras receitas e despesas.",
+            categoria: "configuracoes",
+            tags: ["categorias", "receitas", "despesas", "tipo fixa/variável"],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Categoria de receita",
+                texto: "Apenas nome obrigatório.",
+                exemplos: [],
+              },
+              {
+                titulo: "Categoria de despesa",
+                texto: "Nome e tipo (Fixa, Variável, Eventual).",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "configuracoes-frequencias",
+            titulo: "🔄 Aba Frequências",
+            descricao:
+              "Intervalos para agendamentos (semanal, quinzenal, etc.).",
+            categoria: "configuracoes",
+            tags: ["frequências", "intervalo"],
+            tempoLeitura: "2 min",
+            passos: [
+              {
+                titulo: "Nova frequência",
+                texto: "Nome, intervalo em dias, descrição.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "configuracoes-eventos",
+            titulo: "📅 Aba Eventos",
+            descricao: "Feriados, eventos internos, com bloqueio de agenda.",
+            categoria: "configuracoes",
+            tags: ["eventos", "feriados", "bloquear agenda", "recorrente"],
+            tempoLeitura: "4 min",
+            passos: [
+              {
+                titulo: "Novo evento",
+                texto:
+                  "Título, data, tipo (evento, feriado, marco, aniversário), recorrência anual, bloquear agenda, destacar no calendário, descrição.",
+                exemplos: [],
+              },
+              {
+                titulo: "Lista de eventos",
+                texto:
+                  "Mostra título, data, tipo, badges (Passado, Destaque, Bloqueio).",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "configuracoes-backup",
+            titulo: "💾 Backup e Importação de Configurações",
+            descricao: "Exportar todas as configurações para JSON e restaurar.",
+            categoria: "configuracoes",
+            tags: ["backup", "exportar", "importar", "json"],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Exportar",
+                texto:
+                  "Clique em 'Exportar' ao lado do título. Um arquivo JSON é baixado.",
+                exemplos: [],
+              },
+              {
+                titulo: "Importar",
+                texto:
+                  "Clique em 'Importar', selecione o arquivo JSON e confirme. Substitui todas as configurações atuais.",
+                exemplos: ["Cuidado: os dados antigos serão apagados."],
+              },
+            ],
+            links: [],
+          },
+          // ===== AVALIAÇÃO DETALHADA DO ALUNO =====
+          {
+            id: "avaliacao-visao-geral",
+            titulo: "🩺 Visão Geral da Avaliação Detalhada",
+            descricao:
+              "A página de Avaliação Detalhada permite registrar informações completas sobre o aluno: dados pessoais, histórico médico, condições de saúde, avaliação postural, dores, hábitos, documentos e gerar uma ficha de treino personalizada.",
+            categoria: "avaliacao",
+            tags: [
+              "avaliação",
+              "visão geral",
+              "ficha de treino",
+              "dores",
+              "postura",
+            ],
+            tempoLeitura: "4 min",
+            passos: [
+              {
+                titulo: "Acessar a avaliação",
+                texto:
+                  "No módulo Alunos, clique no botão de 'Avaliação Detalhada' ao lado do aluno desejado. Você também pode acessar diretamente pelo link avaliacao.html.",
+                exemplos: [],
+              },
+              {
+                titulo: "Estrutura da página",
+                texto:
+                  "A página é dividida em: seletor de aluno, barra de progresso, duas abas (Nova Avaliação e Histórico) e um formulário com 9 seções colapsáveis.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "avaliacao-selecionar-aluno",
+            titulo: "👤 Selecionar Aluno para Avaliação",
+            descricao:
+              "Como escolher o aluno que será avaliado, usando o dropdown ou a busca em tempo real.",
+            categoria: "avaliacao",
+            tags: ["selecionar aluno", "busca", "dropdown"],
+            tempoLeitura: "2 min",
+            passos: [
+              {
+                titulo: "Dropdown de alunos",
+                texto:
+                  "No seletor 'Selecione um aluno...', escolha o aluno na lista carregada.",
+                exemplos: [],
+              },
+              {
+                titulo: "Busca em tempo real",
+                texto:
+                  "Digite no campo de busca por nome ou CPF (mínimo 2 caracteres). Os resultados aparecem abaixo; clique no desejado.",
+                exemplos: ["A busca ignora acentos e maiúsculas."],
+              },
+              {
+                titulo: "Após selecionar",
+                texto:
+                  "Os campos de informações básicas (nome, data de nascimento, CPF, contato) são preenchidos automaticamente com os dados do cadastro. O histórico de avaliações do aluno também é carregado.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "avaliacao-barra-progresso",
+            titulo: "📊 Barra de Progresso da Avaliação",
+            descricao: "Acompanhe o preenchimento das 9 seções do formulário.",
+            categoria: "avaliacao",
+            tags: ["progresso", "barra", "seções"],
+            tempoLeitura: "2 min",
+            passos: [
+              {
+                titulo: "Indicadores",
+                texto:
+                  "A barra mostra o percentual preenchido, o número de seções completas e o total de seções (9). Abaixo, há um texto indicando a próxima seção a ser preenchida.",
+                exemplos: [
+                  "Seção 1 é considerada completa apenas se um aluno foi selecionado.",
+                ],
+              },
+              {
+                titulo: "Cálculo do progresso",
+                texto:
+                  "Cada seção é marcada como completa se pelo menos um campo relevante foi preenchido (checkbox marcado, texto digitado, valor de escala selecionado).",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "avaliacao-historico",
+            titulo: "📋 Histórico de Avaliações",
+            descricao: "Visualize e carregue avaliações anteriores do aluno.",
+            categoria: "avaliacao",
+            tags: ["histórico", "avaliações antigas", "cards"],
+            tempoLeitura: "2 min",
+            passos: [
+              {
+                titulo: "Acessar o histórico",
+                texto:
+                  "Clique na aba 'Histórico de Avaliações'. Serão exibidos cards com a data, objetivo e profissional responsável.",
+                exemplos: [],
+              },
+              {
+                titulo: "Carregar uma avaliação",
+                texto:
+                  "Clique em um card para carregar todos os dados daquela avaliação no formulário da aba 'Nova Avaliação'. Você pode então visualizar ou editar.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "avaliacao-secoes",
+            titulo: "📝 Seções do Formulário de Avaliação",
+            descricao:
+              "Detalhamento de cada uma das 9 seções e como preenchê-las.",
+            categoria: "avaliacao",
+            tags: [
+              "seções",
+              "informações básicas",
+              "histórico médico",
+              "condições de saúde",
+              "orientações médicas",
+              "avaliação postural",
+              "dores",
+              "hábitos",
+              "documentos",
+              "observações",
+            ],
+            tempoLeitura: "8 min",
+            passos: [
+              {
+                titulo: "1. Informações Básicas do Aluno",
+                texto:
+                  "Campos pré-preenchidos: nome, data de nascimento, CPF, contato. Você deve selecionar o Objetivo Principal e o Tempo de Prática de Pilates.",
+                exemplos: [],
+              },
+              {
+                titulo: "2. Histórico Médico e Exames",
+                texto:
+                  "Registre médico responsável, data do checkup, pressão arterial, frequência cardíaca, peso, altura (IMC é calculado automaticamente). Marque os exames recentes e descreva resultados.",
+                exemplos: [
+                  "Peso e altura são usados para calcular o IMC automaticamente.",
+                ],
+              },
+              {
+                titulo: "3. Condições de Saúde e Restrições",
+                texto:
+                  "Marque doenças crônicas (hipertensão, diabetes, etc.) e descreva outras condições, cirurgias, medicamentos e alergias.",
+                exemplos: [],
+              },
+              {
+                titulo: "4. Orientações Médicas",
+                texto:
+                  "Descreva restrições de movimento, exercícios contraindicados, exercícios recomendados e se há necessidade de acompanhamento médico.",
+                exemplos: [],
+              },
+              {
+                titulo: "5. Avaliação Postural",
+                texto:
+                  "Descreva a postura em pé, sentada, amplitude de movimento, simetrias. Utilize as escalas de 1 a 10 para flexibilidade, força e equilíbrio clicando nos números.",
+                exemplos: [
+                  "As escalas são interativas: o número selecionado fica destacado.",
+                ],
+              },
+              {
+                titulo: "6. Avaliação Funcional e Dores",
+                texto:
+                  "Descreva as queixas de dor, intensidade (escala 0-10), marque as áreas afetadas e registre histórico de lesões.",
+                exemplos: [],
+              },
+              {
+                titulo: "7. Hábitos e Estilo de Vida",
+                texto:
+                  "Informe nível de atividade física, outras atividades, qualidade do sono (escala 1-10), horas de sono, estresse (escala 1-10), hábitos alimentares, tabagismo e consumo de álcool.",
+                exemplos: [],
+              },
+              {
+                titulo: "8. Documentos Médicos",
+                texto:
+                  "Clique na área de upload ou arraste arquivos (PDF, JPG, PNG, até 10MB). Os documentos são enviados e listados abaixo. É possível removê-los.",
+                exemplos: ["Os arquivos são armazenados no Supabase Storage."],
+              },
+              {
+                titulo: "9. Observações e Recomendações",
+                texto:
+                  "Registre observações gerais, recomendações para treino, pontos de atenção. A data da avaliação é obrigatória; a próxima reavaliação é opcional.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "avaliacao-escalas",
+            titulo: "🎚️ Como usar as escalas de avaliação",
+            descricao:
+              "As escalas numéricas (1 a 10) para flexibilidade, força, equilíbrio, dor, sono e estresse.",
+            categoria: "avaliacao",
+            tags: [
+              "escalas",
+              "rating",
+              "flexibilidade",
+              "força",
+              "equilíbrio",
+              "dor",
+              "sono",
+              "estresse",
+            ],
+            tempoLeitura: "2 min",
+            passos: [
+              {
+                titulo: "Funcionamento",
+                texto:
+                  "Cada escala é uma linha de botões numerados. Clique no número que corresponde à avaliação do aluno. O botão ficará destacado e o valor é armazenado automaticamente.",
+                exemplos: [
+                  "Na escala de dor, os números vão de 0 a 10 (0 = sem dor, 10 = pior dor possível).",
+                ],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "avaliacao-documentos",
+            titulo: "📎 Upload e gerenciamento de documentos",
+            descricao:
+              "Como anexar laudos, exames e outros documentos ao aluno.",
+            categoria: "avaliacao",
+            tags: ["upload", "documentos", "anexos", "arquivos"],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Fazer upload",
+                texto:
+                  "Na seção 8, clique na área de upload ou arraste arquivos. São aceitos PDF, JPG, PNG com até 10MB cada.",
+                exemplos: [],
+              },
+              {
+                titulo: "Visualizar e remover",
+                texto:
+                  "Após o upload, os documentos aparecem listados com botões para download (⬇️) e exclusão (🗑️).",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "avaliacao-gerar-ficha",
+            titulo: "📋 Gerar Ficha de Treino Personalizada",
+            descricao:
+              "O sistema analisa os dados preenchidos e gera recomendações de exercícios, contraindicações e pontos de atenção.",
+            categoria: "avaliacao",
+            tags: [
+              "ficha de treino",
+              "exercícios",
+              "recomendações",
+              "contraindicações",
+            ],
+            tempoLeitura: "4 min",
+            passos: [
+              {
+                titulo: "Acessar a ficha",
+                texto:
+                  "Clique no botão 'Gerar Ficha de Treino' abaixo do formulário. Um modal será aberto com as recomendações.",
+                exemplos: [],
+              },
+              {
+                titulo: "Como é gerada",
+                texto:
+                  "O sistema usa regras baseadas nos campos: objetivo, restrições, dores, flexibilidade, força, equilíbrio, etc. Exemplo: se objetivo = reabilitação, recomenda exercícios de baixo impacto; se há restrições na coluna, contraindica flexão de coluna com carga.",
+                exemplos: [],
+              },
+              {
+                titulo: "Exportar",
+                texto:
+                  "No modal, há um botão 'Exportar PDF' para gerar um arquivo com a ficha (funcionalidade em desenvolvimento, exibe toast de sucesso).",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "avaliacao-salvar",
+            titulo: "💾 Salvar Avaliação",
+            descricao: "Como salvar os dados preenchidos no banco de dados.",
+            categoria: "avaliacao",
+            tags: ["salvar", "enviar", "banco de dados"],
+            tempoLeitura: "2 min",
+            passos: [
+              {
+                titulo: "Pré-requisitos",
+                texto:
+                  "É necessário ter um aluno selecionado e a data da avaliação preenchida.",
+                exemplos: [],
+              },
+              {
+                titulo: "Ação",
+                texto:
+                  "Clique no botão 'Salvar Avaliação' (verde). Se for uma nova avaliação, um registro será inserido; se estiver editando uma existente, será atualizado.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "avaliacao-problemas",
+            titulo: "❓ Problemas Comuns na Avaliação",
+            descricao: "Soluções para dificuldades frequentes.",
+            categoria: "avaliacao",
+            tags: [
+              "problemas",
+              "erro",
+              "aluno não encontrado",
+              "upload não funciona",
+              "barra de progresso",
+            ],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Aluno não aparece na busca",
+                texto:
+                  "Digite pelo menos 2 caracteres. Verifique se o aluno está cadastrado no módulo Alunos. Tente sem acentos.",
+                exemplos: [],
+              },
+              {
+                titulo: "Upload de arquivos não funciona",
+                texto:
+                  "Confira se o arquivo tem menos de 10MB e é do tipo permitido (PDF, JPG, PNG). Se o erro persistir, abra o console do navegador (F12) para ver mensagens de erro.",
+                exemplos: [],
+              },
+              {
+                titulo: "Barra de progresso não atualiza",
+                texto:
+                  "Certifique-se de que está preenchendo campos relevantes. Tente clicar em outro campo ou use o botão 'Limpar' e recomece.",
+                exemplos: [],
+              },
+              {
+                titulo: "Erro ao salvar",
+                texto:
+                  "Verifique se um aluno está selecionado e a data da avaliação foi preenchida. Se o erro persistir, verifique sua conexão.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          // ===== PORTAL DO ALUNO =====
+          {
+            id: "portal-visao-geral",
+            titulo: "🎓 Visão Geral do Portal do Aluno",
+            descricao:
+              "O Portal do Aluno é uma área exclusiva onde o aluno pode acessar suas informações, agenda, financeiro, evolução, documentos e muito mais, de forma prática e segura.",
+            categoria: "portal",
+            tags: ["portal", "aluno", "acesso", "visão geral"],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "O que é o Portal do Aluno?",
+                texto:
+                  "É um ambiente online onde cada aluno tem login próprio para acompanhar sua jornada no estúdio. Ele pode ver horários de aulas, histórico de pagamentos, anotações de evolução e documentos compartilhados.",
+                exemplos: [],
+              },
+              {
+                titulo: "Como o aluno acessa?",
+                texto:
+                  "O aluno recebe um link de acesso (ex: portal.estudio.com.br) e faz login com e-mail e senha cadastrados. O primeiro acesso pode exigir criação de senha via link enviado por e-mail.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "portal-funcionalidades",
+            titulo: "📱 Funcionalidades do Portal do Aluno",
+            descricao: "Conheça tudo o que o aluno pode fazer no portal.",
+            categoria: "portal",
+            tags: [
+              "funcionalidades",
+              "agenda",
+              "financeiro",
+              "evolução",
+              "documentos",
+              "perfil",
+            ],
+            tempoLeitura: "5 min",
+            passos: [
+              {
+                titulo: "Agenda de Aulas",
+                texto:
+                  "O aluno visualiza suas aulas futuras e passadas, com datas, horários e status (confirmada, cancelada, realizada). Ele pode solicitar reagendamento ou cancelamento (se permitido).",
+                exemplos: [],
+              },
+              {
+                titulo: "Financeiro",
+                texto:
+                  "Acompanhamento de mensalidades, parcelas pagas e pendentes, com opção de visualizar boletos ou gerar segunda via (se disponível).",
+                exemplos: [],
+              },
+              {
+                titulo: "Evolução e Anotações",
+                texto:
+                  "O instrutor pode compartilhar anotações sobre o progresso do aluno, e o aluno pode visualizar esses registros. Também pode haver espaço para o aluno adicionar suas próprias observações.",
+                exemplos: [],
+              },
+              {
+                titulo: "Documentos",
+                texto:
+                  "Documentos como avaliações, fichas de treino, atestados e laudos podem ser disponibilizados para o aluno fazer download.",
+                exemplos: [],
+              },
+              {
+                titulo: "Perfil e Dados Pessoais",
+                texto:
+                  "O aluno pode visualizar e editar seus dados de contato, alterar senha e configurar notificações.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "portal-acesso-inicial",
+            titulo: "🔐 Primeiro Acesso e Recuperação de Senha",
+            descricao:
+              "Instruções para o aluno criar sua senha ou recuperar o acesso.",
+            categoria: "portal",
+            tags: ["primeiro acesso", "senha", "recuperar senha", "login"],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Primeiro acesso",
+                texto:
+                  "O aluno recebe um e-mail com um link para criar sua senha. Ao clicar, ele define uma senha segura e já pode fazer login. Caso não receba, verifique a caixa de spam ou solicite reenvio pelo sistema.",
+                exemplos: [],
+              },
+              {
+                titulo: "Esqueci minha senha",
+                texto:
+                  "Na tela de login, clique em 'Esqueci minha senha'. Insira o e-mail cadastrado. Um link de redefinição será enviado. O aluno deve criar uma nova senha.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "portal-comunicados",
+            titulo: "📢 Comunicados e Notificações no Portal",
+            descricao: "Como o aluno recebe avisos e mensagens do estúdio.",
+            categoria: "portal",
+            tags: ["comunicados", "notificações", "mensagens"],
+            tempoLeitura: "2 min",
+            passos: [
+              {
+                titulo: "Central de Notificações",
+                texto:
+                  "No portal, há um ícone de sino onde o aluno vê avisos como: lembretes de aula, vencimentos próximos, novos documentos compartilhados, etc.",
+                exemplos: [],
+              },
+              {
+                titulo: "Comunicados gerais",
+                texto:
+                  "O estúdio pode enviar comunicados em massa (ex: feriados, promoções) que aparecem em um mural ou como notificação.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+          {
+            id: "portal-problemas",
+            titulo: "❓ Problemas Comuns no Portal do Aluno",
+            descricao:
+              "Soluções para dificuldades de acesso, visualização de dados, etc.",
+            categoria: "portal",
+            tags: [
+              "problemas",
+              "não consigo acessar",
+              "erro login",
+              "dados não aparecem",
+            ],
+            tempoLeitura: "3 min",
+            passos: [
+              {
+                titulo: "Não consigo acessar o portal",
+                texto:
+                  "Verifique se o e-mail e senha estão corretos. Se o acesso for negado, tente redefinir a senha. Se o problema persistir, contate o instrutor para verificar se o cadastro do aluno está ativo.",
+                exemplos: [],
+              },
+              {
+                titulo: "Dados não aparecem (agenda, financeiro)",
+                texto:
+                  "Pode ser que não haja informações registradas ainda. Se o aluno tem aulas agendadas mas não aparecem, verifique se o período selecionado está correto. Caso contrário, entre em contato com o suporte.",
+                exemplos: [],
+              },
+              {
+                titulo: "Erro ao carregar página",
+                texto:
+                  "Tente recarregar a página ou limpar o cache do navegador. Se o erro continuar, pode ser instabilidade no servidor; aguarde alguns minutos.",
+                exemplos: [],
+              },
+            ],
+            links: [],
+          },
+        ],
+        glossario: [
+          // Dashboard
+          {
+            termo: "Dashboard",
+            definicao:
+              "Tela inicial do sistema com visão geral de alunos, aulas, financeiro e alertas.",
+          },
+          {
+            termo: "Inadimplência",
+            definicao:
+              "Total de mensalidades em atraso. No Dashboard, mostra valor e quantidade de alunos inadimplentes.",
+          },
+          {
+            termo: "Mensalidades Pendentes",
+            definicao:
+              "Parcelas que ainda não foram pagas, incluindo as dentro do prazo e as atrasadas.",
+          },
+          {
+            termo: "Ticket Médio",
+            definicao:
+              "Valor médio recebido por parcela de mensalidade no período.",
+          },
+          {
+            termo: "Margem de Contribuição",
+            definicao:
+              "(Receitas - Despesas) / Receitas, em percentual. Indica lucratividade operacional.",
+          },
+          {
+            termo: "Fluxo de Caixa",
+            definicao:
+              "Relatório que mostra todas as entradas e saídas de dinheiro em um período.",
+          },
+          {
+            termo: "Conciliação Bancária",
+            definicao:
+              "Processo de comparar movimentações do sistema com extratos bancários importados (OFX).",
+          },
+          {
+            termo: "DRE",
+            definicao:
+              "Demonstrativo de Resultados do Exercício: receitas, despesas e lucro/prejuízo.",
+          },
+          {
+            termo: "OFX",
+            definicao:
+              "Formato de arquivo bancário para importação de extratos.",
+          },
+          // Alunos
+          {
+            termo: "Dossiê",
+            definicao:
+              "Conjunto completo de informações de um aluno: dados cadastrais, endereço, saúde, documentos e evolução.",
+          },
+          {
+            termo: "Status Financeiro (aluno)",
+            definicao:
+              "Indica se o aluno está em dia (✅), pendente (⏳) ou atrasado (❌) nas mensalidades.",
+          },
+          {
+            termo: "Planos a vencer",
+            definicao:
+              "Planos próximos do fim, seja por número de sessões restantes ou data de término.",
+          },
+          {
+            termo: "Evolução (aluno)",
+            definicao:
+              "Registros textuais sobre o progresso, dificuldades ou marcos alcançados.",
+          },
+          // Agenda
+          {
+            termo: "Check-in / Check-out",
+            definicao: "Registro de entrada e saída do aluno na aula.",
+          },
+          {
+            termo: "Lista de Espera",
+            definicao:
+              "Fila de alunos aguardando vaga em horários específicos.",
+          },
+          {
+            termo: "Ocupação Média",
+            definicao:
+              "Percentual de aulas realizadas em relação à capacidade total dos horários.",
+          },
+          {
+            termo: "Taxa de Faltas",
+            definicao:
+              "Percentual de aulas com presença 'ausente' em relação ao total.",
+          },
+          {
+            termo: "Reagendamento",
+            definicao:
+              "Alteração de data/horário de uma aula existente; a original fica como 'reagendada'.",
+          },
+          // Financeiro
+          {
+            termo: "DRE",
+            definicao:
+              "Demonstrativo de Resultados do Exercício. Relatório que mostra receitas, despesas e lucro/prejuízo.",
+          },
+          {
+            termo: "Inadimplência (financeiro)",
+            definicao:
+              "Percentual de parcelas em atraso em relação ao total de parcelas pendentes.",
+          },
+          {
+            termo: "Conciliação",
+            definicao:
+              "Processo de comparar as movimentações bancárias (importadas via OFX) com os lançamentos do sistema.",
+          },
+          {
+            termo: "Ticket Médio",
+            definicao:
+              "Valor médio recebido por parcela de mensalidade no período.",
+          },
+          {
+            termo: "Margem de Contribuição",
+            definicao:
+              "(Receitas - Despesas) / Receitas. Indica lucratividade.",
+          },
+          {
+            termo: "Fluxo de Caixa",
+            definicao: "Entradas e saídas de dinheiro em um período.",
+          },
+          // Configurações
+          {
+            termo: "Capacidade Máxima por Horário",
+            definicao:
+              "Número máximo de alunos que podem ser agendados simultaneamente no mesmo horário.",
+          },
+          {
+            termo: "Recorrência Anual (evento)",
+            definicao:
+              "Evento que se repete todo ano na mesma data, ignorando o ano.",
+          },
+          // Avaliação Detalhada
+          {
+            termo: "Avaliação Detalhada",
+            definicao:
+              "Página para registro completo de dados físicos, médicos, posturais e funcionais do aluno, com geração de ficha de treino personalizada.",
+          },
+          {
+            termo: "IMC",
+            definicao:
+              "Índice de Massa Corporal, calculado a partir do peso e altura. Ajuda a classificar o aluno em faixas de peso.",
+          },
+          {
+            termo: "Exercícios Contraindicados",
+            definicao:
+              "Movimentos ou atividades que devem ser evitados devido a condições de saúde, lesões ou restrições médicas.",
+          },
+          {
+            termo: "Propriocepção",
+            definicao:
+              "Capacidade de perceber a posição do corpo no espaço. Exercícios proprioceptivos ajudam no equilíbrio.",
+          },
+          {
+            termo: "Core",
+            definicao:
+              "Conjunto de músculos da região central do corpo (abdômen, lombar, pelve), fundamental para estabilidade.",
+          },
+          // Portal do Aluno
+          {
+            termo: "Portal do Aluno",
+            definicao:
+              "Área online exclusiva onde o aluno acessa sua agenda, financeiro, evolução e documentos.",
+          },
+          {
+            termo: "Agenda do Aluno (portal)",
+            definicao:
+              "Visualização das aulas futuras e passadas, com possibilidade de solicitar alterações.",
+          },
+          {
+            termo: "Financeiro do Aluno (portal)",
+            definicao: "Acompanhamento de mensalidades, parcelas e boletos.",
+          },
+          {
+            termo: "Evolução no Portal",
+            definicao:
+              "Registros compartilhados pelo instrutor sobre o progresso do aluno.",
+          },
+        ],
+        intents: [
+          // Dashboard
+          {
+            patterns: [
+              "o que é dashboard",
+              "visão geral dashboard",
+              "tela inicial",
+            ],
+            response:
+              "O Dashboard é a tela inicial do sistema, oferecendo uma visão geral do estúdio: números de alunos, aulas do dia, faturamento, inadimplência, aniversariantes, gráficos de desempenho e alertas importantes. Após o login, você já está nele.",
+            category: "dashboard",
+          },
+          {
+            patterns: ["como acesso dashboard", "voltar ao dashboard"],
+            response:
+              "Clique no ícone da casa 🏠 no menu lateral ou no logo do estúdio.",
+            category: "dashboard",
+          },
+          {
+            patterns: ["cards dashboard", "estatísticas dashboard"],
+            response:
+              "Os cards mostram Total de Alunos, Aulas Hoje, Mensalidades Pendentes e Contas a Pagar. Cores indicam alerta: verde normal, amarelo alerta, vermelho crítico. Clique neles para mais detalhes.",
+            category: "dashboard",
+          },
+          {
+            patterns: [
+              "gráficos dashboard",
+              "aulas por horário",
+              "status financeiro",
+            ],
+            response:
+              "O gráfico 'Aulas por Horário' é de barras e mostra a distribuição das aulas ao longo do dia. O gráfico 'Status Financeiro' é uma rosca comparando recebido x pendente. Clique nos gráficos para ver detalhes.",
+            category: "dashboard",
+          },
+          {
+            patterns: ["aulas de hoje lista", "ver aulas hoje"],
+            response:
+              "Na lista 'Aulas de Hoje' você vê todas as aulas do dia, com horário, aluno e status (✅ presente, ❌ ausente, ⏳ pendente, 🚫 cancelada). Clique sobre uma aula para marcar presença ou no link 'Ver todas' para ir à agenda.",
+            category: "dashboard",
+          },
+          {
+            patterns: ["aniversariantes", "aniversariantes do mês"],
+            response:
+              "A lista de aniversariantes mostra alunos que fazem aniversário no mês, com destaque para os do dia ('Hoje! 🎉'). Clique no nome para abrir o dossiê.",
+            category: "dashboard",
+          },
+          {
+            patterns: ["contas a pagar próximos 7 dias"],
+            response:
+              "Lista as despesas com vencimento nos próximos 7 dias. Badges: 🔴 vencida, 🟡 vence hoje/até 3 dias, 🔵 normal. Clique na conta para pagar.",
+            category: "dashboard",
+          },
+          {
+            patterns: ["acesso rápido módulos"],
+            response:
+              "Os cards de Acesso Rápido levam diretamente para Alunos, Agenda, Financeiro e Relatórios, mostrando um resumo de cada.",
+            category: "dashboard",
+          },
+          {
+            patterns: ["alertas dashboard", "notificações dashboard"],
+            response:
+              "Alertas podem aparecer em banners (inadimplência alta) ou no ícone do sino 🔔. O número vermelho indica notificações não lidas. Clique no sino para ver e marcar como lidas.",
+            category: "dashboard",
+          },
+          {
+            patterns: ["atualizar dashboard", "dados desatualizados"],
+            response:
+              "Clique no botão 'Atualizar' (seta circular) ou aguarde a atualização automática a cada 30 segundos.",
+            category: "dashboard",
+          },
+          // Alunos
+          {
+            patterns: [
+              "cadastrar aluno",
+              "novo aluno",
+              "adicionar aluno",
+              "criar aluno",
+            ],
+            response:
+              "Vá ao módulo Alunos e clique em 'Novo Aluno'. Preencha os dados obrigatórios (nome, data de nascimento, telefone). Você pode adicionar foto, endereço (CEP automático), saúde, documentos e evolução. Clique em 'Salvar Dossiê'.",
+            tutorial_id: "alunos-cadastro",
+            category: "alunos",
+          },
+          {
+            patterns: ["cards alerta alunos"],
+            response:
+              "No topo do módulo Alunos, há cards: 🔴 Financeiro atrasado, 🟡 Planos a vencer, 🔵 Inativos há 30+ dias. Clique para filtrar a lista.",
+            category: "alunos",
+          },
+          {
+            patterns: ["filtrar alunos", "buscar aluno"],
+            response:
+              "Use o campo de busca por nome, CPF ou telefone. Ao lado, filtre por status (Ativos, Inativos, Todos).",
+            category: "alunos",
+          },
+          {
+            patterns: ["status financeiro aluno", "coluna financeiro"],
+            response:
+              "Na tabela de alunos, a coluna Financeiro mostra ícones: ✅ em dia, ⏳ pendente, ❌ atrasado.",
+            category: "alunos",
+          },
+          {
+            patterns: ["documentos aluno", "anexar documentos"],
+            response:
+              "No cadastro/edição do aluno, aba 'Documentos', você pode fazer upload de arquivos (PDF, imagens). Cada documento pode ter uma observação.",
+            category: "alunos",
+          },
+          {
+            patterns: ["evolução aluno", "registrar evolução"],
+            response:
+              "Na aba 'Evolução', preencha título, data e descrição para registrar o progresso do aluno. O histórico é exibido abaixo.",
+            category: "alunos",
+          },
+          {
+            patterns: ["dossiê aluno", "visualizar aluno"],
+            response:
+              "Clique no botão de olho 👁️ na linha do aluno. O modal exibe todas as informações consolidadas.",
+            category: "alunos",
+          },
+          {
+            patterns: ["desativar aluno", "reativar aluno"],
+            response:
+              "Use o botão 👤 na linha do aluno para alternar entre ativo/inativo. Desativar mantém o histórico.",
+            category: "alunos",
+          },
+          // Agenda
+          {
+            patterns: [
+              "agendar aula",
+              "nova aula",
+              "marcar aula",
+              "criar agendamento",
+            ],
+            response:
+              "Na Agenda, clique em 'Novo Agendamento' para criar um plano (contínuo, por sessões, por período) ou clique em um horário vago para aula avulsa. Você também pode usar a aba 'Agendamento em Lote' para criar várias aulas de uma vez.",
+            tutorial_id: "agenda-agendamento",
+            category: "agenda",
+          },
+          {
+            patterns: ["check-in", "check-out", "marcar presença"],
+            response:
+              "Clique na aula na agenda e use os botões 'Check-in' e 'Check-out' no modal de detalhes. Disponível apenas no dia da aula.",
+            category: "agenda",
+          },
+          {
+            patterns: ["reagendar aula", "cancelar aula"],
+            response:
+              "No modal de detalhes da aula, clique em 'Reagendar' para mudar data/horário, ou 'Cancelar Aula' para cancelar. A aula original fica como reagendada/cancelada.",
+            category: "agenda",
+          },
+          {
+            patterns: ["lista de espera agenda", "entrar na lista"],
+            response:
+              "Ao tentar agendar um horário lotado, o sistema oferece a opção 'Lista de Espera'. Na seção 'Lista de Espera' você vê os alunos e pode notificá-los quando surgir vaga.",
+            category: "agenda",
+          },
+          {
+            patterns: ["relatórios agenda", "ocupação média", "taxa de faltas"],
+            response:
+              "Na parte inferior da agenda, há cards com relatórios: Aulas Hoje, Ocupação Média, Taxa de Faltas e Lista de Espera. Cada um pode ser exportado em PDF.",
+            category: "agenda",
+          },
+          {
+            patterns: ["consultar disponibilidade agenda", "vagas"],
+            response:
+              "Use a seção 'Consultar Disponibilidade' escolhendo data e horário para ver ocupação e alunos agendados.",
+            category: "agenda",
+          },
+          // Financeiro
+          {
+            patterns: [
+              "gerar mensalidade",
+              "criar mensalidade",
+              "nova mensalidade",
+            ],
+            response:
+              "No módulo Financeiro, aba 'Mensalidades', clique em 'Nova Mensalidade'. Busque o aluno, defina plano, parcelas (1-12), valores, desconto e data de vencimento. Uma prévia é exibida. Confirme em 'Gerar Mensalidade'.",
+            tutorial_id: "financeiro-mensalidades",
+            category: "financeiro",
+          },
+          {
+            patterns: ["importar ofx", "conciliar", "conciliação bancária"],
+            response:
+              "Na aba 'Conciliação', clique em 'Importar OFX' e selecione o arquivo do banco. Depois, marque os itens não conciliados e clique em 'Conciliar Selecionados'.",
+            category: "financeiro",
+          },
+          {
+            patterns: ["notificar inadimplentes", "juros multa"],
+            response:
+              "O botão 'Notificar Inadimplentes' na aba Conciliação envia notificações internas para alunos com parcelas atrasadas, incluindo cálculo de juros e multa se configurados.",
+            category: "financeiro",
+          },
+          {
+            patterns: ["dre", "demonstrativo de resultados"],
+            response:
+              "A aba DRE mostra receitas totais, despesas fixas/variáveis e resultado líquido (lucro/prejuízo) do período. Você pode exportar.",
+            category: "financeiro",
+          },
+          {
+            patterns: ["metas financeiras", "cadastrar meta"],
+            response:
+              "Na aba 'Metas', clique em 'Nova Meta' e informe o valor desejado. O sistema acompanha o realizado automaticamente.",
+            category: "financeiro",
+          },
+          // Relatórios
+          {
+            patterns: [
+              "relatório financeiro",
+              "gerar relatório",
+              "exportar relatório",
+            ],
+            response:
+              "No módulo Relatórios, escolha a aba desejada (Financeiro, Alunos, etc.). Use os filtros de período e clique em PDF, CSV ou Excel para exportar.",
+            category: "relatorios",
+          },
+          {
+            patterns: ["favoritos relatórios", "salvar relatório"],
+            response:
+              "Clique na estrela ao lado do título do relatório para favoritar. Acesse rapidamente pelo menu de estrelas no canto superior direito.",
+            category: "relatorios",
+          },
+          // Configurações
+          {
+            patterns: ["configurar plano", "novo plano mensalidade"],
+            response:
+              "Em Configurações > Planos, preencha nome, valor, duração (dias), aulas por semana e descrição. Clique em 'Salvar Plano'.",
+            tutorial_id: "configuracoes-planos",
+            category: "configuracoes",
+          },
+          {
+            patterns: [
+              "configurar horários funcionamento",
+              "dias funcionamento",
+            ],
+            response:
+              "Na aba 'Estúdio', defina hora de abertura, fechamento e marque os dias de funcionamento nos quadrados. Clique em 'Salvar Horários'.",
+            category: "configuracoes",
+          },
+          {
+            patterns: ["cadastrar evento", "feriado", "bloquear agenda"],
+            response:
+              "Em Configurações > Eventos, preencha título, data, tipo, recorrência anual, se bloqueia agenda e se destaca no calendário. Clique em 'Salvar Evento'.",
+            category: "configuracoes",
+          },
+          {
+            patterns: ["backup configurações", "exportar configurações"],
+            response:
+              "Clique em 'Exportar' ao lado do título em Configurações para baixar um arquivo JSON com todas as configurações. Para importar, clique em 'Importar' e selecione o arquivo.",
+            category: "configuracoes",
+          },
+          // Avaliação Detalhada
+          {
+            patterns: [
+              "avaliação detalhada",
+              "avaliacao aluno",
+              "ficha de treino",
+              "como fazer avaliação",
+            ],
+            response:
+              "A página de Avaliação Detalhada permite registrar informações completas sobre o aluno: dados pessoais, histórico médico, condições de saúde, avaliação postural, dores, hábitos, documentos e gerar uma ficha de treino personalizada. Você pode acessá-la pelo módulo Alunos, clicando no botão 'Avaliação Detalhada' ao lado do aluno.",
+            tutorial_id: "avaliacao-visao-geral",
+            category: "avaliacao",
+          },
+          {
+            patterns: ["selecionar aluno avaliação", "buscar aluno avaliação"],
+            response:
+              "No topo da página de avaliação, há um dropdown com todos os alunos e um campo de busca em tempo real por nome ou CPF. Digite pelo menos 2 caracteres e clique no aluno desejado. As informações básicas serão preenchidas automaticamente.",
+            tutorial_id: "avaliacao-selecionar-aluno",
+            category: "avaliacao",
+          },
+          {
+            patterns: ["barra de progresso avaliação", "progresso avaliação"],
+            response:
+              "A barra de progresso mostra quantas das 9 seções do formulário já foram preenchidas. Cada seção é considerada completa se pelo menos um campo relevante foi preenchido. O percentual e a próxima seção são exibidos.",
+            tutorial_id: "avaliacao-barra-progresso",
+            category: "avaliacao",
+          },
+          {
+            patterns: ["histórico de avaliações", "avaliações anteriores"],
+            response:
+              "Na aba 'Histórico de Avaliações', você vê cards com as avaliações já realizadas para o aluno. Clique em um card para carregar os dados no formulário e visualizar ou editar.",
+            tutorial_id: "avaliacao-historico",
+            category: "avaliacao",
+          },
+          {
+            patterns: ["seções avaliação", "campos avaliação"],
+            response:
+              "O formulário tem 9 seções: Informações Básicas, Histórico Médico, Condições de Saúde, Orientações Médicas, Avaliação Postural, Dores, Hábitos, Documentos e Observações. Cada uma pode ser expandida clicando no cabeçalho.",
+            tutorial_id: "avaliacao-secoes",
+            category: "avaliacao",
+          },
+          {
+            patterns: [
+              "escala avaliação",
+              "como usar escala",
+              "flexibilidade escala",
+            ],
+            response:
+              "As escalas numéricas (1 a 10) são usadas para flexibilidade, força, equilíbrio, sono e estresse. A escala de dor vai de 0 a 10. Basta clicar no número correspondente; ele ficará destacado.",
+            tutorial_id: "avaliacao-escalas",
+            category: "avaliacao",
+          },
+          {
+            patterns: ["upload documentos avaliação", "anexar exames"],
+            response:
+              "Na seção 8, você pode arrastar ou clicar para selecionar arquivos (PDF, JPG, PNG, até 10MB). Eles serão enviados e listados abaixo. É possível remover com o botão de lixeira.",
+            tutorial_id: "avaliacao-documentos",
+            category: "avaliacao",
+          },
+          {
+            patterns: ["gerar ficha de treino", "ficha personalizada"],
+            response:
+              "Após preencher a avaliação, clique em 'Gerar Ficha de Treino'. O sistema analisa os dados e cria recomendações de exercícios, contraindicações e pontos de atenção. Você pode exportar para PDF.",
+            tutorial_id: "avaliacao-gerar-ficha",
+            category: "avaliacao",
+          },
+          {
+            patterns: ["salvar avaliação", "como salvar avaliação"],
+            response:
+              "Para salvar, é necessário ter um aluno selecionado e a data da avaliação preenchida. Clique no botão verde 'Salvar Avaliação'. Se for uma nova, será inserida; se for edição, será atualizada.",
+            tutorial_id: "avaliacao-salvar",
+            category: "avaliacao",
+          },
+          {
+            patterns: [
+              "problemas avaliação",
+              "aluno não aparece",
+              "upload não funciona",
+            ],
+            response:
+              "Se o aluno não aparece na busca, digite pelo menos 2 caracteres ou verifique se ele está cadastrado. Se o upload falhar, confira o tamanho e tipo do arquivo. Para outros problemas, tente recarregar a página.",
+            tutorial_id: "avaliacao-problemas",
+            category: "avaliacao",
+          },
+          // Portal do Aluno
+          {
+            patterns: ["portal do aluno", "acesso do aluno", "aluno portal"],
+            response:
+              "O Portal do Aluno é uma área exclusiva onde o aluno pode acessar sua agenda, financeiro, evolução e documentos. Para acessar, o aluno deve usar o link fornecido pelo estúdio e fazer login com e-mail e senha.",
+            tutorial_id: "portal-visao-geral",
+            category: "portal",
+          },
+          {
+            patterns: ["como aluno acessa portal", "login aluno"],
+            response:
+              "O aluno recebe um link de acesso (ex: portal.estudio.com.br) e faz login com e-mail e senha cadastrados. No primeiro acesso, ele cria a senha através de um link enviado por e-mail.",
+            tutorial_id: "portal-acesso-inicial",
+            category: "portal",
+          },
+          {
+            patterns: [
+              "funcionalidades portal aluno",
+              "o que aluno ve no portal",
+            ],
+            response:
+              "No portal, o aluno pode: visualizar sua agenda de aulas, acompanhar financeiro (mensalidades e boletos), ver anotações de evolução, acessar documentos compartilhados e editar seu perfil.",
+            tutorial_id: "portal-funcionalidades",
+            category: "portal",
+          },
+          {
+            patterns: ["portal não consigo acessar", "erro login portal"],
+            response:
+              "Verifique se o e-mail e senha estão corretos. Se não lembrar a senha, use a opção 'Esqueci minha senha' na tela de login. Se o problema persistir, contate o instrutor para verificar se o cadastro está ativo.",
+            tutorial_id: "portal-problemas",
+            category: "portal",
+          },
+          {
+            patterns: ["recuperar senha portal", "esqueci senha aluno"],
+            response:
+              "Na tela de login do portal, clique em 'Esqueci minha senha', informe o e-mail cadastrado e siga as instruções enviadas por e-mail para criar uma nova senha.",
+            tutorial_id: "portal-acesso-inicial",
+            category: "portal",
+          },
+          {
+            patterns: ["comunicados portal", "notificações aluno"],
+            response:
+              "O portal possui uma central de notificações (ícone de sino) onde o aluno recebe avisos de lembretes de aula, vencimentos e comunicados do estúdio.",
+            tutorial_id: "portal-comunicados",
+            category: "portal",
+          },
+          {
+            patterns: [
+              "aluno não vê agenda no portal",
+              "dados não aparecem portal",
+            ],
+            response:
+              "Se a agenda não aparece, verifique se há aulas agendadas para o período. Se o aluno tem aulas mas não aparecem, pode ser necessário ajustar o filtro de data. Caso contrário, contate o suporte.",
+            tutorial_id: "portal-problemas",
+            category: "portal",
+          },
+          // Glossário
+          {
+            patterns: ["o que é imc", "calcular imc"],
+            response:
+              "IMC é o Índice de Massa Corporal, calculado a partir do peso e altura. Na avaliação, ele é calculado automaticamente quando você preenche peso e altura.",
+            category: "glossario",
+          },
+          {
+            patterns: ["o que são exercícios contraindicados"],
+            response:
+              "São movimentos que devem ser evitados devido a condições de saúde, lesões ou restrições médicas. A ficha de treino gerada pela avaliação pode listar alguns.",
+            category: "glossario",
+          },
+        ],
+      };
+
+      // ============================================================
+      // FUNÇÕES AUXILIARES
+      // ============================================================
+      function mostrarToast(msg, tipo = "info") {
+        const container = document.getElementById("toastContainer");
+        const toast = document.createElement("div");
+        toast.className = `toast ${tipo}`;
+        let icone = "info-circle";
+        if (tipo === "success") icone = "check-circle";
+        if (tipo === "error") icone = "exclamation-circle";
+        toast.innerHTML = `<i class="fas fa-${icone}"></i> ${msg}`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+      }
+
+      // ============================================================
+      // CARREGAR USUÁRIO (simulação)
+      // ============================================================
+      function carregarUsuario() {
+        const usuario = JSON.parse(localStorage.getItem("usuario")) || {
+          nome: "Usuário",
+          role: "admin",
+        };
+        document.getElementById("userName").textContent = usuario.nome;
+        document.getElementById("userRole").textContent =
+          usuario.role === "admin" ? "Administrador" : "Instrutor";
+        const iniciais = (usuario.nome || "U")
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .substring(0, 2)
+          .toUpperCase();
+        document.getElementById("userAvatar").textContent = iniciais;
+      }
+
+      // ============================================================
+      // RENDERIZAR CATEGORIAS
+      // ============================================================
+      function renderizarCategorias() {
+        const grid = document.getElementById("categoriasGrid");
+        grid.innerHTML = conhecimento.categorias
+          .map(
+            (cat) => `
+                <div class="categoria-card" onclick="filtrarPorCategoria('${cat.id}')">
+                    <i class="fas ${cat.icone}" style="color: ${cat.cor};"></i>
+                    <span>${cat.nome}</span>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      // ============================================================
+      // RENDERIZAR GLOSSÁRIO
+      // ============================================================
+      function renderizarGlossario() {
+        const grid = document.getElementById("glossarioGrid");
+        grid.innerHTML = conhecimento.glossario
+          .map(
+            (item) => `
+                <div class="glossario-item">
+                    <div class="glossario-termo">${item.termo}</div>
+                    <div class="glossario-definicao">${item.definicao}</div>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      // ============================================================
+      // FILTRAR POR CATEGORIA (com rolagem automática)
+      // ============================================================
+      window.filtrarPorCategoria = function (categoriaId) {
+        const tutoriaisFiltrados = conhecimento.tutoriais.filter(
+          (t) => t.categoria === categoriaId
+        );
+        if (tutoriaisFiltrados.length === 0) {
+          mostrarToast("Nenhum tutorial nesta categoria ainda.", "info");
+          return;
+        }
+        document.getElementById("searchInput").value = "";
+        document.getElementById(
+          "searchTerm"
+        ).textContent = `Categoria: ${categoriaId}`;
+        const lista = document.getElementById("resultsList");
+        lista.innerHTML = tutoriaisFiltrados
+          .map(
+            (t) => `
+                <div class="result-item" onclick="abrirTutorial('${t.id}')">
+                    <h3>${t.titulo}</h3>
+                    <p>${t.descricao}</p>
+                    <div class="result-tags">${t.tags
+                      .map((tag) => `<span class="tag">${tag}</span>`)
+                      .join("")}</div>
+                </div>
+            `
+          )
+          .join("");
+        document.getElementById("resultsSection").classList.add("show");
+        document.getElementById("tutorialSection").classList.remove("show");
+        // Rolagem suave até a seção de resultados
+        document
+          .getElementById("resultsSection")
+          .scrollIntoView({ behavior: "smooth", block: "start" });
+      };
+
+      // ============================================================
+      // PESQUISA (com rolagem automática)
+      // ============================================================
+      window.performSearch = function () {
+        const termo = document
+          .getElementById("searchInput")
+          .value.trim()
+          .toLowerCase();
+        if (termo === "") {
+          document.getElementById("resultsSection").classList.remove("show");
+          return;
+        }
+
+        const resultados = conhecimento.tutoriais.filter(
+          (t) =>
+            t.titulo.toLowerCase().includes(termo) ||
+            t.descricao.toLowerCase().includes(termo) ||
+            t.tags.some((tag) => tag.toLowerCase().includes(termo))
+        );
+
+        document.getElementById("searchTerm").textContent = termo;
+        const lista = document.getElementById("resultsList");
+        if (resultados.length === 0) {
+          lista.innerHTML =
+            '<div class="empty-state">Nenhum resultado encontrado. Tente outros termos.</div>';
+        } else {
+          lista.innerHTML = resultados
+            .map(
+              (t) => `
+                    <div class="result-item" onclick="abrirTutorial('${t.id}')">
+                        <h3>${t.titulo}</h3>
+                        <p>${t.descricao}</p>
+                        <div class="result-tags">${t.tags
+                          .map((tag) => `<span class="tag">${tag}</span>`)
+                          .join("")}</div>
+                    </div>
+                `
+            )
+            .join("");
+        }
+        document.getElementById("resultsSection").classList.add("show");
+        document.getElementById("tutorialSection").classList.remove("show");
+        // Rolagem suave até a seção de resultados
+        document
+          .getElementById("resultsSection")
+          .scrollIntoView({ behavior: "smooth", block: "start" });
+      };
+
+      window.quickSearch = function (termo) {
+        document.getElementById("searchInput").value = termo;
+        performSearch();
+      };
+
+      window.clearSearch = function () {
+        document.getElementById("searchInput").value = "";
+        document.getElementById("resultsSection").classList.remove("show");
+      };
+
+      // ============================================================
+      // ABRIR TUTORIAL COM EXEMPLOS MÚLTIPLOS E LINKS
+      // ============================================================
+      window.abrirTutorial = function (id) {
+        const tutorial = conhecimento.tutoriais.find((t) => t.id === id);
+        if (!tutorial) return;
+
+        document.getElementById(
+          "tutorialTitle"
+        ).innerHTML = `<i class="fas fa-graduation-cap"></i> ${tutorial.titulo}`;
+        document.getElementById(
+          "tutorialMeta"
+        ).innerHTML = `<span><i class="far fa-clock"></i> ${tutorial.tempoLeitura} de leitura</span> <span class="tag">${tutorial.categoria}</span>`;
+
+        let passosHtml = "";
+        tutorial.passos.forEach((passo, idx) => {
+          let exemplosHtml = "";
+          if (passo.exemplos && passo.exemplos.length) {
+            exemplosHtml =
+              '<div style="margin-top:0.5rem;">' +
+              passo.exemplos
+                .map(
+                  (ex) =>
+                    `<div class="example"><i class="fas fa-lightbulb"></i> ${ex}</div>`
+                )
+                .join("") +
+              "</div>";
+          }
+          passosHtml += `
+                    <div class="step-item">
+                        <div class="step-number">${idx + 1}</div>
+                        <div class="step-content">
+                            <strong>${passo.titulo}</strong>
+                            <p>${passo.texto}</p>
+                            ${exemplosHtml}
+                        </div>
+                    </div>
+                `;
+        });
+
+        document.getElementById("tutorialContent").innerHTML = `
+                <p style="margin-bottom:1rem; background:var(--off-white); padding:0.8rem; border-radius:8px;">${tutorial.descricao}</p>
+                <div class="step-container">${passosHtml}</div>
+            `;
+
+        if (tutorial.links && tutorial.links.length) {
+          let botoesHtml = "";
+          tutorial.links.forEach((link) => {
+            const classe =
+              link.tipo === "primary" ? "btn-action" : "btn-outline-action";
+            botoesHtml += `<a href="${link.url}" class="${classe}" target="_blank"><i class="fas fa-external-link-alt"></i> ${link.texto}</a>`;
+          });
+          document.getElementById("tutorialActions").innerHTML = botoesHtml;
+        } else {
+          document.getElementById("tutorialActions").innerHTML = "";
+        }
+
+        document.getElementById("tutorialSection").classList.add("show");
+        document.getElementById("resultsSection").classList.remove("show");
+        document
+          .getElementById("tutorialSection")
+          .scrollIntoView({ behavior: "smooth", block: "start" });
+      };
+
+      // ============================================================
+      // FEEDBACK
+      // ============================================================
+      window.feedbackUtil = function (util) {
+        mostrarToast(
+          util
+            ? "Obrigado pelo feedback!"
+            : "Que pena! Enviaremos sua opinião para melhoria.",
+          "success"
+        );
+      };
+
+      // ============================================================
+      // ASSISTENTE VIRTUAL INTELIGENTE (COM EFEITO DE DIGITAÇÃO)
+      // ============================================================
+      window.toggleChatbot = function () {
+        const win = document.getElementById("chatbotWindow");
+        win.classList.toggle("open");
+      };
+
+      window.sendMessage = function () {
+        const input = document.getElementById("chatbotInput");
+        const msg = input.value.trim();
+        if (msg === "") return;
+
+        const messagesDiv = document.getElementById("chatbotMessages");
+        messagesDiv.innerHTML += `<div class="message user">${msg}</div>`;
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+        const resposta = encontrarResposta(msg);
+
+        const botMessageId = "bot-msg-" + Date.now();
+        messagesDiv.innerHTML += `<div class="message bot" id="${botMessageId}"><span class="typing">...</span></div>`;
+        const botMessageElement = document.getElementById(botMessageId);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+        digitarMensagem(
+          botMessageElement,
+          resposta.texto,
+          resposta.acoes,
+          resposta.tutorial_id
+        );
+        input.value = "";
+      };
+
+      function encontrarResposta(pergunta) {
+        const p = pergunta.toLowerCase().replace(/[^\w\s]/g, "");
+
+        for (const intent of conhecimento.intents) {
+          for (const pattern of intent.patterns) {
+            if (p.includes(pattern)) {
+              let texto = intent.response;
+              const acoes = [];
+              if (intent.tutorial_id) {
+                acoes.push({
+                  tipo: "tutorial",
+                  id: intent.tutorial_id,
+                  label: "Ver tutorial",
+                });
+              }
+              return { texto, acoes, tutorial_id: intent.tutorial_id };
+            }
+          }
+        }
+
+        for (const item of conhecimento.glossario) {
+          if (p.includes(item.termo.toLowerCase())) {
+            const texto = `${item.termo}: ${item.definicao}`;
+            return { texto, acoes: [], tutorial_id: null };
+          }
+        }
+
+        const tutorialEncontrado = conhecimento.tutoriais.find(
+          (t) =>
+            t.titulo.toLowerCase().includes(p) ||
+            t.descricao.toLowerCase().includes(p) ||
+            t.tags.some((tag) => p.includes(tag))
+        );
+
+        if (tutorialEncontrado) {
+          const texto = `Encontrei um tutorial sobre "${tutorialEncontrado.titulo}". ${tutorialEncontrado.descricao}`;
+          return {
+            texto,
+            acoes: [
+              {
+                tipo: "tutorial",
+                id: tutorialEncontrado.id,
+                label: "Abrir tutorial",
+              },
+            ],
+            tutorial_id: tutorialEncontrado.id,
+          };
+        }
+
+        return {
+          texto:
+            "Desculpe, ainda não sei responder essa pergunta. Tente perguntar de outra forma ou pesquise na barra de busca.",
+          acoes: [],
+          tutorial_id: null,
+        };
+      }
+
+      function digitarMensagem(elemento, texto, acoes = [], tutorialId = null) {
+        let index = 0;
+        elemento.innerHTML = "";
+
+        function typeNext() {
+          if (index < texto.length) {
+            elemento.innerHTML += texto.charAt(index);
+            index++;
+            setTimeout(typeNext, 30);
+          } else {
+            if (acoes.length > 0 || tutorialId) {
+              const actionsDiv = document.createElement("div");
+              actionsDiv.className = "message-actions";
+
+              if (tutorialId) {
+                const btn = document.createElement("button");
+                btn.className = "message-action-btn";
+                btn.innerHTML = '<i class="fas fa-book-open"></i> Ver tutorial';
+                btn.onclick = () => abrirTutorial(tutorialId);
+                actionsDiv.appendChild(btn);
+              }
+
+              acoes.forEach((acao) => {
+                if (acao.tipo === "tutorial" && acao.id) {
+                  const btn = document.createElement("button");
+                  btn.className = "message-action-btn";
+                  btn.innerHTML = `<i class="fas fa-book-open"></i> ${acao.label}`;
+                  btn.onclick = () => abrirTutorial(acao.id);
+                  actionsDiv.appendChild(btn);
+                }
+              });
+
+              elemento.appendChild(actionsDiv);
+            }
+            const messagesDiv = document.getElementById("chatbotMessages");
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+          }
+        }
+        typeNext();
+      }
+
+      // ============================================================
+      // INICIALIZAÇÃO
+      // ============================================================
+      document.addEventListener("DOMContentLoaded", () => {
+        carregarUsuario();
+        renderizarCategorias();
+        renderizarGlossario();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const tutorialId = urlParams.get("id");
+        if (tutorialId) {
+          abrirTutorial(tutorialId);
+        }
+      });
+    </script>
+
+    <!-- Estilo extra para toasts -->
+    <style>
+      .toast-container {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        z-index: 9999;
+      }
+      .toast {
+        background: var(--branco);
+        padding: 0.8rem 1.5rem;
+        border-radius: 10px;
+        margin-top: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border-left: 4px solid var(--verde-principal);
+        animation: slideIn 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        min-width: 250px;
+        font-size: 0.85rem;
+      }
+      .toast.success {
+        border-left-color: #27ae60;
+      }
+      .toast.error {
+        border-left-color: var(--vermelho-urgente);
+      }
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+    </style>
+  </body>
+</html>
