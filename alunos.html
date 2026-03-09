@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dossiê do Aluno</title>
+    <title>Dossiê do Aluno - Versão Avançada</title>
 
     <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -19,16 +19,26 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
 
-    <!-- Supabase JS Client -->
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Bibliotecas para exportação -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- Biblioteca para compressão de imagem -->
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.0/dist/browser-image-compression.js"></script>
+
+    <!-- Supabase -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
     <style>
+      /* ===== VARIÁVEIS ===== */
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
-
       :root {
         --verde-principal: #3a6b5c;
         --verde-claro: #8fc1b0;
@@ -37,7 +47,6 @@
         --grafite-claro: #4a4a4a;
         --off-white: #f5f5f5;
         --branco: #ffffff;
-
         --vermelho-urgente: #e74c3c;
         --vermelho-suave: #ffe5e5;
         --laranja-atencao: #f39c12;
@@ -47,30 +56,25 @@
         --verde-sucesso: #27ae60;
         --azul-info: #3498db;
         --azul-suave: #e3f2fd;
-
+        --pago: #27ae60;
+        --pendente: #f39c12;
+        --atrasado: #e74c3c;
         --font-titulos: "Cormorant Garamond", serif;
         --font-corpo: "Montserrat", sans-serif;
-
         --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         --shadow-hover: 0 8px 24px rgba(58, 107, 92, 0.15);
-
-        --sidebar-width: 280px;
         --card-padding: 20px;
         --grid-gap: 20px;
       }
-
       html {
         font-size: 14px;
       }
-
       body {
         font-family: var(--font-corpo);
         background: var(--off-white);
         color: var(--grafite);
         min-height: 100vh;
       }
-
-      /* ===== HEADER ===== */
       .header {
         background: var(--branco);
         box-shadow: var(--shadow);
@@ -78,7 +82,6 @@
         top: 0;
         z-index: 100;
       }
-
       .header-content {
         max-width: 1600px;
         margin: 0 auto;
@@ -87,13 +90,11 @@
         align-items: center;
         justify-content: space-between;
       }
-
       .logo-area {
         display: flex;
         align-items: center;
         gap: 0.8rem;
       }
-
       .logo-icon {
         width: 40px;
         height: 40px;
@@ -102,13 +103,12 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        text-decoration: none;
       }
-
       .logo-icon i {
         font-size: 1.5rem;
         color: var(--branco);
       }
-
       .logo-text h1 {
         font-family: var(--font-titulos);
         font-size: 1.4rem;
@@ -116,37 +116,34 @@
         color: var(--grafite);
         line-height: 1.2;
       }
-
       .logo-text span {
         font-size: 0.7rem;
         color: var(--verde-principal);
       }
-
       .user-area {
         display: flex;
         align-items: center;
         gap: 0.8rem;
       }
-
       .user-info {
         text-align: right;
       }
-
       .user-name {
         font-weight: 600;
         font-size: 0.85rem;
+        color: var(--grafite);
       }
-
       .user-role {
         font-size: 0.7rem;
         color: var(--verde-principal);
       }
-
       .user-avatar {
         width: 38px;
         height: 38px;
-        background: var(--verde-pastel);
         border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--verde-pastel);
+        background: var(--verde-pastel);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -154,7 +151,6 @@
         font-weight: 600;
         font-size: 0.95rem;
       }
-
       .btn-icon {
         width: 35px;
         height: 35px;
@@ -169,27 +165,35 @@
         justify-content: center;
         font-size: 1rem;
       }
-
       .btn-icon:hover {
         background: var(--verde-pastel);
         color: var(--verde-principal);
       }
-
-      /* ===== CONTEÚDO PRINCIPAL ===== */
+      .welcome-message {
+        color: var(--verde-principal);
+        font-size: 0.95rem;
+        background: var(--verde-pastel);
+        padding: 0.5rem 1.2rem;
+        border-radius: 30px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-right: 1rem;
+      }
+      .welcome-message i {
+        font-size: 1rem;
+      }
       .main-content {
         max-width: 1600px;
         margin: 0 auto;
         padding: 1.5rem;
       }
-
-      /* PAGE HEADER */
       .page-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
         margin-bottom: 1.5rem;
       }
-
       .page-header h1 {
         font-family: var(--font-titulos);
         font-size: 2rem;
@@ -197,12 +201,10 @@
         color: var(--grafite);
         margin-bottom: 0.2rem;
       }
-
       .page-header .subtitle {
         color: var(--verde-principal);
         font-size: 0.9rem;
       }
-
       .btn-primary {
         background: var(--verde-sucesso);
         color: var(--branco);
@@ -218,12 +220,10 @@
         transition: all 0.3s;
         text-decoration: none;
       }
-
       .btn-primary:hover {
         transform: translateY(-2px);
         box-shadow: var(--shadow-hover);
       }
-
       .btn-secondary {
         background: #95a5a6;
         color: var(--branco);
@@ -238,11 +238,9 @@
         transition: all 0.3s;
         text-decoration: none;
       }
-
       .btn-secondary:hover {
         background: #7f8c8d;
       }
-
       .btn-outline {
         background: none;
         border: 1px solid var(--verde-principal);
@@ -257,12 +255,10 @@
         transition: all 0.3s;
         text-decoration: none;
       }
-
       .btn-outline:hover {
         background: var(--verde-principal);
         color: var(--branco);
       }
-
       .btn-danger {
         background: var(--vermelho-urgente);
         color: var(--branco);
@@ -275,11 +271,9 @@
         gap: 0.4rem;
         transition: all 0.3s;
       }
-
       .btn-danger:hover {
         background: #c0392b;
       }
-
       .btn-warning {
         background: var(--laranja-atencao);
         color: var(--branco);
@@ -292,12 +286,86 @@
         gap: 0.4rem;
         transition: all 0.3s;
       }
-
       .btn-warning:hover {
         background: #e67e22;
       }
-
-      /* FILTROS E BUSCA */
+      .btn-success {
+        background: var(--verde-sucesso);
+        color: var(--branco);
+        border: none;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        transition: all 0.3s;
+      }
+      .btn-success:hover {
+        filter: brightness(1.1);
+      }
+      .alert-cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      .alert-card {
+        background: var(--branco);
+        border-radius: 16px;
+        padding: 1.2rem;
+        box-shadow: var(--shadow);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        border-left: 4px solid transparent;
+      }
+      .alert-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+      }
+      .alert-card.vermelho {
+        border-left-color: var(--vermelho-urgente);
+      }
+      .alert-card.amarelo {
+        border-left-color: var(--laranja-atencao);
+      }
+      .alert-card.azul {
+        border-left-color: var(--azul-info);
+      }
+      .alert-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+      }
+      .alert-icon.vermelho {
+        background: var(--vermelho-suave);
+        color: var(--vermelho-urgente);
+      }
+      .alert-icon.amarelo {
+        background: var(--laranja-suave);
+        color: var(--laranja-atencao);
+      }
+      .alert-icon.azul {
+        background: var(--azul-suave);
+        color: var(--azul-info);
+      }
+      .alert-content h3 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        line-height: 1.2;
+      }
+      .alert-content p {
+        font-size: 0.8rem;
+        color: var(--grafite-claro);
+      }
       .filters-bar {
         display: flex;
         gap: 0.8rem;
@@ -309,7 +377,6 @@
         border-radius: 12px;
         box-shadow: var(--shadow);
       }
-
       .search-box {
         flex: 1;
         display: flex;
@@ -321,12 +388,10 @@
         border: 1px solid var(--verde-claro);
         min-width: 200px;
       }
-
       .search-box i {
         color: var(--verde-principal);
         font-size: 0.9rem;
       }
-
       .search-box input {
         flex: 1;
         border: none;
@@ -334,18 +399,15 @@
         outline: none;
         font-size: 0.85rem;
       }
-
       .filter-group {
         display: flex;
         align-items: center;
         gap: 0.4rem;
       }
-
       .filter-group label {
         font-size: 0.8rem;
         color: var(--verde-principal);
       }
-
       .filter-select {
         padding: 0.4rem 0.8rem;
         border: 1px solid var(--verde-claro);
@@ -354,60 +416,13 @@
         background: var(--branco);
         min-width: 120px;
       }
-
-      /* STATS CARDS */
-      .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: var(--grid-gap);
-        margin-bottom: 1.5rem;
-      }
-
-      .stat-card {
-        background: var(--branco);
-        padding: 1.2rem;
-        border-radius: 16px;
-        box-shadow: var(--shadow);
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-      }
-
-      .stat-icon {
-        width: 48px;
-        height: 48px;
-        background: var(--verde-pastel);
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .stat-icon i {
-        font-size: 1.5rem;
-        color: var(--verde-principal);
-      }
-
-      .stat-info h3 {
-        font-size: 1.6rem;
-        font-weight: 700;
-        color: var(--grafite);
-        line-height: 1.2;
-      }
-
-      .stat-info p {
-        font-size: 0.75rem;
-        color: var(--grafite-claro);
-      }
-
-      /* TABELA */
       .table-container {
         background: var(--branco);
         border-radius: 16px;
         box-shadow: var(--shadow);
         overflow: hidden;
+        margin-bottom: 1rem;
       }
-
       .table-header {
         padding: 1.5rem;
         border-bottom: 1px solid #e8e8e8;
@@ -415,126 +430,253 @@
         align-items: center;
         justify-content: space-between;
       }
-
       .table-title {
         font-family: var(--font-titulos);
         font-size: 1.2rem;
         font-weight: 600;
         color: var(--grafite);
       }
-
       .table-responsive {
         overflow-x: auto;
       }
-
       table {
         width: 100%;
         border-collapse: collapse;
+        table-layout: fixed;
       }
-
       thead tr {
         background: var(--verde-pastel);
       }
-
       thead th {
-        padding: 1rem;
+        padding: 1rem 0.5rem;
         text-align: left;
         font-weight: 600;
         color: var(--verde-principal);
         font-size: 0.85rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
-
+      th:last-child {
+        text-align: right;
+      }
       tbody tr {
         border-bottom: 1px solid #e8e8e8;
         transition: background 0.2s;
       }
-
       tbody tr:hover {
         background: var(--off-white);
       }
-
       tbody td {
-        padding: 1rem;
-        font-size: 0.85rem;
+        padding: 0.8rem 0.5rem;
+        font-size: 0.9rem;
+        vertical-align: middle;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
-
-      .status-badge {
+      th:first-child,
+      td:first-child {
+        padding-left: 1rem;
+      }
+      th:last-child,
+      td:last-child {
+        padding-right: 1rem;
+      }
+      th:nth-child(1),
+      td:nth-child(1) {
+        width: 50px;
+      }
+      th:nth-child(2),
+      td:nth-child(2) {
+        width: 160px;
+      }
+      th:nth-child(3),
+      td:nth-child(3) {
+        width: 70px;
+      }
+      th:nth-child(4),
+      td:nth-child(4) {
+        width: 60px;
+      }
+      th:nth-child(5),
+      td:nth-child(5) {
+        width: 60px;
+      }
+      th:nth-child(6),
+      td:nth-child(6) {
+        width: 80px;
+      }
+      th:nth-child(7),
+      td:nth-child(7) {
+        width: 80px;
+      }
+      th:nth-child(8),
+      td:nth-child(8) {
+        width: 240px;
+      }
+      .foto-mini {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--verde-pastel);
+        display: block;
+        margin: 0 auto;
+      }
+      .foto-placeholder {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--verde-pastel);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--verde-principal);
+        font-weight: 600;
+        font-size: 1rem;
+        margin: 0 auto;
+      }
+      .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+      }
+      .status-indicator i {
+        font-size: 1.1rem;
+      }
+      .status-indicator .fa-circle-check {
+        color: var(--verde-sucesso);
+      }
+      .status-indicator .fa-circle-exclamation {
+        color: var(--laranja-atencao);
+      }
+      .status-indicator .fa-circle-xmark {
+        color: var(--vermelho-urgente);
+      }
+      .badge {
         display: inline-block;
-        padding: 0.3rem 0.8rem;
+        padding: 0.2rem 0.6rem;
         border-radius: 20px;
         font-size: 0.7rem;
         font-weight: 600;
         text-transform: capitalize;
+        text-align: center;
       }
-
-      .status-badge.ativo {
+      .badge.ativo {
         background: #d4edda;
         color: #155724;
       }
-
-      .status-badge.inativo {
+      .badge.inativo {
         background: #f8d7da;
         color: #721c24;
       }
-
       .action-buttons {
         display: flex;
-        gap: 0.5rem;
+        gap: 0.3rem;
+        justify-content: flex-end;
+        flex-wrap: wrap;
       }
-
       .action-btn {
-        width: 32px;
-        height: 32px;
+        width: 28px;
+        height: 28px;
         border: none;
-        border-radius: 6px;
+        border-radius: 4px;
         cursor: pointer;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         transition: all 0.2s;
+        flex-shrink: 0;
       }
-
       .action-btn.visualizar {
         background: var(--azul-suave);
         color: var(--azul-info);
       }
-
       .action-btn.visualizar:hover {
         background: var(--azul-info);
         color: var(--branco);
       }
-
       .action-btn.editar {
         background: var(--laranja-suave);
         color: var(--laranja-atencao);
       }
-
       .action-btn.editar:hover {
         background: var(--laranja-atencao);
         color: var(--branco);
       }
-
+      .action-btn.avaliacao {
+        background: var(--roxo-suave);
+        color: var(--roxo-celebracao);
+      }
+      .action-btn.avaliacao:hover {
+        background: var(--roxo-celebracao);
+        color: var(--branco);
+      }
+      .action-btn.agenda {
+        background: var(--azul-suave);
+        color: var(--azul-info);
+      }
+      .action-btn.agenda:hover {
+        background: var(--azul-info);
+        color: var(--branco);
+      }
+      .action-btn.financeiro {
+        background: var(--verde-pastel);
+        color: var(--verde-principal);
+      }
+      .action-btn.financeiro:hover {
+        background: var(--verde-principal);
+        color: var(--branco);
+      }
       .action-btn.ativar {
         background: var(--verde-sucesso);
         color: white;
       }
-
       .action-btn.ativar:hover {
         background: #219a52;
       }
-
       .action-btn.desativar {
         background: var(--vermelho-suave);
         color: var(--vermelho-urgente);
       }
-
       .action-btn.desativar:hover {
         background: var(--vermelho-urgente);
         color: var(--branco);
       }
-
-      /* MODAL */
+      .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        background: var(--branco);
+        border-top: 1px solid #e8e8e8;
+      }
+      .pagination button {
+        min-width: 36px;
+        height: 36px;
+        border: 1px solid var(--verde-claro);
+        background: var(--branco);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.85rem;
+      }
+      .pagination button:hover {
+        background: var(--verde-pastel);
+        border-color: var(--verde-principal);
+      }
+      .pagination button.active {
+        background: var(--verde-principal);
+        color: var(--branco);
+        border-color: var(--verde-principal);
+      }
+      .pagination button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
       .modal {
         display: none;
         position: fixed;
@@ -546,13 +688,11 @@
         background-color: rgba(0, 0, 0, 0.5);
         animation: fadeIn 0.3s;
       }
-
       .modal.show {
         display: flex;
         align-items: center;
         justify-content: center;
       }
-
       @keyframes fadeIn {
         from {
           opacity: 0;
@@ -561,21 +701,29 @@
           opacity: 1;
         }
       }
-
       .modal-content {
         background-color: var(--branco);
         padding: 0;
         border-radius: 16px;
         width: 90%;
-        max-width: 900px;
-        height: 85vh;
+        max-width: 1200px;
+        height: 90vh;
         display: flex;
         flex-direction: column;
         animation: slideIn 0.3s;
         overflow: hidden;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
       }
-
+      .modal-content.small {
+        max-width: 500px;
+        height: auto;
+        max-height: 90vh;
+      }
+      .modal-content.medium {
+        max-width: 800px;
+        height: auto;
+        max-height: 90vh;
+      }
       @keyframes slideIn {
         from {
           transform: translateY(-50px);
@@ -586,7 +734,6 @@
           opacity: 1;
         }
       }
-
       .modal-header {
         padding: 1.5rem;
         border-bottom: 1px solid #e8e8e8;
@@ -596,14 +743,12 @@
         flex-shrink: 0;
         background: var(--branco);
       }
-
       .modal-title {
         font-family: var(--font-titulos);
         font-size: 1.3rem;
         font-weight: 600;
         color: var(--grafite);
       }
-
       .close-modal {
         background: none;
         border: none;
@@ -612,18 +757,15 @@
         color: var(--grafite-claro);
         transition: color 0.2s;
       }
-
       .close-modal:hover {
         color: var(--grafite);
       }
-
       .modal-body {
         flex: 1;
         overflow-y: auto;
         padding: 1.5rem;
         background: var(--off-white);
       }
-
       .modal-footer {
         padding: 1.5rem;
         border-top: 1px solid #e8e8e8;
@@ -633,46 +775,6 @@
         flex-shrink: 0;
         background: var(--branco);
       }
-
-      /* MODAL DE CONFIRMAÇÃO PERSONALIZADO */
-      #modalConfirmar .modal-content {
-        max-width: 400px;
-        height: auto;
-        animation: zoomIn 0.2s;
-      }
-
-      @keyframes zoomIn {
-        from {
-          transform: scale(0.9);
-          opacity: 0;
-        }
-        to {
-          transform: scale(1);
-          opacity: 1;
-        }
-      }
-
-      #modalConfirmar .modal-header {
-        border-bottom-color: var(--laranja-atencao);
-      }
-
-      #modalConfirmar .modal-body {
-        text-align: center;
-        padding: 2rem;
-      }
-
-      #modalConfirmar i.fa-exclamation-triangle {
-        font-size: 3rem;
-        color: var(--laranja-atencao);
-        margin-bottom: 1rem;
-      }
-
-      #modalConfirmar p {
-        font-size: 1.1rem;
-        margin-bottom: 1.5rem;
-      }
-
-      /* TABS */
       .tabs {
         display: flex;
         gap: 0.5rem;
@@ -683,8 +785,10 @@
         background: var(--branco);
         padding: 0.5rem 0.5rem 0;
         border-radius: 8px 8px 0 0;
+        position: sticky;
+        top: 0;
+        z-index: 10;
       }
-
       .tab {
         background: none;
         border: none;
@@ -696,45 +800,44 @@
         transition: all 0.2s;
         font-family: var(--font-corpo);
         font-weight: 500;
+        white-space: nowrap;
       }
-
+      .tab:hover {
+        color: var(--verde-principal);
+      }
       .tab.active {
         color: var(--verde-principal);
         border-bottom-color: var(--verde-principal);
       }
-
       .tab-pane {
         display: none;
       }
-
       .tab-pane.active {
         display: block;
       }
-
-      /* FORMULÁRIOS */
       .form-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 1rem;
         margin-bottom: 1rem;
       }
-
       .form-group {
         display: flex;
         flex-direction: column;
       }
-
       .form-group.full-width {
-        grid-column: 1 / -1;
+        grid-column: 1/-1;
       }
-
       .form-label {
         font-weight: 600;
         font-size: 0.85rem;
         margin-bottom: 0.4rem;
         color: var(--grafite);
       }
-
+      .form-label.required::after {
+        content: " *";
+        color: var(--vermelho-urgente);
+      }
       .form-control,
       .form-select,
       .form-textarea {
@@ -746,7 +849,6 @@
         transition: border-color 0.2s;
         background: var(--branco);
       }
-
       .form-control:focus,
       .form-select:focus,
       .form-textarea:focus {
@@ -754,13 +856,52 @@
         border-color: var(--verde-principal);
         box-shadow: 0 0 0 3px var(--verde-pastel);
       }
-
-      .form-textarea {
-        resize: vertical;
-        min-height: 80px;
+      .form-control[readonly] {
+        background: var(--off-white);
+        cursor: default;
+        opacity: 0.9;
+        border-color: #ccc;
       }
-
-      /* SEÇÕES DO DOSSIÊ */
+      .readonly-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        color: var(--grafite-claro);
+        font-size: 0.75rem;
+        margin-top: 0.2rem;
+      }
+      .foto-upload {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+      }
+      .foto-preview {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--verde-pastel);
+        background: var(--off-white);
+      }
+      .foto-preview-placeholder {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: var(--verde-pastel);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--verde-principal);
+        font-size: 2rem;
+        border: 3px solid var(--verde-pastel);
+      }
+      .foto-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
       .dossie-section {
         margin-bottom: 1.5rem;
         padding: 1.5rem;
@@ -769,11 +910,6 @@
         border: 1px solid #e8e8e8;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
       }
-
-      .dossie-section:last-child {
-        margin-bottom: 0;
-      }
-
       .section-title {
         font-family: var(--font-titulos);
         font-size: 1.1rem;
@@ -786,23 +922,19 @@
         padding-bottom: 0.5rem;
         border-bottom: 1px solid var(--verde-pastel);
       }
-
-      .section-title i {
-        font-size: 1.2rem;
-      }
-
       .info-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 1rem;
       }
-
       .info-item {
         padding: 0.8rem;
         background: var(--off-white);
         border-radius: 8px;
       }
-
+      .info-item.full-width {
+        grid-column: 1/-1;
+      }
       .info-label {
         font-size: 0.75rem;
         color: var(--grafite-claro);
@@ -810,14 +942,11 @@
         text-transform: uppercase;
         margin-bottom: 0.3rem;
       }
-
       .info-value {
         font-size: 0.9rem;
         color: var(--grafite);
         word-break: break-word;
       }
-
-      /* UPLOAD AREA */
       .upload-area {
         margin-top: 1rem;
         padding: 1.5rem;
@@ -827,16 +956,13 @@
         text-align: center;
         transition: all 0.3s;
       }
-
       .upload-area:hover {
         border-color: var(--verde-principal);
         background: var(--branco);
       }
-
       .upload-area input[type="file"] {
         display: none;
       }
-
       .upload-label {
         display: flex;
         flex-direction: column;
@@ -844,22 +970,18 @@
         gap: 0.5rem;
         cursor: pointer;
       }
-
       .upload-label i {
         font-size: 2rem;
         color: var(--verde-principal);
       }
-
       .upload-label span {
         font-size: 0.9rem;
         color: var(--verde-principal);
       }
-
       .upload-label small {
         font-size: 0.75rem;
         color: var(--grafite-claro);
       }
-
       .documento-item {
         display: flex;
         align-items: center;
@@ -869,96 +991,161 @@
         border: 1px solid var(--verde-claro);
         border-radius: 8px;
         margin-bottom: 0.5rem;
+        gap: 0.5rem;
+        flex-wrap: wrap;
       }
-
       .documento-info {
         display: flex;
         align-items: center;
         gap: 0.8rem;
+        min-width: 200px;
       }
-
       .documento-info i {
         font-size: 1.2rem;
         color: var(--verde-principal);
       }
-
       .documento-nome {
         font-weight: 500;
         font-size: 0.9rem;
       }
-
       .documento-tipo {
         font-size: 0.75rem;
         color: var(--grafite-claro);
       }
-
+      .documento-observacao {
+        flex: 1;
+        min-width: 200px;
+        padding: 0.4rem 0.6rem;
+        border: 1px solid var(--verde-claro);
+        border-radius: 4px;
+        font-size: 0.8rem;
+        background: var(--branco);
+      }
+      .documento-observacao:focus {
+        outline: none;
+        border-color: var(--verde-principal);
+        box-shadow: 0 0 0 2px var(--verde-pastel);
+      }
+      .documento-actions {
+        display: flex;
+        gap: 0.3rem;
+      }
+      .btn-download,
+      .btn-save,
+      .btn-delete {
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+      }
       .btn-download {
         background: var(--azul-suave);
         color: var(--azul-info);
-        border: none;
-        width: 32px;
-        height: 32px;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: all 0.2s;
       }
-
       .btn-download:hover {
         background: var(--azul-info);
         color: var(--branco);
       }
-
+      .btn-save {
+        background: var(--verde-pastel);
+        color: var(--verde-principal);
+      }
+      .btn-save:hover {
+        background: var(--verde-principal);
+        color: var(--branco);
+      }
       .btn-delete {
         background: var(--vermelho-suave);
         color: var(--vermelho-urgente);
-        border: none;
-        width: 32px;
-        height: 32px;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: all 0.2s;
       }
-
       .btn-delete:hover {
         background: var(--vermelho-urgente);
         color: var(--branco);
       }
-
-      /* EVOLUÇÃO */
       .evolucao-item {
         padding: 1rem;
         background: var(--off-white);
         border-radius: 8px;
         margin-bottom: 0.8rem;
         border-left: 4px solid var(--verde-principal);
+        transition: all 0.2s;
       }
-
+      .evolucao-item:hover {
+        transform: translateX(5px);
+        box-shadow: var(--shadow);
+      }
       .evolucao-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
         margin-bottom: 0.5rem;
       }
-
       .evolucao-data {
         font-weight: 600;
         color: var(--verde-principal);
         font-size: 0.85rem;
       }
-
       .evolucao-titulo {
         font-weight: 600;
         font-size: 0.95rem;
       }
-
       .evolucao-descricao {
         font-size: 0.85rem;
         color: var(--grafite-claro);
         margin-bottom: 0.5rem;
         white-space: pre-wrap;
       }
-
-      /* TOAST */
+      /* Timeline visual */
+      .timeline {
+        position: relative;
+        padding: 1rem 0;
+      }
+      .timeline::before {
+        content: "";
+        position: absolute;
+        left: 20px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--verde-claro);
+      }
+      .timeline-item {
+        position: relative;
+        padding-left: 50px;
+        margin-bottom: 1.5rem;
+      }
+      .timeline-item::before {
+        content: "";
+        position: absolute;
+        left: 14px;
+        top: 0;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--verde-principal);
+        border: 2px solid var(--branco);
+        box-shadow: 0 0 0 2px var(--verde-claro);
+      }
+      .timeline-item .timeline-date {
+        font-size: 0.75rem;
+        color: var(--grafite-claro);
+        margin-bottom: 0.2rem;
+      }
+      .timeline-item .timeline-title {
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 0.2rem;
+      }
+      .timeline-item .timeline-content {
+        font-size: 0.85rem;
+        color: var(--grafite-claro);
+      }
       .toast-container {
         position: fixed;
         top: 1rem;
@@ -968,7 +1155,6 @@
         flex-direction: column;
         gap: 0.8rem;
       }
-
       .toast {
         background: var(--branco);
         padding: 1rem 1.5rem;
@@ -980,7 +1166,6 @@
         animation: slideInRight 0.3s;
         min-width: 300px;
       }
-
       @keyframes slideInRight {
         from {
           transform: translateX(400px);
@@ -991,23 +1176,18 @@
           opacity: 1;
         }
       }
-
       .toast.success {
         border-left: 4px solid var(--verde-sucesso);
         color: var(--verde-sucesso);
       }
-
       .toast.error {
         border-left: 4px solid var(--vermelho-urgente);
         color: var(--vermelho-urgente);
       }
-
       .toast.info {
         border-left: 4px solid var(--azul-info);
         color: var(--azul-info);
       }
-
-      /* LOADING OVERLAY */
       .loading-overlay {
         display: none;
         position: fixed;
@@ -1022,11 +1202,9 @@
         flex-direction: column;
         gap: 1rem;
       }
-
       .loading-overlay.show {
         display: flex;
       }
-
       .spinner {
         width: 40px;
         height: 40px;
@@ -1035,44 +1213,11 @@
         border-radius: 50%;
         animation: spin 1s linear infinite;
       }
-
       @keyframes spin {
         to {
           transform: rotate(360deg);
         }
       }
-
-      /* CACHE INDICATOR */
-      .cache-indicator {
-        font-size: 0.75rem;
-        color: var(--grafite-claro);
-        background: var(--verde-pastel);
-        padding: 0.2rem 0.8rem;
-        border-radius: 20px;
-        margin-left: 1rem;
-      }
-
-      .refresh-btn {
-        background: var(--branco);
-        border: 1px solid var(--verde-claro);
-        color: var(--verde-principal);
-        padding: 0.3rem 1rem;
-        border-radius: 30px;
-        font-size: 0.8rem;
-        cursor: pointer;
-        transition: all 0.3s;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-      }
-
-      .refresh-btn:hover {
-        background: var(--verde-principal);
-        color: var(--branco);
-        border-color: var(--verde-principal);
-      }
-
-      /* LOGIN MESSAGE */
       .login-message {
         text-align: center;
         padding: 3rem;
@@ -1081,21 +1226,80 @@
         box-shadow: var(--shadow);
         margin-top: 2rem;
       }
-
       .login-message i {
         font-size: 4rem;
         color: var(--verde-principal);
         margin-bottom: 1rem;
       }
-
       .login-message h2 {
         font-family: var(--font-titulos);
         margin-bottom: 1rem;
       }
-
       .login-message p {
         color: var(--grafite-claro);
         margin-bottom: 1.5rem;
+      }
+      /* Melhorias visuais sutis */
+      .card-hover {
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .card-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+      }
+      .btn-icon-large {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+      }
+      .stats-card {
+        background: linear-gradient(
+          135deg,
+          var(--verde-principal),
+          var(--verde-claro)
+        );
+        color: white;
+        border-radius: 12px;
+        padding: 1.2rem;
+      }
+      .progress-bar-thin {
+        height: 4px;
+        border-radius: 2px;
+      }
+      /* Acesso rápido no modal */
+      .quick-access-bar {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        padding: 0.8rem;
+        background: var(--off-white);
+        border-radius: 8px;
+        border: 1px solid var(--verde-claro);
+      }
+      .quick-access-btn {
+        background: var(--branco);
+        border: 1px solid var(--verde-principal);
+        color: var(--verde-principal);
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        transition: all 0.2s;
+      }
+      .quick-access-btn:hover {
+        background: var(--verde-principal);
+        color: var(--branco);
+      }
+      .quick-access-btn i {
+        font-size: 0.9rem;
+      }
+      /* Gráficos pequenos */
+      .mini-chart-container {
+        height: 150px;
+        margin: 1rem 0;
       }
     </style>
   </head>
@@ -1110,27 +1314,15 @@
     <header class="header">
       <div class="header-content">
         <div class="logo-area">
-          <div class="logo-icon">
-            <i class="fas fa-spa"></i>
-          </div>
+          <a href="index.html" class="logo-icon"><i class="fas fa-spa"></i></a>
           <div class="logo-text">
-            <h1>ESTÚDIO RAFAELA LISBOA</h1>
+            <h1>ESTÚDIO DE PILATES - RAFAELA LISBOA</h1>
             <span>Dossiê de Alunos</span>
           </div>
         </div>
-
         <div class="user-area">
-          <div style="display: flex; align-items: center; gap: 0.8rem">
-            <span class="cache-indicator" id="cacheIndicator">
-              <i class="fas fa-database"></i> <span id="cacheTime">-</span>
-            </span>
-            <button
-              class="refresh-btn"
-              onclick="recarregarDados(true)"
-              title="Atualizar dados"
-            >
-              <i class="fas fa-sync-alt"></i>
-            </button>
+          <div class="welcome-message">
+            <i class="fas fa-smile"></i> Tenha um ótimo dia!
           </div>
           <div class="user-info">
             <div class="user-name" id="userName">Carregando...</div>
@@ -1155,9 +1347,8 @@
           href="index.html"
           class="btn-primary"
           style="display: inline-flex; text-decoration: none"
+          ><i class="fas fa-sign-in-alt"></i> Ir para Login</a
         >
-          <i class="fas fa-sign-in-alt"></i> Ir para Login
-        </a>
       </div>
 
       <!-- CONTEÚDO DOS ALUNOS -->
@@ -1172,7 +1363,42 @@
           </button>
         </div>
 
-        <!-- BARRA DE FILTROS -->
+        <!-- CARDS DE ALERTA -->
+        <div class="alert-cards">
+          <div
+            class="alert-card vermelho"
+            onclick="filtrarPorAlerta('atrasado')"
+          >
+            <div class="alert-icon vermelho">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="alert-content">
+              <h3 id="cardAtrasados">0</h3>
+              <p>Financeiro atrasado</p>
+            </div>
+          </div>
+          <div
+            class="alert-card amarelo"
+            onclick="filtrarPorAlerta('proximo-vencimento')"
+          >
+            <div class="alert-icon amarelo"><i class="fas fa-clock"></i></div>
+            <div class="alert-content">
+              <h3 id="cardVencimento">0</h3>
+              <p>Planos a vencer (este mês)</p>
+            </div>
+          </div>
+          <div class="alert-card azul" onclick="filtrarPorAlerta('inativos')">
+            <div class="alert-icon azul">
+              <i class="fas fa-calendar-times"></i>
+            </div>
+            <div class="alert-content">
+              <h3 id="cardInativos">0</h3>
+              <p>Inativos há 30+ dias</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- BARRA DE FILTROS AVANÇADOS -->
         <div class="filters-bar">
           <div class="search-box">
             <i class="fas fa-search"></i>
@@ -1183,7 +1409,6 @@
               onkeyup="filtrarAlunos()"
             />
           </div>
-
           <div class="filter-group">
             <label>Status:</label>
             <select
@@ -1196,7 +1421,6 @@
               <option value="inativo">Inativos</option>
             </select>
           </div>
-
           <div class="filter-group">
             <label>Plano:</label>
             <select
@@ -1205,49 +1429,57 @@
               onchange="filtrarAlunos()"
             >
               <option value="">Todos</option>
-              <option value="Mensal">Mensal</option>
-              <option value="Trimestral">Trimestral</option>
-              <option value="Semestral">Semestral</option>
-              <option value="Anual">Anual</option>
+              <!-- Opções carregadas dinamicamente -->
             </select>
           </div>
-
+          <div class="filter-group">
+            <label>Última aula:</label>
+            <select
+              class="filter-select"
+              id="filtroUltimaAula"
+              onchange="filtrarAlunos()"
+            >
+              <option value="">Qualquer</option>
+              <option value="hoje">Hoje</option>
+              <option value="ultimos7">Últimos 7 dias</option>
+              <option value="ultimos30">Últimos 30 dias</option>
+              <option value="mais30">Mais de 30 dias</option>
+            </select>
+          </div>
           <button class="btn-outline" onclick="limparFiltros()">
             <i class="fas fa-times"></i> Limpar
           </button>
         </div>
 
-        <!-- CARDS DE ESTATÍSTICAS -->
-        <div class="stats-grid" id="statsCards"></div>
-
-        <!-- TABELA DE ALUNOS -->
+        <!-- TABELA -->
         <div class="table-container">
           <div class="table-header">
             <h3 class="table-title">Lista de Alunos</h3>
             <span id="resultadosEncontrados">0 resultados</span>
           </div>
-
           <div class="table-responsive">
             <table>
               <thead>
                 <tr>
+                  <th>Foto</th>
                   <th>Nome</th>
-                  <th>CPF</th>
-                  <th>Telefone</th>
-                  <th>Plano</th>
                   <th>Status</th>
+                  <th>Financeiro</th>
                   <th>Documentos</th>
+                  <th>Última Aula</th>
+                  <th>Próxima Aula</th>
                   <th>Ações</th>
                 </tr>
               </thead>
               <tbody id="tbodyAlunos"></tbody>
             </table>
           </div>
+          <div class="pagination" id="paginacao"></div>
         </div>
       </div>
     </main>
 
-    <!-- MODAL DE CADASTRO/EDIÇÃO DE ALUNO -->
+    <!-- MODAL DE CADASTRO/EDIÇÃO DE ALUNO (com acesso rápido) -->
     <div class="modal" id="modalAluno">
       <div class="modal-content">
         <div class="modal-header">
@@ -1257,6 +1489,45 @@
           </button>
         </div>
         <div class="modal-body">
+          <!-- Barra de acesso rápido (visível apenas quando editando) -->
+          <div
+            id="quickAccessBar"
+            class="quick-access-bar"
+            style="display: none"
+          >
+            <span style="font-weight: 600; color: var(--verde-principal)"
+              >Acesso rápido:</span
+            >
+            <button
+              class="quick-access-btn"
+              onclick="abrirModalAvaliacao()"
+              title="Avaliação Detalhada"
+            >
+              <i class="fas fa-stethoscope"></i> Avaliação
+            </button>
+            <button
+              class="quick-access-btn"
+              onclick="abrirModalAgenda()"
+              title="Agenda do Aluno"
+            >
+              <i class="fas fa-calendar-alt"></i> Agenda
+            </button>
+            <button
+              class="quick-access-btn"
+              onclick="abrirModalFinanceiro()"
+              title="Financeiro do Aluno"
+            >
+              <i class="fas fa-dollar-sign"></i> Financeiro
+            </button>
+            <button
+              class="quick-access-btn"
+              onclick="exportarDadosAluno()"
+              title="Exportar dados"
+            >
+              <i class="fas fa-download"></i> Exportar
+            </button>
+          </div>
+
           <div class="tabs">
             <button class="tab active" onclick="mudarTab('dados', event)">
               Dados Pessoais
@@ -1266,9 +1537,6 @@
             </button>
             <button class="tab" onclick="mudarTab('saude', event)">
               Saúde
-            </button>
-            <button class="tab" onclick="mudarTab('plano', event)">
-              Plano
             </button>
             <button class="tab" onclick="mudarTab('documentos', event)">
               Documentos
@@ -1280,13 +1548,71 @@
 
           <form id="formAluno" onsubmit="return false;">
             <input type="hidden" id="alunoId" />
+            <input type="hidden" id="fotoUrl" />
 
-            <!-- TAB DADOS PESSOAIS -->
+            <!-- DADOS PESSOAIS (com botão para liberar edição) -->
             <div class="tab-pane active" id="tabDados">
               <div class="dossie-section">
-                <h3 class="section-title">
-                  <i class="fas fa-user"></i> Informações Pessoais
-                </h3>
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 0.5rem;
+                  "
+                >
+                  <h3 class="section-title" style="margin-bottom: 0">
+                    <i class="fas fa-user"></i> Informações Pessoais
+                  </h3>
+                  <button
+                    class="btn-outline"
+                    id="btnLiberarEdicao"
+                    onclick="liberarEdicaoDadosPessoais()"
+                    style="display: none"
+                  >
+                    <i class="fas fa-pencil-alt"></i> Editar
+                  </button>
+                </div>
+                <div class="foto-upload">
+                  <div id="fotoPreviewContainer">
+                    <img
+                      id="fotoPreview"
+                      class="foto-preview"
+                      src="#"
+                      alt="Foto do aluno"
+                      style="display: none"
+                    />
+                    <div id="fotoPlaceholder" class="foto-preview-placeholder">
+                      <i class="fas fa-user"></i>
+                    </div>
+                  </div>
+                  <div class="foto-actions">
+                    <button
+                      type="button"
+                      class="btn-outline"
+                      onclick="document.getElementById('fotoInput').click()"
+                      id="btnEscolherFoto"
+                    >
+                      <i class="fas fa-upload"></i> Escolher foto
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-danger"
+                      onclick="removerFoto()"
+                      id="btnRemoverFoto"
+                      style="display: none"
+                    >
+                      <i class="fas fa-trash"></i> Remover
+                    </button>
+                  </div>
+                  <input
+                    type="file"
+                    id="fotoInput"
+                    accept="image/*"
+                    style="display: none"
+                    onchange="processarFoto(this.files[0])"
+                  />
+                </div>
                 <div class="form-grid">
                   <div class="form-group full-width">
                     <label class="form-label">Nome Completo *</label>
@@ -1296,10 +1622,29 @@
                       id="alunoNome"
                       required
                     />
+                    <span
+                      class="readonly-indicator"
+                      id="readonlyNome"
+                      style="display: none"
+                      ><i class="fas fa-lock"></i> Somente leitura</span
+                    >
                   </div>
                   <div class="form-group">
                     <label class="form-label">CPF</label>
-                    <input type="text" class="form-control" id="alunoCpf" />
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="alunoCpf"
+                      oninput="this.value = mascaraCPF(this.value)"
+                      maxlength="14"
+                      placeholder="000.000.000-00"
+                    />
+                    <span
+                      class="readonly-indicator"
+                      id="readonlyCpf"
+                      style="display: none"
+                      ><i class="fas fa-lock"></i> Somente leitura</span
+                    >
                   </div>
                   <div class="form-group">
                     <label class="form-label">RG</label>
@@ -1328,6 +1673,23 @@
                       class="form-control"
                       id="alunoNascimento"
                       required
+                      onchange="atualizarIdade()"
+                    />
+                    <span
+                      class="readonly-indicator"
+                      id="readonlyNascimento"
+                      style="display: none"
+                      ><i class="fas fa-lock"></i> Somente leitura</span
+                    >
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Idade</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="alunoIdade"
+                      readonly
+                      placeholder="Calculada automaticamente"
                     />
                   </div>
                   <div class="form-group">
@@ -1365,7 +1727,11 @@
                       class="form-control"
                       id="alunoTelefone"
                       required
+                      oninput="this.value = mascaraTelefone(this.value)"
+                      maxlength="15"
+                      placeholder="(00) 00000-0000"
                     />
+                    <!-- Sem indicador de readonly para telefone -->
                   </div>
                   <div class="form-group">
                     <label class="form-label">Telefone Secundário</label>
@@ -1373,13 +1739,16 @@
                       type="text"
                       class="form-control"
                       id="alunoTelefone2"
+                      oninput="this.value = mascaraTelefone(this.value)"
+                      maxlength="15"
+                      placeholder="(00) 00000-0000"
                     />
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- TAB ENDEREÇO -->
+            <!-- ENDEREÇO -->
             <div class="tab-pane" id="tabEndereco">
               <div class="dossie-section">
                 <h3 class="section-title">
@@ -1388,7 +1757,15 @@
                 <div class="form-grid">
                   <div class="form-group">
                     <label class="form-label">CEP</label>
-                    <input type="text" class="form-control" id="alunoCep" />
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="alunoCep"
+                      oninput="this.value = mascaraCEP(this.value)"
+                      maxlength="9"
+                      placeholder="00000-000"
+                      onblur="buscarCEP()"
+                    />
                   </div>
                   <div class="form-group full-width">
                     <label class="form-label">Logradouro</label>
@@ -1426,7 +1803,7 @@
               </div>
             </div>
 
-            <!-- TAB SAÚDE -->
+            <!-- SAÚDE -->
             <div class="tab-pane" id="tabSaude">
               <div class="dossie-section">
                 <h3 class="section-title">
@@ -1505,82 +1882,13 @@
               </div>
             </div>
 
-            <!-- TAB PLANO -->
-            <div class="tab-pane" id="tabPlano">
-              <div class="dossie-section">
-                <h3 class="section-title">
-                  <i class="fas fa-calendar-alt"></i> Plano e Orientações
-                </h3>
-                <div class="form-grid">
-                  <div class="form-group">
-                    <label class="form-label">Tipo de Plano *</label>
-                    <select class="form-select" id="alunoPlano" required>
-                      <option value="Mensal">Mensal</option>
-                      <option value="Trimestral">Trimestral</option>
-                      <option value="Semestral">Semestral</option>
-                      <option value="Anual">Anual</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Data de Início *</label>
-                    <input
-                      type="date"
-                      class="form-control"
-                      id="alunoDataInicio"
-                      required
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Status *</label>
-                    <select class="form-select" id="alunoStatus" required>
-                      <option value="ativo">Ativo</option>
-                      <option value="inativo">Inativo</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Indicação</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      id="alunoIndicacao"
-                    />
-                  </div>
-                  <div class="form-group full-width">
-                    <label class="form-label">Restrições</label>
-                    <textarea
-                      class="form-textarea"
-                      id="alunoRestricoes"
-                    ></textarea>
-                  </div>
-                  <div class="form-group full-width">
-                    <label class="form-label">Orientações</label>
-                    <textarea
-                      class="form-textarea"
-                      id="alunoOrientacoes"
-                    ></textarea>
-                  </div>
-                  <div class="form-group full-width">
-                    <label class="form-label">Observações Gerais</label>
-                    <textarea
-                      class="form-textarea"
-                      id="alunoObservacoes"
-                    ></textarea>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- TAB DOCUMENTOS -->
+            <!-- DOCUMENTOS -->
             <div class="tab-pane" id="tabDocumentos">
               <div class="dossie-section">
                 <h3 class="section-title">
                   <i class="fas fa-file-upload"></i> Documentos
                 </h3>
-
-                <!-- Lista de documentos existentes -->
                 <div id="listaDocumentos" style="margin-bottom: 1rem"></div>
-
-                <!-- Área de upload -->
                 <div class="upload-area">
                   <input
                     type="file"
@@ -1594,8 +1902,6 @@
                     <small>ou arraste e solte aqui</small>
                   </label>
                 </div>
-
-                <!-- Barra de progresso -->
                 <div
                   id="uploadProgress"
                   style="display: none; margin-top: 1rem"
@@ -1628,14 +1934,20 @@
               </div>
             </div>
 
-            <!-- TAB EVOLUÇÃO -->
+            <!-- EVOLUÇÃO (com timeline visual e gráfico real) -->
             <div class="tab-pane" id="tabEvolucao">
               <div class="dossie-section">
                 <h3 class="section-title">
                   <i class="fas fa-chart-line"></i> Evolução do Aluno
                 </h3>
-
-                <!-- Formulário para nova evolução -->
+                <!-- Gráfico de desempenho real -->
+                <div class="mini-chart-container">
+                  <canvas
+                    id="graficoEvolucao"
+                    width="400"
+                    height="150"
+                  ></canvas>
+                </div>
                 <div
                   class="form-grid"
                   style="
@@ -1688,10 +2000,10 @@
                     </button>
                   </div>
                 </div>
-
-                <!-- Lista de evoluções -->
-                <h4 style="margin-bottom: 1rem">Histórico de Evoluções</h4>
-                <div id="listaEvolucoes"></div>
+                <h4 style="margin-bottom: 1rem">
+                  Histórico de Evoluções (Timeline)
+                </h4>
+                <div id="listaEvolucoesTimeline" class="timeline"></div>
               </div>
             </div>
           </form>
@@ -1707,17 +2019,167 @@
       </div>
     </div>
 
+    <!-- MODAL DE AGENDA DO ALUNO -->
+    <div class="modal" id="modalAgenda">
+      <div class="modal-content medium">
+        <div class="modal-header">
+          <h2 class="modal-title">Agenda do Aluno</h2>
+          <button class="close-modal" onclick="fecharModal('modalAgenda')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div
+            style="
+              display: flex;
+              gap: 1rem;
+              align-items: center;
+              margin-bottom: 1rem;
+            "
+          >
+            <button class="btn-outline" onclick="navegarAgenda('anterior')">
+              <i class="fas fa-chevron-left"></i> Anterior
+            </button>
+            <span id="agendaDataAtual" style="font-weight: 600">Hoje</span>
+            <button class="btn-outline" onclick="navegarAgenda('proximo')">
+              Próximo <i class="fas fa-chevron-right"></i>
+            </button>
+            <button class="btn-outline" onclick="navegarAgenda('hoje')">
+              Hoje
+            </button>
+          </div>
+          <div
+            id="listaAulasAgenda"
+            style="max-height: 400px; overflow-y: auto"
+          >
+            <!-- Aulas serão inseridas aqui -->
+            <p class="empty-state">Carregando aulas...</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalAgenda')">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL FINANCEIRO DO ALUNO -->
+    <div class="modal" id="modalFinanceiro">
+      <div class="modal-content medium">
+        <div class="modal-header">
+          <h2 class="modal-title">Situação Financeira do Aluno</h2>
+          <button class="close-modal" onclick="fecharModal('modalFinanceiro')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(3, 1fr);
+              gap: 1rem;
+              margin-bottom: 1.5rem;
+            "
+          >
+            <div class="stats-card" style="background: var(--verde-principal)">
+              <div style="font-size: 0.8rem; opacity: 0.8">Total Pago</div>
+              <div
+                style="font-size: 1.5rem; font-weight: 700"
+                id="financeiroTotalPago"
+              >
+                R$ 0,00
+              </div>
+            </div>
+            <div class="stats-card" style="background: var(--laranja-atencao)">
+              <div style="font-size: 0.8rem; opacity: 0.8">Em Aberto</div>
+              <div
+                style="font-size: 1.5rem; font-weight: 700"
+                id="financeiroEmAberto"
+              >
+                R$ 0,00
+              </div>
+            </div>
+            <div class="stats-card" style="background: var(--vermelho-urgente)">
+              <div style="font-size: 0.8rem; opacity: 0.8">Atrasado</div>
+              <div
+                style="font-size: 1.5rem; font-weight: 700"
+                id="financeiroAtrasado"
+              >
+                R$ 0,00
+              </div>
+            </div>
+          </div>
+          <!-- Gráfico de histórico de pagamentos real -->
+          <h4 style="margin-bottom: 0.5rem">Histórico de Pagamentos</h4>
+          <div class="mini-chart-container">
+            <canvas id="graficoFinanceiro" width="400" height="150"></canvas>
+          </div>
+          <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem">
+            Últimas Parcelas
+          </h4>
+          <div
+            id="listaParcelasFinanceiro"
+            style="max-height: 300px; overflow-y: auto"
+          >
+            <!-- Lista de parcelas -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalFinanceiro')"
+          >
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DE AVALIAÇÃO DETALHADA (apenas atalho) -->
+    <div class="modal" id="modalAvaliacao">
+      <div class="modal-content medium">
+        <div class="modal-header">
+          <h2 class="modal-title">Avaliação Detalhada</h2>
+          <button class="close-modal" onclick="fecharModal('modalAvaliacao')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>
+            Esta funcionalidade abrirá a página de avaliação detalhada. Deseja
+            continuar?
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalAvaliacao')">
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="irParaAvaliacao()">
+            Ir para Avaliação
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- MODAL DE VISUALIZAÇÃO DE DOSSIÊ -->
     <div class="modal" id="modalDossie">
-      <div class="modal-content">
+      <div class="modal-content" style="max-width: 1000px">
         <div class="modal-header">
-          <h2 class="modal-title">Dossiê do Aluno</h2>
+          <h2 class="modal-title">Dossiê Completo do Aluno</h2>
           <button class="close-modal" onclick="fecharModal('modalDossie')">
             <i class="fas fa-times"></i>
           </button>
         </div>
         <div class="modal-body" id="conteudoDossie"></div>
         <div class="modal-footer">
+          <button
+            class="btn-outline"
+            onclick="exportarDossiePDF()"
+            id="btnExportarPDF"
+          >
+            <i class="fas fa-file-pdf"></i> Exportar PDF
+          </button>
           <button class="btn-secondary" onclick="fecharModal('modalDossie')">
             Fechar
           </button>
@@ -1726,7 +2188,7 @@
     </div>
 
     <!-- MODAL DE VISUALIZAÇÃO DE DOCUMENTO -->
-    <div class="modal" id="modalVisualizarDocumento" style="display: none">
+    <div class="modal" id="modalVisualizarDocumento">
       <div class="modal-content" style="max-width: 800px; height: 80vh">
         <div class="modal-header">
           <h2 class="modal-title" id="modalDocumentoTitulo">
@@ -1741,7 +2203,6 @@
         </div>
         <div
           class="modal-body"
-          id="conteudoDocumento"
           style="
             display: flex;
             align-items: center;
@@ -1765,9 +2226,9 @@
       </div>
     </div>
 
-    <!-- MODAL DE CONFIRMAÇÃO PERSONALIZADO -->
+    <!-- MODAL DE CONFIRMAÇÃO -->
     <div class="modal" id="modalConfirmar">
-      <div class="modal-content">
+      <div class="modal-content small">
         <div
           class="modal-header"
           style="border-bottom-color: var(--laranja-atencao)"
@@ -1815,7 +2276,6 @@
       // ============================================================
       // CONFIGURAÇÃO DO SUPABASE
       // ============================================================
-
       const SUPABASE_URL = "https://mputdowrhzrvqslslubk.supabase.co";
       const SUPABASE_ANON_KEY =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wdXRkb3dyaHpydnFzbHNsdWJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxNjY1NDEsImV4cCI6MjA4NDc0MjU0MX0.1TlAIzCd7896EBOeYIYy3B5Czt41l-XcWYboaspEizc";
@@ -1828,54 +2288,59 @@
       // ============================================================
       // CONSTANTES E CONFIGURAÇÕES
       // ============================================================
-
       const CACHE_KEYS = {
         ALUNOS: "cache_alunos_completo",
         ENDERECOS: "cache_enderecos",
         SAUDE: "cache_saude",
-        PLANOS: "cache_planos",
         DOCUMENTOS: "cache_documentos",
         EVOLUCAO: "cache_evolucao",
+        PLANOS: "cache_planos_alunos",
+        MENSALIDADES: "cache_mensalidades_aluno",
+        AULAS: "cache_aulas_aluno",
         LAST_UPDATE: "cache_alunos_last_update",
       };
-
       const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 
       // ============================================================
-      // ESTADO GLOBAL DA APLICAÇÃO
+      // ESTADO GLOBAL
       // ============================================================
-
       const estado = {
         usuario: null,
         dados: {
           alunos: { data: [], loading: false, error: null },
           enderecos: { data: {}, loading: false, error: null },
           saude: { data: {}, loading: false, error: null },
-          planos: { data: {}, loading: false, error: null },
           documentos: { data: {}, loading: false, error: null },
           evolucao: { data: {}, loading: false, error: null },
+          planos: { data: [], loading: false, error: null },
+          mensalidades: { data: {}, loading: false, error: null },
+          aulas: { data: {}, loading: false, error: null },
         },
-        cache: {
-          enabled: true,
-          lastUpdate: null,
-        },
+        cache: { enabled: true, lastUpdate: null },
         filtros: {
           busca: "",
           status: "",
+          alerta: null,
           plano: "",
+          ultimaAula: "",
         },
         alunoAtual: null,
+        paginacao: { pagina: 1, itensPorPagina: 10, totalItens: 0 },
+        alertas: { atrasados: 0, vencimento: 0, inativos: 0 },
+        fotoArquivo: null,
+        graficos: {
+          evolucao: null,
+          financeiro: null,
+        },
       };
 
       // ============================================================
-      // FUNÇÕES DE CACHE (localStorage)
+      // FUNÇÕES DE CACHE
       // ============================================================
-
       function getFromCache(key) {
         try {
           const cached = localStorage.getItem(key);
           if (!cached) return null;
-
           const { data, timestamp } = JSON.parse(cached);
           if (Date.now() - timestamp > CACHE_DURATION) {
             localStorage.removeItem(key);
@@ -1890,63 +2355,31 @@
 
       function setInCache(key, data) {
         try {
-          const cacheData = {
-            data,
-            timestamp: Date.now(),
-          };
+          const cacheData = { data, timestamp: Date.now() };
           localStorage.setItem(key, JSON.stringify(cacheData));
-
           estado.cache.lastUpdate = Date.now();
           localStorage.setItem(
             CACHE_KEYS.LAST_UPDATE,
-            JSON.stringify({
-              timestamp: Date.now(),
-            })
+            JSON.stringify({ timestamp: Date.now() })
           );
-
-          atualizarIndicadorCache();
         } catch (error) {
           console.warn("Erro ao salvar cache:", error);
         }
       }
 
       function limparCache() {
-        Object.values(CACHE_KEYS).forEach((key) => {
-          localStorage.removeItem(key);
-        });
+        Object.values(CACHE_KEYS).forEach((key) =>
+          localStorage.removeItem(key)
+        );
         estado.cache.lastUpdate = null;
-        atualizarIndicadorCache();
-      }
-
-      function atualizarIndicadorCache() {
-        const cacheTimeEl = document.getElementById("cacheTime");
-        if (!cacheTimeEl) return;
-
-        const lastUpdate = estado.cache.lastUpdate;
-        if (!lastUpdate) {
-          cacheTimeEl.textContent = "Sem cache";
-          return;
-        }
-
-        const diff = Date.now() - lastUpdate;
-        const minutos = Math.floor(diff / 60000);
-        const segundos = Math.floor((diff % 60000) / 1000);
-
-        if (minutos > 0) {
-          cacheTimeEl.textContent = `${minutos} min atrás`;
-        } else {
-          cacheTimeEl.textContent = `${segundos} seg atrás`;
-        }
       }
 
       // ============================================================
       // FUNÇÕES UTILITÁRIAS
       // ============================================================
-
       function mostrarLoading() {
         document.getElementById("loadingOverlay").classList.add("show");
       }
-
       function esconderLoading() {
         document.getElementById("loadingOverlay").classList.remove("show");
       }
@@ -1955,14 +2388,11 @@
         const container = document.getElementById("toastContainer");
         const toast = document.createElement("div");
         toast.className = `toast ${tipo}`;
-
         let icone = "fa-info-circle";
         if (tipo === "success") icone = "fa-check-circle";
         if (tipo === "error") icone = "fa-exclamation-circle";
-
         toast.innerHTML = `<i class="fas ${icone}"></i> ${mensagem}`;
         container.appendChild(toast);
-
         setTimeout(() => toast.remove(), 3000);
       }
 
@@ -1975,11 +2405,6 @@
         }
       }
 
-      function formatarTelefone(telefone) {
-        if (!telefone) return "-";
-        return telefone;
-      }
-
       function formatarBytes(bytes) {
         if (bytes === 0) return "0 Bytes";
         const k = 1024;
@@ -1988,10 +2413,124 @@
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
       }
 
+      function formatarMoeda(valor) {
+        if (valor === null || valor === undefined) return "R$ 0,00";
+        return valor.toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        });
+      }
+
+      // ============================================================
+      // MÁSCARAS
+      // ============================================================
+      function mascaraCPF(value) {
+        if (!value) return "";
+        return value
+          .replace(/\D/g, "")
+          .replace(/(\d{3})(\d)/, "$1.$2")
+          .replace(/(\d{3})(\d)/, "$1.$2")
+          .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+          .substring(0, 14);
+      }
+      function mascaraTelefone(value) {
+        if (!value) return "";
+        return value
+          .replace(/\D/g, "")
+          .replace(/(\d{2})(\d)/, "($1) $2")
+          .replace(/(\d{5})(\d)/, "$1-$2")
+          .substring(0, 15);
+      }
+      function mascaraCEP(value) {
+        if (!value) return "";
+        return value
+          .replace(/\D/g, "")
+          .replace(/(\d{5})(\d)/, "$1-$2")
+          .substring(0, 9);
+      }
+
+      // ============================================================
+      // VALIDAÇÕES
+      // ============================================================
+      function validarCPF(cpf) {
+        if (!cpf) return true;
+        cpf = cpf.replace(/\D/g, "");
+        if (cpf.length !== 11) return false;
+        if (/^(\d)\1+$/.test(cpf)) return false;
+        let soma = 0,
+          resto;
+        for (let i = 1; i <= 9; i++)
+          soma += parseInt(cpf.substring(i - 1, i)) * (11 - i);
+        resto = (soma * 10) % 11;
+        if (resto === 10 || resto === 11) resto = 0;
+        if (resto !== parseInt(cpf.substring(9, 10))) return false;
+        soma = 0;
+        for (let i = 1; i <= 10; i++)
+          soma += parseInt(cpf.substring(i - 1, i)) * (12 - i);
+        resto = (soma * 10) % 11;
+        if (resto === 10 || resto === 11) resto = 0;
+        if (resto !== parseInt(cpf.substring(10, 11))) return false;
+        return true;
+      }
+      function validarEmail(email) {
+        if (!email) return true;
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      }
+      function validarTelefone(tel) {
+        if (!tel) return true;
+        const nums = tel.replace(/\D/g, "");
+        return nums.length >= 10 && nums.length <= 11;
+      }
+
+      // ============================================================
+      // CÁLCULOS AUTOMÁTICOS
+      // ============================================================
+      function calcularIdade(nascimento) {
+        if (!nascimento) return null;
+        const hoje = new Date();
+        const nasc = new Date(nascimento + "T12:00:00");
+        let idade = hoje.getFullYear() - nasc.getFullYear();
+        const mes = hoje.getMonth() - nasc.getMonth();
+        if (mes < 0 || (mes === 0 && hoje.getDate() < nasc.getDate())) idade--;
+        return idade;
+      }
+      function atualizarIdade() {
+        const nascimento = document.getElementById("alunoNascimento").value;
+        const idadeInput = document.getElementById("alunoIdade");
+        if (nascimento) {
+          const idade = calcularIdade(nascimento);
+          idadeInput.value = idade !== null ? idade + " anos" : "";
+        } else idadeInput.value = "";
+      }
+
+      // ============================================================
+      // BUSCA DE CEP
+      // ============================================================
+      async function buscarCEP() {
+        const cepInput = document.getElementById("alunoCep");
+        let cep = cepInput.value.replace(/\D/g, "");
+        if (cep.length !== 8) return;
+        mostrarLoading();
+        try {
+          const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+          const data = await response.json();
+          if (!data.erro) {
+            document.getElementById("alunoEndereco").value = data.logradouro;
+            document.getElementById("alunoBairro").value = data.bairro;
+            document.getElementById("alunoCidade").value = data.localidade;
+            document.getElementById("alunoEstado").value = data.uf;
+          } else mostrarToast("CEP não encontrado", "error");
+        } catch (error) {
+          console.error("Erro ao buscar CEP:", error);
+          mostrarToast("Erro ao buscar CEP", "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
       // ============================================================
       // FUNÇÃO SEGURA PARA QUERIES
       // ============================================================
-
       async function safeQuery(
         queryFn,
         fallback = [],
@@ -2009,64 +2548,61 @@
       }
 
       // ============================================================
-      // VERIFICAÇÃO DE LOGIN (Supabase Auth)
+      // VERIFICAÇÃO DE LOGIN E CARREGAMENTO DO USUÁRIO
       // ============================================================
-
       async function verificarLogin() {
         try {
           const {
             data: { user },
-            error,
           } = await supabaseClient.auth.getUser();
-
-          if (error || !user) {
+          if (!user) {
             const usuarioSalvo = localStorage.getItem("usuario");
             if (usuarioSalvo) {
-              try {
-                estado.usuario = JSON.parse(usuarioSalvo);
-                return true;
-              } catch (e) {
-                return false;
-              }
+              estado.usuario = JSON.parse(usuarioSalvo);
+              atualizarHeaderUsuario();
+              return true;
             }
             return false;
           }
-
-          const { data: usuarioData, error: usuarioError } =
-            await supabaseClient
-              .from("usuarios")
-              .select("id, nome, email, role")
-              .eq("id", user.id)
-              .single();
-
-          if (!usuarioError && usuarioData) {
+          const { data: usuarioData } = await supabaseClient
+            .from("usuarios")
+            .select("id, nome, email, role, foto_url")
+            .eq("id", user.id)
+            .single();
+          if (usuarioData) {
             estado.usuario = usuarioData;
             localStorage.setItem("usuario", JSON.stringify(usuarioData));
-
-            document.getElementById("userName").textContent =
-              usuarioData.nome || "Usuário";
-            document.getElementById("userRole").textContent =
-              usuarioData.role === "admin"
-                ? "Administrador"
-                : usuarioData.role === "instrutor"
-                ? "Instrutor"
-                : "Financeiro";
-
-            const iniciais = (usuarioData.nome || "U")
-              .split(" ")
-              .map((n) => n[0])
-              .join("")
-              .substring(0, 2)
-              .toUpperCase();
-            document.getElementById("userAvatar").textContent = iniciais;
-
+            atualizarHeaderUsuario();
             return true;
           }
-
           return false;
         } catch (error) {
           console.error("Erro ao verificar login:", error);
           return false;
+        }
+      }
+
+      function atualizarHeaderUsuario() {
+        if (!estado.usuario) return;
+        document.getElementById("userName").textContent =
+          estado.usuario.nome || "Usuário";
+        document.getElementById("userRole").textContent =
+          estado.usuario.role === "admin"
+            ? "Administrador"
+            : estado.usuario.role === "instrutor"
+            ? "Instrutor"
+            : "Financeiro";
+        const avatar = document.getElementById("userAvatar");
+        if (estado.usuario.foto_url) {
+          avatar.innerHTML = `<img src="${estado.usuario.foto_url}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" />`;
+        } else {
+          const iniciais = (estado.usuario.nome || "U")
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .substring(0, 2)
+            .toUpperCase();
+          avatar.textContent = iniciais;
         }
       }
 
@@ -2084,22 +2620,18 @@
       }
 
       // ============================================================
-      // FUNÇÕES DE CARREGAMENTO DE DADOS
+      // CARREGAMENTO DE DADOS
       // ============================================================
-
       async function carregarAlunos(forceRefresh = false) {
         const cacheKey = CACHE_KEYS.ALUNOS;
-
         if (!forceRefresh && estado.cache.enabled) {
           const cached = getFromCache(cacheKey);
           if (cached) {
-            estado.dados.alunos = { data: cached, loading: false, error: null };
+            estado.dados.alunos.data = cached;
             return cached;
           }
         }
-
         estado.dados.alunos.loading = true;
-
         const data = await safeQuery(
           () =>
             supabaseClient
@@ -2109,134 +2641,66 @@
           [],
           "Erro ao carregar alunos"
         );
-
-        estado.dados.alunos = { data, loading: false, error: null };
+        estado.dados.alunos.data = data;
         setInCache(cacheKey, data);
-
         return data;
       }
 
       async function carregarEnderecos(forceRefresh = false) {
         const cacheKey = CACHE_KEYS.ENDERECOS;
-
         if (!forceRefresh && estado.cache.enabled) {
           const cached = getFromCache(cacheKey);
           if (cached) {
-            estado.dados.enderecos = {
-              data: cached,
-              loading: false,
-              error: null,
-            };
+            estado.dados.enderecos.data = cached;
             return cached;
           }
         }
-
-        estado.dados.enderecos.loading = true;
-
         const data = await safeQuery(
           () => supabaseClient.from("enderecos").select("*"),
           [],
           "Erro ao carregar endereços"
         );
-
         const indexed = (data || []).reduce((acc, item) => {
           acc[String(item.aluno_id)] = item;
           return acc;
         }, {});
-
-        estado.dados.enderecos = { data: indexed, loading: false, error: null };
+        estado.dados.enderecos.data = indexed;
         setInCache(cacheKey, indexed);
-
         return indexed;
       }
 
       async function carregarSaude(forceRefresh = false) {
         const cacheKey = CACHE_KEYS.SAUDE;
-
         if (!forceRefresh && estado.cache.enabled) {
           const cached = getFromCache(cacheKey);
           if (cached) {
-            estado.dados.saude = { data: cached, loading: false, error: null };
+            estado.dados.saude.data = cached;
             return cached;
           }
         }
-
-        estado.dados.saude.loading = true;
-
         const data = await safeQuery(
           () => supabaseClient.from("saude_alunos").select("*"),
           [],
           "Erro ao carregar dados de saúde"
         );
-
         const indexed = (data || []).reduce((acc, item) => {
           acc[String(item.aluno_id)] = item;
           return acc;
         }, {});
-
-        estado.dados.saude = { data: indexed, loading: false, error: null };
+        estado.dados.saude.data = indexed;
         setInCache(cacheKey, indexed);
-
-        return indexed;
-      }
-
-      async function carregarPlanos(forceRefresh = false) {
-        const cacheKey = CACHE_KEYS.PLANOS;
-
-        if (!forceRefresh && estado.cache.enabled) {
-          const cached = getFromCache(cacheKey);
-          if (cached) {
-            estado.dados.planos = { data: cached, loading: false, error: null };
-            return cached;
-          }
-        }
-
-        estado.dados.planos.loading = true;
-
-        const data = await safeQuery(
-          () =>
-            supabaseClient
-              .from("planos_alunos")
-              .select("*")
-              .order("data_inicio", { ascending: false }),
-          [],
-          "Erro ao carregar planos"
-        );
-
-        const indexed = (data || []).reduce((acc, item) => {
-          if (
-            !acc[String(item.aluno_id)] ||
-            new Date(item.data_inicio) >
-              new Date(acc[String(item.aluno_id)].data_inicio)
-          ) {
-            acc[String(item.aluno_id)] = item;
-          }
-          return acc;
-        }, {});
-
-        estado.dados.planos = { data: indexed, loading: false, error: null };
-        setInCache(cacheKey, indexed);
-
         return indexed;
       }
 
       async function carregarDocumentos(forceRefresh = false) {
         const cacheKey = CACHE_KEYS.DOCUMENTOS;
-
         if (!forceRefresh && estado.cache.enabled) {
           const cached = getFromCache(cacheKey);
           if (cached) {
-            estado.dados.documentos = {
-              data: cached,
-              loading: false,
-              error: null,
-            };
+            estado.dados.documentos.data = cached;
             return cached;
           }
         }
-
-        estado.dados.documentos.loading = true;
-
         const data = await safeQuery(
           () =>
             supabaseClient
@@ -2246,40 +2710,25 @@
           [],
           "Erro ao carregar documentos"
         );
-
         const indexed = (data || []).reduce((acc, item) => {
           if (!acc[String(item.aluno_id)]) acc[String(item.aluno_id)] = [];
           acc[String(item.aluno_id)].push(item);
           return acc;
         }, {});
-
-        estado.dados.documentos = {
-          data: indexed,
-          loading: false,
-          error: null,
-        };
+        estado.dados.documentos.data = indexed;
         setInCache(cacheKey, indexed);
-
         return indexed;
       }
 
       async function carregarEvolucao(forceRefresh = false) {
         const cacheKey = CACHE_KEYS.EVOLUCAO;
-
         if (!forceRefresh && estado.cache.enabled) {
           const cached = getFromCache(cacheKey);
           if (cached) {
-            estado.dados.evolucao = {
-              data: cached,
-              loading: false,
-              error: null,
-            };
+            estado.dados.evolucao.data = cached;
             return cached;
           }
         }
-
-        estado.dados.evolucao.loading = true;
-
         const data = await safeQuery(
           () =>
             supabaseClient
@@ -2289,108 +2738,452 @@
           [],
           "Erro ao carregar evoluções"
         );
-
         const indexed = (data || []).reduce((acc, item) => {
           if (!acc[String(item.aluno_id)]) acc[String(item.aluno_id)] = [];
           acc[String(item.aluno_id)].push(item);
           return acc;
         }, {});
-
-        estado.dados.evolucao = { data: indexed, loading: false, error: null };
+        estado.dados.evolucao.data = indexed;
         setInCache(cacheKey, indexed);
-
         return indexed;
       }
 
-      async function carregarTodosDados(forceRefresh = false) {
+      async function carregarPlanos(forceRefresh = false) {
+        const cacheKey = CACHE_KEYS.PLANOS;
+        if (!forceRefresh && estado.cache.enabled) {
+          const cached = getFromCache(cacheKey);
+          if (cached) {
+            estado.dados.planos.data = cached;
+            return cached;
+          }
+        }
+        const data = await safeQuery(
+          () =>
+            supabaseClient
+              .from("planos_alunos")
+              .select("*")
+              .eq("status", "ativo"),
+          [],
+          "Erro ao carregar planos"
+        );
+        estado.dados.planos.data = data;
+        setInCache(cacheKey, data);
+        return data;
+      }
+
+      async function carregarMensalidades(forceRefresh = false) {
+        const cacheKey = CACHE_KEYS.MENSALIDADES;
+        if (!forceRefresh && estado.cache.enabled) {
+          const cached = getFromCache(cacheKey);
+          if (cached) {
+            estado.dados.mensalidades.data = cached;
+            return cached;
+          }
+        }
+        const data = await safeQuery(
+          () =>
+            supabaseClient
+              .from("mensalidades")
+              .select("*")
+              .order("data_contratacao", { ascending: false }),
+          [],
+          "Erro ao carregar mensalidades"
+        );
+        const indexed = (data || []).reduce((acc, item) => {
+          if (!acc[String(item.aluno_id)]) acc[String(item.aluno_id)] = [];
+          acc[String(item.aluno_id)].push(item);
+          return acc;
+        }, {});
+        estado.dados.mensalidades.data = indexed;
+        setInCache(cacheKey, indexed);
+        return indexed;
+      }
+
+      async function carregarAulas(forceRefresh = false) {
+        const cacheKey = CACHE_KEYS.AULAS;
+        if (!forceRefresh && estado.cache.enabled) {
+          const cached = getFromCache(cacheKey);
+          if (cached) {
+            estado.dados.aulas.data = cached;
+            return cached;
+          }
+        }
+        const data = await safeQuery(
+          () =>
+            supabaseClient
+              .from("aulas")
+              .select("*")
+              .order("data", { ascending: false }),
+          [],
+          "Erro ao carregar aulas"
+        );
+        const indexed = (data || []).reduce((acc, item) => {
+          if (!acc[String(item.aluno_id)]) acc[String(item.aluno_id)] = [];
+          acc[String(item.aluno_id)].push(item);
+          return acc;
+        }, {});
+        estado.dados.aulas.data = indexed;
+        setInCache(cacheKey, indexed);
+        return indexed;
+      }
+
+      // ============================================================
+      // FUNÇÕES PARA FOTO DE PERFIL
+      // ============================================================
+      function removerFoto() {
+        estado.fotoArquivo = null;
+        document.getElementById("fotoUrl").value = "";
+        document.getElementById("fotoPreview").style.display = "none";
+        document.getElementById("fotoPlaceholder").style.display = "flex";
+        document.getElementById("btnRemoverFoto").style.display = "none";
+        document.getElementById("fotoInput").value = "";
+      }
+
+      async function processarFoto(file) {
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+          mostrarToast("A imagem não pode ter mais de 5MB", "error");
+          return;
+        }
         mostrarLoading();
-
         try {
-          await Promise.all([
-            carregarAlunos(forceRefresh),
-            carregarEnderecos(forceRefresh),
-            carregarSaude(forceRefresh),
-            carregarPlanos(forceRefresh),
-            carregarDocumentos(forceRefresh),
-            carregarEvolucao(forceRefresh),
-          ]);
-
-          exibirTabelaAlunos();
-          atualizarStatsCards();
-          mostrarToast("Dados atualizados com sucesso!", "success");
+          const options = {
+            maxSizeMB: 1,
+            maxWidthOrHeight: 500,
+            useWebWorker: true,
+            fileType: "image/jpeg",
+            initialQuality: 0.8,
+          };
+          const compressedFile = await imageCompression(file, options);
+          estado.fotoArquivo = compressedFile;
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const preview = document.getElementById("fotoPreview");
+            const placeholder = document.getElementById("fotoPlaceholder");
+            preview.src = e.target.result;
+            preview.style.display = "block";
+            placeholder.style.display = "none";
+            document.getElementById("btnRemoverFoto").style.display =
+              "inline-flex";
+          };
+          reader.readAsDataURL(compressedFile);
+          mostrarToast("Foto processada com sucesso", "success");
         } catch (error) {
-          console.error("Erro ao carregar dados:", error);
-          mostrarToast("Erro ao carregar alguns dados", "error");
+          console.error("Erro ao processar imagem:", error);
+          mostrarToast("Erro ao processar a imagem", "error");
         } finally {
           esconderLoading();
         }
       }
 
-      async function recarregarDados(forceRefresh = true) {
-        await carregarTodosDados(forceRefresh);
+      async function uploadFoto(alunoId) {
+        if (!estado.fotoArquivo) return null;
+        try {
+          const fileName = `fotos_perfil/${alunoId}_${Date.now()}.jpg`;
+          const { error: uploadError } = await supabaseClient.storage
+            .from("documentos")
+            .upload(fileName, estado.fotoArquivo, {
+              contentType: "image/jpeg",
+              upsert: true,
+            });
+          if (uploadError) throw uploadError;
+          const {
+            data: { publicUrl },
+          } = supabaseClient.storage.from("documentos").getPublicUrl(fileName);
+          return publicUrl;
+        } catch (error) {
+          console.error("Erro ao fazer upload da foto:", error);
+          mostrarToast("Erro ao salvar a foto", "error");
+          return null;
+        }
       }
 
       // ============================================================
-      // FUNÇÕES DE EXIBIÇÃO
+      // FUNÇÕES PARA FINANCEIRO, PLANOS E AULAS
       // ============================================================
+      async function carregarStatusFinanceiro(alunoId) {
+        try {
+          const { data, error } = await supabaseClient
+            .from("mensalidades")
+            .select(`id, parcelas!inner(status, valor)`)
+            .eq("aluno_id", alunoId);
+          if (error) throw error;
+          let temAtrasado = false,
+            temPendente = false;
+          (data || []).forEach((m) => {
+            (m.parcelas || []).forEach((p) => {
+              if (p.status === "atrasado") temAtrasado = true;
+              else if (p.status === "pendente") temPendente = true;
+            });
+          });
+          if (temAtrasado) return "atrasado";
+          if (temPendente) return "pendente";
+          return "em-dia";
+        } catch (error) {
+          console.error("Erro ao carregar financeiro:", error);
+          return "erro";
+        }
+      }
 
-      function exibirTabelaAlunos() {
+      async function carregarUltimaAula(alunoId) {
+        try {
+          const hoje = new Date().toISOString().split("T")[0];
+          const { data, error } = await supabaseClient
+            .from("aulas")
+            .select("data")
+            .eq("aluno_id", alunoId)
+            .lt("data", hoje)
+            .order("data", { ascending: false })
+            .limit(1);
+          if (error) throw error;
+          return data && data.length > 0 ? data[0].data : null;
+        } catch (error) {
+          console.error("Erro ao carregar última aula:", error);
+          return null;
+        }
+      }
+
+      async function carregarProximaAula(alunoId) {
+        try {
+          const hoje = new Date().toISOString().split("T")[0];
+          const { data, error } = await supabaseClient
+            .from("aulas")
+            .select("data")
+            .eq("aluno_id", alunoId)
+            .gte("data", hoje)
+            .order("data", { ascending: true })
+            .limit(1);
+          if (error) throw error;
+          return data && data.length > 0 ? data[0].data : null;
+        } catch (error) {
+          console.error("Erro ao carregar próxima aula:", error);
+          return null;
+        }
+      }
+
+      // ============================================================
+      // FUNÇÃO PARA CONTAR PLANOS A VENCER (ESTE MÊS)
+      // ============================================================
+      function contarPlanosAVencer() {
+        const hoje = new Date();
+        const fimDoMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+        fimDoMes.setHours(23, 59, 59, 999);
+        const planos = estado.dados.planos.data || [];
+        return planos.filter((plano) => {
+          if (plano.status !== "ativo") return false;
+          const tipo = plano.tipo_plano;
+          if (tipo === "sessoes") {
+            const restantes =
+              (plano.total_sessoes || 0) - (plano.sessoes_realizadas || 0);
+            return restantes <= 4;
+          }
+          if (tipo === "periodo" && plano.data_fim) {
+            const dataFim = new Date(plano.data_fim + "T12:00:00");
+            return dataFim >= hoje && dataFim <= fimDoMes;
+          }
+          if (tipo === "continuo" && plano.data_proxima_renovacao) {
+            const dataRenov = new Date(
+              plano.data_proxima_renovacao + "T12:00:00"
+            );
+            return dataRenov >= hoje && dataRenov <= fimDoMes;
+          }
+          return false;
+        }).length;
+      }
+
+      // ============================================================
+      // EXIBIÇÃO DA TABELA COM PAGINAÇÃO E FILTROS AVANÇADOS
+      // ============================================================
+      async function exibirTabelaAlunos() {
         const alunos = estado.dados.alunos.data || [];
-        const planos = estado.dados.planos.data || {};
         const documentos = estado.dados.documentos.data || {};
 
-        const alunosFiltrados = alunos.filter((aluno) => {
-          const busca = estado.filtros.busca.toLowerCase();
-          const matchBusca =
-            !busca ||
-            (aluno.nome && aluno.nome.toLowerCase().includes(busca)) ||
-            (aluno.cpf && aluno.cpf.includes(busca)) ||
-            (aluno.telefone && aluno.telefone.includes(busca));
+        let alunosFiltrados = alunos
+          .filter((aluno) => {
+            const busca = estado.filtros.busca.trim().toLowerCase();
+            if (busca) {
+              const nomeMatch =
+                aluno.nome && aluno.nome.toLowerCase().includes(busca);
+              const buscaNumerica = busca.replace(/\D/g, "");
+              let cpfMatch = false,
+                telMatch = false;
+              if (buscaNumerica.length > 0) {
+                const cpfLimpo = aluno.cpf ? aluno.cpf.replace(/\D/g, "") : "";
+                const telLimpo = aluno.telefone
+                  ? aluno.telefone.replace(/\D/g, "")
+                  : "";
+                cpfMatch = cpfLimpo.includes(buscaNumerica);
+                telMatch = telLimpo.includes(buscaNumerica);
+              }
+              return nomeMatch || cpfMatch || telMatch;
+            }
+            return true;
+          })
+          .filter((aluno) => {
+            if (!estado.filtros.status) return true;
+            return estado.filtros.status === "ativo"
+              ? aluno.ativo
+              : !aluno.ativo;
+          });
 
-          const matchStatus =
-            !estado.filtros.status ||
-            (estado.filtros.status === "ativo" ? aluno.ativo : !aluno.ativo);
+        // Filtro por plano (real)
+        if (estado.filtros.plano) {
+          // Buscar alunos que têm esse plano ativo
+          const alunosComPlano = estado.dados.planos.data
+            .filter(
+              (p) => p.plano === estado.filtros.plano && p.status === "ativo"
+            )
+            .map((p) => String(p.aluno_id));
+          alunosFiltrados = alunosFiltrados.filter((a) =>
+            alunosComPlano.includes(String(a.id))
+          );
+        }
 
-          const plano = planos[String(aluno.id)];
-          const matchPlano =
-            !estado.filtros.plano ||
-            (plano && plano.plano === estado.filtros.plano);
+        // Filtro por última aula (real)
+        if (estado.filtros.ultimaAula) {
+          const hoje = new Date();
+          const hojeStr = hoje.toISOString().split("T")[0];
+          const limite7 = new Date(hoje);
+          limite7.setDate(hoje.getDate() - 7);
+          const limite30 = new Date(hoje);
+          limite30.setDate(hoje.getDate() - 30);
+          const alunosComUltimaAula = await Promise.all(
+            alunosFiltrados.map(async (aluno) => {
+              const ultimaAula = await carregarUltimaAula(aluno.id);
+              if (!ultimaAula) return { aluno, incluir: false };
+              const dataUltima = new Date(ultimaAula);
+              if (estado.filtros.ultimaAula === "hoje") {
+                return {
+                  aluno,
+                  incluir: dataUltima.toISOString().split("T")[0] === hojeStr,
+                };
+              } else if (estado.filtros.ultimaAula === "ultimos7") {
+                return { aluno, incluir: dataUltima >= limite7 };
+              } else if (estado.filtros.ultimaAula === "ultimos30") {
+                return { aluno, incluir: dataUltima >= limite30 };
+              } else if (estado.filtros.ultimaAula === "mais30") {
+                return { aluno, incluir: dataUltima < limite30 };
+              }
+              return { aluno, incluir: true };
+            })
+          );
+          alunosFiltrados = alunosComUltimaAula
+            .filter((r) => r.incluir)
+            .map((r) => r.aluno);
+        }
 
-          return matchBusca && matchStatus && matchPlano;
-        });
+        // Aplicar filtro de alerta se existir
+        if (estado.filtros.alerta) {
+          if (
+            typeof estado.filtros.alerta === "object" &&
+            estado.filtros.alerta.tipo === "ids"
+          ) {
+            const idsSet = new Set(
+              estado.filtros.alerta.ids.map((id) => String(id))
+            );
+            alunosFiltrados = alunosFiltrados.filter((aluno) =>
+              idsSet.has(String(aluno.id))
+            );
+          } else {
+            const promessas = alunosFiltrados.map(async (aluno) => {
+              const [statusFinanceiro, ultimaAula] = await Promise.all([
+                carregarStatusFinanceiro(aluno.id),
+                carregarUltimaAula(aluno.id),
+              ]);
+              let incluir = false;
+              if (estado.filtros.alerta === "atrasado")
+                incluir = statusFinanceiro === "atrasado";
+              else if (estado.filtros.alerta === "inativos") {
+                if (ultimaAula) {
+                  const dias = Math.ceil(
+                    (new Date() - new Date(ultimaAula)) / (1000 * 60 * 60 * 24)
+                  );
+                  incluir = dias >= 30;
+                }
+              }
+              return { aluno, incluir };
+            });
+            const resultados = await Promise.all(promessas);
+            alunosFiltrados = resultados
+              .filter((r) => r.incluir)
+              .map((r) => r.aluno);
+          }
+          estado.filtros.alerta = null;
+        }
+
+        estado.paginacao.totalItens = alunosFiltrados.length;
+        const inicio =
+          (estado.paginacao.pagina - 1) * estado.paginacao.itensPorPagina;
+        const fim = inicio + estado.paginacao.itensPorPagina;
+        const alunosPaginados = alunosFiltrados.slice(inicio, fim);
 
         const tbody = document.getElementById("tbodyAlunos");
         if (!tbody) return;
 
-        if (alunosFiltrados.length === 0) {
+        if (alunosPaginados.length === 0) {
           tbody.innerHTML =
-            '<tr><td colspan="7" style="text-align: center; padding: 2rem;">Nenhum aluno encontrado</td></tr>';
+            '<tr><td colspan="8" style="text-align:center; padding:2rem;">Nenhum aluno encontrado</td></tr>';
           document.getElementById("resultadosEncontrados").textContent =
             "0 resultados";
+          renderizarPaginacao();
           return;
         }
 
-        tbody.innerHTML = alunosFiltrados
-          .map((aluno) => {
-            const plano = planos[String(aluno.id)];
-            const docs = documentos[String(aluno.id)] || [];
-            const acaoStatus = aluno.ativo ? "desativar" : "reativar";
-            const iconeStatus = aluno.ativo ? "fa-user-slash" : "fa-user-check";
-            const tituloStatus = aluno.ativo ? "Desativar" : "Reativar";
-            const classeBotao = aluno.ativo ? "desativar" : "ativar";
+        const linhas = await Promise.all(
+          alunosPaginados.map(async (aluno) => {
+            try {
+              const [statusFinanceiro, ultimaAula, proximaAula] =
+                await Promise.all([
+                  carregarStatusFinanceiro(aluno.id),
+                  carregarUltimaAula(aluno.id),
+                  carregarProximaAula(aluno.id),
+                ]);
+              let iconeFinanceiro =
+                '<i class="fa-regular fa-circle-check" style="color: var(--verde-sucesso);" title="Em dia"></i>';
+              if (statusFinanceiro === "pendente")
+                iconeFinanceiro =
+                  '<i class="fa-regular fa-clock" style="color: var(--laranja-atencao);" title="Pendente"></i>';
+              else if (statusFinanceiro === "atrasado")
+                iconeFinanceiro =
+                  '<i class="fa-regular fa-circle-xmark" style="color: var(--vermelho-urgente);" title="Atrasado"></i>';
 
-            return `
+              const ultimaAulaStr = ultimaAula ? formatarData(ultimaAula) : "-";
+              const proximaAulaStr = proximaAula
+                ? formatarData(proximaAula)
+                : "-";
+              const docs = documentos[String(aluno.id)] || [];
+              const qtdDocs = docs.length;
+
+              let fotoHtml = "";
+              if (aluno.foto_url) {
+                fotoHtml = `<img src="${aluno.foto_url}" class="foto-mini" alt="foto" />`;
+              } else {
+                const iniciais = aluno.nome
+                  ? aluno.nome
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .substring(0, 2)
+                      .toUpperCase()
+                  : "?";
+                fotoHtml = `<div class="foto-placeholder">${iniciais}</div>`;
+              }
+
+              return `
                         <tr>
+                            <td>${fotoHtml}</td>
                             <td><strong>${
                               aluno.nome || "Sem nome"
-                            }</strong></td>
-                            <td>${aluno.cpf || "-"}</td>
-                            <td>${formatarTelefone(aluno.telefone)}</td>
-                            <td>${plano ? plano.plano : "-"}</td>
-                            <td><span class="status-badge ${
+                            }</strong><br><small>${
+                aluno.telefone ? mascaraTelefone(aluno.telefone) : "-"
+              }</small></td>
+                            <td><span class="badge ${
                               aluno.ativo ? "ativo" : "inativo"
-                            }">${aluno.ativo ? "ativo" : "inativo"}</span></td>
-                            <td>${docs.length} docs</td>
+                            }">${aluno.ativo ? "Ativo" : "Inativo"}</span></td>
+                            <td><span class="status-indicator">${iconeFinanceiro}</span></td>
+                            <td>${qtdDocs} docs</td>
+                            <td>${ultimaAulaStr}</td>
+                            <td>${proximaAulaStr}</td>
                             <td>
                                 <div class="action-buttons">
                                     <button class="action-btn visualizar" onclick="visualizarDossie('${
@@ -2399,67 +3192,177 @@
                                     <button class="action-btn editar" onclick="abrirModalAluno('${
                                       aluno.id
                                     }')" title="Editar"><i class="fas fa-edit"></i></button>
-                                    <button class="action-btn ${classeBotao}" onclick="toggleStatusAluno('${
-              aluno.id
-            }', ${aluno.ativo})" title="${tituloStatus}">
-                                        <i class="fas ${iconeStatus}"></i>
-                                    </button>
+                                    <button class="action-btn avaliacao" onclick="abrirModalAvaliacao('${
+                                      aluno.id
+                                    }')" title="Avaliação Detalhada"><i class="fas fa-stethoscope"></i></button>
+                                    <button class="action-btn agenda" onclick="abrirModalAgenda('${
+                                      aluno.id
+                                    }')" title="Agenda do Aluno"><i class="fas fa-calendar-alt"></i></button>
+                                    <button class="action-btn financeiro" onclick="abrirModalFinanceiro('${
+                                      aluno.id
+                                    }')" title="Financeiro"><i class="fas fa-dollar-sign"></i></button>
+                                    <button class="action-btn ${
+                                      aluno.ativo ? "desativar" : "ativar"
+                                    }" onclick="toggleStatusAluno('${
+                aluno.id
+              }', ${aluno.ativo})" title="${
+                aluno.ativo ? "Desativar" : "Reativar"
+              }"><i class="fas ${
+                aluno.ativo ? "fa-user-slash" : "fa-user-check"
+              }"></i></button>
                                 </div>
                             </td>
                         </tr>
                     `;
+            } catch (e) {
+              console.error("Erro ao gerar linha para aluno", aluno.id, e);
+              return '<tr><td colspan="8">Erro ao carregar dados do aluno</td></tr>';
+            }
           })
-          .join("");
+        );
 
+        tbody.innerHTML = linhas.join("");
         document.getElementById(
           "resultadosEncontrados"
         ).textContent = `${alunosFiltrados.length} resultados`;
         document.getElementById(
           "totalAlunos"
         ).textContent = `${alunos.length} alunos cadastrados`;
+        renderizarPaginacao();
+        await atualizarCardsAlerta();
       }
 
-      function atualizarStatsCards() {
+      // ============================================================
+      // CARDS DE ALERTA
+      // ============================================================
+      async function atualizarCardsAlerta() {
         const alunos = estado.dados.alunos.data || [];
-        const total = alunos.length;
-        const ativos = alunos.filter((a) => a.ativo).length;
-        const inativos = total - ativos;
+        let atrasados = 0,
+          inativos30 = 0;
+        const promessas = alunos.map(async (aluno) => {
+          const [statusFinanceiro, ultimaAula] = await Promise.all([
+            carregarStatusFinanceiro(aluno.id),
+            carregarUltimaAula(aluno.id),
+          ]);
+          if (statusFinanceiro === "atrasado") atrasados++;
+          if (ultimaAula) {
+            const dias = Math.ceil(
+              (new Date() - new Date(ultimaAula)) / (1000 * 60 * 60 * 24)
+            );
+            if (dias >= 30) inativos30++;
+          }
+        });
+        await Promise.all(promessas);
+        document.getElementById("cardAtrasados").textContent = atrasados;
+        const aVencer = contarPlanosAVencer();
+        document.getElementById("cardVencimento").textContent = aVencer;
+        document.getElementById("cardInativos").textContent = inativos30;
+      }
 
-        const documentos = estado.dados.documentos.data || {};
-        const totalDocs = Object.values(documentos).flat().length;
-
-        const statsContainer = document.getElementById("statsCards");
-        if (!statsContainer) return;
-
-        statsContainer.innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-users"></i></div>
-                    <div class="stat-info"><h3>${total}</h3><p>Total de Alunos</p></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-                    <div class="stat-info"><h3>${ativos}</h3><p>Ativos</p></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
-                    <div class="stat-info"><h3>${inativos}</h3><p>Inativos</p></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-file-medical"></i></div>
-                    <div class="stat-info"><h3>${totalDocs}</h3><p>Documentos</p></div>
-                </div>
-            `;
+      async function filtrarPorAlerta(tipo) {
+        if (tipo === "proximo-vencimento") {
+          const hoje = new Date();
+          const fimDoMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+          fimDoMes.setHours(23, 59, 59, 999);
+          const planos = estado.dados.planos.data || [];
+          const alunosIds = new Set();
+          planos.forEach((plano) => {
+            if (plano.status !== "ativo") return;
+            if (plano.tipo_plano === "sessoes") {
+              const restantes =
+                (plano.total_sessoes || 0) - (plano.sessoes_realizadas || 0);
+              if (restantes <= 4) alunosIds.add(String(plano.aluno_id));
+              return;
+            }
+            if (plano.tipo_plano === "periodo" && plano.data_fim) {
+              const dataFim = new Date(plano.data_fim + "T12:00:00");
+              if (dataFim >= hoje && dataFim <= fimDoMes)
+                alunosIds.add(String(plano.aluno_id));
+            }
+            if (
+              plano.tipo_plano === "continuo" &&
+              plano.data_proxima_renovacao
+            ) {
+              const dataRenov = new Date(
+                plano.data_proxima_renovacao + "T12:00:00"
+              );
+              if (dataRenov >= hoje && dataRenov <= fimDoMes)
+                alunosIds.add(String(plano.aluno_id));
+            }
+          });
+          estado.filtros.alerta = { tipo: "ids", ids: Array.from(alunosIds) };
+          estado.paginacao.pagina = 1;
+          exibirTabelaAlunos();
+          return;
+        }
+        estado.filtros.alerta = tipo;
+        estado.paginacao.pagina = 1;
+        exibirTabelaAlunos();
       }
 
       // ============================================================
-      // FUNÇÕES DE FILTRO
+      // PAGINAÇÃO
       // ============================================================
+      function renderizarPaginacao() {
+        const totalPaginas = Math.ceil(
+          estado.paginacao.totalItens / estado.paginacao.itensPorPagina
+        );
+        const paginacaoDiv = document.getElementById("paginacao");
+        if (totalPaginas <= 1) {
+          paginacaoDiv.innerHTML = "";
+          return;
+        }
+        let html =
+          '<button onclick="mudarPagina(1)" ' +
+          (estado.paginacao.pagina === 1 ? "disabled" : "") +
+          '><i class="fas fa-angle-double-left"></i></button>';
+        html +=
+          '<button onclick="mudarPagina(' +
+          (estado.paginacao.pagina - 1) +
+          ')" ' +
+          (estado.paginacao.pagina === 1 ? "disabled" : "") +
+          '><i class="fas fa-angle-left"></i></button>';
+        let inicio = Math.max(1, estado.paginacao.pagina - 2);
+        let fim = Math.min(totalPaginas, estado.paginacao.pagina + 2);
+        for (let i = inicio; i <= fim; i++) {
+          html += `<button onclick="mudarPagina(${i})" class="${
+            i === estado.paginacao.pagina ? "active" : ""
+          }">${i}</button>`;
+        }
+        html +=
+          '<button onclick="mudarPagina(' +
+          (estado.paginacao.pagina + 1) +
+          ')" ' +
+          (estado.paginacao.pagina === totalPaginas ? "disabled" : "") +
+          '><i class="fas fa-angle-right"></i></button>';
+        html +=
+          '<button onclick="mudarPagina(' +
+          totalPaginas +
+          ')" ' +
+          (estado.paginacao.pagina === totalPaginas ? "disabled" : "") +
+          '><i class="fas fa-angle-double-right"></i></button>';
+        paginacaoDiv.innerHTML = html;
+      }
 
+      function mudarPagina(novaPagina) {
+        const totalPaginas = Math.ceil(
+          estado.paginacao.totalItens / estado.paginacao.itensPorPagina
+        );
+        if (novaPagina < 1 || novaPagina > totalPaginas) return;
+        estado.paginacao.pagina = novaPagina;
+        exibirTabelaAlunos();
+      }
+
+      // ============================================================
+      // FILTROS
+      // ============================================================
       function filtrarAlunos() {
         estado.filtros.busca = document.getElementById("searchInput").value;
         estado.filtros.status = document.getElementById("filtroStatus").value;
         estado.filtros.plano = document.getElementById("filtroPlano").value;
-
+        estado.filtros.ultimaAula =
+          document.getElementById("filtroUltimaAula").value;
+        estado.paginacao.pagina = 1;
         exibirTabelaAlunos();
       }
 
@@ -2467,24 +3370,60 @@
         document.getElementById("searchInput").value = "";
         document.getElementById("filtroStatus").value = "";
         document.getElementById("filtroPlano").value = "";
-
+        document.getElementById("filtroUltimaAula").value = "";
         estado.filtros = {
           busca: "",
           status: "",
+          alerta: null,
           plano: "",
+          ultimaAula: "",
         };
-
+        estado.paginacao.pagina = 1;
         exibirTabelaAlunos();
       }
 
       // ============================================================
-      // FUNÇÕES DE UPLOAD DE DOCUMENTOS
+      // CARREGAMENTO INICIAL
       // ============================================================
+      async function carregarTodosDados(forceRefresh = false) {
+        mostrarLoading();
+        try {
+          await Promise.all([
+            carregarAlunos(forceRefresh),
+            carregarEnderecos(forceRefresh),
+            carregarSaude(forceRefresh),
+            carregarDocumentos(forceRefresh),
+            carregarEvolucao(forceRefresh),
+            carregarPlanos(forceRefresh),
+            carregarMensalidades(forceRefresh),
+            carregarAulas(forceRefresh),
+          ]);
+          await exibirTabelaAlunos();
+          // Popular select de planos
+          const planosSelect = document.getElementById("filtroPlano");
+          const planosUnicos = [
+            ...new Set(estado.dados.planos.data.map((p) => p.plano)),
+          ];
+          planosUnicos.forEach((plano) => {
+            const option = document.createElement("option");
+            option.value = plano;
+            option.textContent = plano;
+            planosSelect.appendChild(option);
+          });
+        } catch (error) {
+          console.error("Erro ao carregar dados:", error);
+          mostrarToast("Erro ao carregar alguns dados", "error");
+        } finally {
+          esconderLoading();
+        }
+      }
 
+      // ============================================================
+      // FUNÇÕES DE UPLOAD E DOCUMENTOS (com observação)
+      // ============================================================
       async function uploadDocumentos(event) {
         const files = event.target.files;
         if (!files || files.length === 0) return;
-
         const alunoId = document.getElementById("alunoId").value;
         if (!alunoId) {
           mostrarToast(
@@ -2493,63 +3432,62 @@
           );
           return;
         }
-
+        if (isNaN(parseInt(alunoId))) {
+          mostrarToast("ID do aluno inválido", "error");
+          return;
+        }
         mostrarLoading();
         const progressDiv = document.getElementById("uploadProgress");
         const progressBar = document.getElementById("progressBar");
         const progressText = document.getElementById("progressText");
-
         progressDiv.style.display = "block";
-
         let uploaded = 0;
         const total = files.length;
-
         try {
           for (let i = 0; i < files.length; i++) {
             const file = files[i];
-
             const fileName = `${alunoId}/${Date.now()}_${file.name}`;
-
             const { error: storageError } = await supabaseClient.storage
               .from("documentos")
               .upload(fileName, file);
-
             if (storageError) throw storageError;
-
             const {
               data: { publicUrl },
             } = supabaseClient.storage
               .from("documentos")
               .getPublicUrl(fileName);
-
+            const hoje = new Date().toISOString().split("T")[0];
+            const agora = new Date().toISOString();
+            const documentData = {
+              aluno_id: parseInt(alunoId),
+              nome: file.name || "documento",
+              tipo: "outro",
+              tamanho: file.size || 0,
+              url: publicUrl,
+              storage_path: fileName,
+              observacao: "",
+              data: hoje,
+              criado_em: agora,
+            };
             const { error: dbError } = await supabaseClient
               .from("documentos")
-              .insert([
-                {
-                  aluno_id: alunoId,
-                  nome: file.name,
-                  tipo: file.type,
-                  tamanho: file.size,
-                  url: publicUrl,
-                  storage_path: fileName,
-                },
-              ]);
-
+              .insert([documentData]);
             if (dbError) throw dbError;
-
             uploaded++;
             const percent = (uploaded / total) * 100;
             progressBar.style.width = percent + "%";
             progressText.textContent = `Enviado ${uploaded} de ${total} arquivos...`;
           }
-
           mostrarToast("Documentos enviados com sucesso!", "success");
-
           await carregarDocumentos(true);
           atualizarListaDocumentos(alunoId);
         } catch (error) {
           console.error("Erro no upload:", error);
-          mostrarToast("Erro ao enviar documentos: " + error.message, "error");
+          let detalhe = error.message || "erro desconhecido";
+          if (error.details) detalhe += " - " + error.details;
+          if (error.hint) detalhe += " - " + error.hint;
+          if (error.code) detalhe += " (código " + error.code + ")";
+          mostrarToast("Erro ao enviar documentos: " + detalhe, "error");
         } finally {
           progressDiv.style.display = "none";
           progressBar.style.width = "0%";
@@ -2558,49 +3496,23 @@
         }
       }
 
-      async function excluirDocumento(documentoId, storagePath) {
-        if (!confirm("Tem certeza que deseja excluir este documento?")) return;
-
-        mostrarLoading();
+      async function salvarObservacaoDocumento(documentoId, observacao) {
+        if (!documentoId) return;
         try {
-          if (storagePath) {
-            const { error: storageError } = await supabaseClient.storage
-              .from("documentos")
-              .remove([storagePath]);
-
-            if (storageError) throw storageError;
-          }
-
-          const { error: dbError } = await supabaseClient
+          const { error } = await supabaseClient
             .from("documentos")
-            .delete()
+            .update({ observacao })
             .eq("id", documentoId);
-
-          if (dbError) throw dbError;
-
-          mostrarToast("Documento excluído com sucesso!", "success");
-
-          await carregarDocumentos(true);
-          if (estado.alunoAtual) {
-            atualizarListaDocumentos(estado.alunoAtual);
+          if (error) throw error;
+          mostrarToast("Observação salva", "success");
+          const alunoId = document.getElementById("alunoId").value;
+          if (alunoId) {
+            await carregarDocumentos(true);
+            atualizarListaDocumentos(alunoId);
           }
         } catch (error) {
-          console.error("Erro ao excluir documento:", error);
-          mostrarToast("Erro ao excluir documento: " + error.message, "error");
-        } finally {
-          esconderLoading();
-        }
-      }
-
-      function visualizarDocumento(url, nome) {
-        const modal = document.getElementById("modalVisualizarDocumento");
-        const iframe = document.getElementById("documentoIframe");
-        const titulo = document.getElementById("modalDocumentoTitulo");
-
-        if (url) {
-          titulo.textContent = nome || "Visualizar Documento";
-          iframe.src = url;
-          modal.style.display = "flex";
+          console.error("Erro ao salvar observação:", error);
+          mostrarToast("Erro ao salvar observação", "error");
         }
       }
 
@@ -2608,13 +3520,11 @@
         const listaDiv = document.getElementById("listaDocumentos");
         const alunoIdStr = String(alunoId);
         const docs = estado.dados.documentos.data[alunoIdStr] || [];
-
         if (docs.length === 0) {
           listaDiv.innerHTML =
             '<p style="font-size:0.8rem; color: var(--grafite-claro); padding: 1rem;">Nenhum documento anexado.</p>';
           return;
         }
-
         listaDiv.innerHTML = docs
           .map((doc) => {
             const iconType = doc.tipo?.includes("pdf")
@@ -2635,22 +3545,25 @@
                                 )}</div>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 0.3rem;">
-                            <button class="btn-download" onclick="visualizarDocumento('${
-                              doc.url
-                            }', '${doc.nome}')" title="Visualizar">
-                                <i class="fas fa-eye"></i>
-                            </button>
+                        <input type="text" class="documento-observacao" id="obs-${
+                          doc.id
+                        }" value="${
+              doc.observacao || ""
+            }" placeholder="Observação" />
+                        <div class="documento-actions">
+                            <button class="btn-save" onclick="salvarObservacaoDocumento('${
+                              doc.id
+                            }', document.getElementById('obs-${
+              doc.id
+            }').value)" title="Salvar observação"><i class="fas fa-save"></i></button>
                             <button class="btn-download" onclick="window.open('${
                               doc.url
-                            }', '_blank')" title="Download">
-                                <i class="fas fa-download"></i>
-                            </button>
+                            }', '_blank')" title="Download"><i class="fas fa-download"></i></button>
                             <button class="btn-delete" onclick="excluirDocumento('${
                               doc.id
-                            }', '${doc.storage_path}')" title="Excluir">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            }', '${
+              doc.storage_path
+            }')" title="Excluir"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
                 `;
@@ -2658,10 +3571,44 @@
           .join("");
       }
 
+      async function excluirDocumento(documentoId, storagePath) {
+        confirmarAcao(
+          "Tem certeza que deseja excluir este documento?",
+          async () => {
+            mostrarLoading();
+            try {
+              if (storagePath) {
+                const { error: storageError } = await supabaseClient.storage
+                  .from("documentos")
+                  .remove([storagePath]);
+                if (storageError) throw storageError;
+              }
+              const { error: dbError } = await supabaseClient
+                .from("documentos")
+                .delete()
+                .eq("id", documentoId);
+              if (dbError) throw dbError;
+              mostrarToast("Documento excluído com sucesso!", "success");
+              await carregarDocumentos(true);
+              if (estado.alunoAtual)
+                atualizarListaDocumentos(estado.alunoAtual);
+            } catch (error) {
+              console.error("Erro ao excluir documento:", error);
+              mostrarToast(
+                "Erro ao excluir documento: " + error.message,
+                "error"
+              );
+            } finally {
+              esconderLoading();
+            }
+          },
+          "Excluir Documento"
+        );
+      }
+
       // ============================================================
       // FUNÇÕES DE EVOLUÇÃO
       // ============================================================
-
       async function salvarEvolucao() {
         const alunoId = document.getElementById("alunoId").value;
         if (!alunoId) {
@@ -2671,43 +3618,29 @@
           );
           return;
         }
-
         const titulo = document.getElementById("evolucaoTitulo").value.trim();
         const descricao = document
           .getElementById("evolucaoDescricao")
           .value.trim();
         let data = document.getElementById("evolucaoData").value;
-
         if (!titulo) {
           mostrarToast("Título da evolução é obrigatório", "error");
           return;
         }
-
-        if (!data) {
-          data = new Date().toISOString().split("T")[0];
-        }
-
+        if (!data) data = new Date().toISOString().split("T")[0];
         mostrarLoading();
         try {
-          const { error } = await supabaseClient.from("evolucao").insert([
-            {
-              aluno_id: alunoId,
-              titulo,
-              descricao,
-              data,
-            },
-          ]);
-
+          const { error } = await supabaseClient
+            .from("evolucao")
+            .insert([{ aluno_id: alunoId, titulo, descricao, data }]);
           if (error) throw error;
-
           mostrarToast("Evolução registrada com sucesso!", "success");
-
           document.getElementById("evolucaoTitulo").value = "";
           document.getElementById("evolucaoDescricao").value = "";
           document.getElementById("evolucaoData").value = "";
-
           await carregarEvolucao(true);
-          atualizarListaEvolucoes(alunoId);
+          atualizarListaEvolucoesTimeline(alunoId);
+          atualizarGraficoEvolucao(alunoId); // atualizar gráfico
         } catch (error) {
           console.error("Erro ao salvar evolução:", error);
           mostrarToast("Erro ao registrar evolução: " + error.message, "error");
@@ -2716,92 +3649,188 @@
         }
       }
 
-      async function excluirEvolucao(evolucaoId) {
-        if (!confirm("Tem certeza que deseja excluir esta evolução?")) return;
-
-        mostrarLoading();
-        try {
-          const { error } = await supabaseClient
-            .from("evolucao")
-            .delete()
-            .eq("id", evolucaoId);
-
-          if (error) throw error;
-
-          mostrarToast("Evolução excluída com sucesso!", "success");
-
-          await carregarEvolucao(true);
-          if (estado.alunoAtual) {
-            atualizarListaEvolucoes(estado.alunoAtual);
-          }
-        } catch (error) {
-          console.error("Erro ao excluir evolução:", error);
-          mostrarToast("Erro ao excluir evolução: " + error.message, "error");
-        } finally {
-          esconderLoading();
-        }
-      }
-
-      function atualizarListaEvolucoes(alunoId) {
-        const listaDiv = document.getElementById("listaEvolucoes");
+      function atualizarListaEvolucoesTimeline(alunoId) {
+        const listaDiv = document.getElementById("listaEvolucoesTimeline");
         const alunoIdStr = String(alunoId);
         const evos = estado.dados.evolucao.data[alunoIdStr] || [];
-
         if (evos.length === 0) {
           listaDiv.innerHTML =
             '<p style="font-size:0.8rem; color: var(--grafite-claro); padding: 1rem;">Nenhuma evolução registrada.</p>';
           return;
         }
-
         listaDiv.innerHTML = evos
           .map(
             (evo) => `
-                <div class="evolucao-item">
-                    <div class="evolucao-header">
-                        <span class="evolucao-data">${formatarData(
-                          evo.data
-                        )}</span>
-                        <button class="btn-delete" onclick="excluirEvolucao('${
-                          evo.id
-                        }')" title="Excluir" style="width: 24px; height: 24px;">
-                            <i class="fas fa-trash" style="font-size:0.8rem;"></i>
-                        </button>
-                    </div>
-                    <div class="evolucao-titulo">${
+                <div class="timeline-item">
+                    <div class="timeline-date">${formatarData(evo.data)}</div>
+                    <div class="timeline-title">${
                       evo.titulo || "Evolução"
                     }</div>
-                    <div class="evolucao-descricao">${evo.descricao || ""}</div>
+                    <div class="timeline-content">${evo.descricao || ""}</div>
                 </div>
             `
           )
           .join("");
       }
 
+      async function excluirEvolucao(evolucaoId) {
+        confirmarAcao(
+          "Tem certeza que deseja excluir esta evolução?",
+          async () => {
+            mostrarLoading();
+            try {
+              const { error } = await supabaseClient
+                .from("evolucao")
+                .delete()
+                .eq("id", evolucaoId);
+              if (error) throw error;
+              mostrarToast("Evolução excluída com sucesso!", "success");
+              await carregarEvolucao(true);
+              if (estado.alunoAtual) {
+                atualizarListaEvolucoesTimeline(estado.alunoAtual);
+                atualizarGraficoEvolucao(estado.alunoAtual);
+              }
+            } catch (error) {
+              console.error("Erro ao excluir evolução:", error);
+              mostrarToast(
+                "Erro ao excluir evolução: " + error.message,
+                "error"
+              );
+            } finally {
+              esconderLoading();
+            }
+          },
+          "Excluir Evolução"
+        );
+      }
+
       // ============================================================
-      // FUNÇÕES DO MODAL/CRUD
+      // GRÁFICO DE EVOLUÇÃO REAL
       // ============================================================
+      async function atualizarGraficoEvolucao(alunoId) {
+        try {
+          // Buscar avaliações do aluno
+          const { data, error } = await supabaseClient
+            .from("avaliacoes")
+            .select(
+              "data_avaliacao, flexibilidade_value, forca_value, equilibrio_value"
+            )
+            .eq("aluno_id", alunoId)
+            .order("data_avaliacao", { ascending: true });
+          if (error) throw error;
+          if (!data || data.length === 0) {
+            if (estado.graficos.evolucao) estado.graficos.evolucao.destroy();
+            return;
+          }
+
+          const labels = data.map((a) => formatarData(a.data_avaliacao));
+          const flex = data.map((a) => a.flexibilidade_value || 0);
+          const forca = data.map((a) => a.forca_value || 0);
+          const equil = data.map((a) => a.equilibrio_value || 0);
+
+          const ctx = document
+            .getElementById("graficoEvolucao")
+            .getContext("2d");
+          if (estado.graficos.evolucao) estado.graficos.evolucao.destroy();
+          estado.graficos.evolucao = new Chart(ctx, {
+            type: "line",
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: "Flexibilidade",
+                  data: flex,
+                  borderColor: "#3498db",
+                  fill: false,
+                },
+                {
+                  label: "Força",
+                  data: forca,
+                  borderColor: "#e74c3c",
+                  fill: false,
+                },
+                {
+                  label: "Equilíbrio",
+                  data: equil,
+                  borderColor: "#f39c12",
+                  fill: false,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+            },
+          });
+        } catch (error) {
+          console.error("Erro ao carregar gráfico de evolução:", error);
+        }
+      }
+
+      // ============================================================
+      // FUNÇÕES DO MODAL/CRUD (com campos bloqueados)
+      // ============================================================
+      async function verificarCpfExistente(cpf, idIgnorar = null) {
+        if (!cpf) return false;
+        let query = supabaseClient.from("alunos").select("id").eq("cpf", cpf);
+        if (idIgnorar) query = query.neq("id", idIgnorar);
+        const { data, error } = await query;
+        if (error) {
+          console.error("Erro ao verificar CPF:", error);
+          return false;
+        }
+        return data && data.length > 0;
+      }
+
+      function liberarEdicaoDadosPessoais() {
+        document.getElementById("alunoNome").removeAttribute("readonly");
+        document.getElementById("alunoCpf").removeAttribute("readonly");
+        document.getElementById("alunoNascimento").removeAttribute("readonly");
+        // O RG não estava readonly, mas vamos garantir que possa ser editado
+        // Reabilitar botão de escolher foto
+        document.getElementById("btnEscolherFoto").disabled = false;
+        // Ocultar indicadores de readonly
+        document
+          .querySelectorAll(".readonly-indicator")
+          .forEach((el) => (el.style.display = "none"));
+        mostrarToast(
+          "Edição de dados pessoais liberada temporariamente",
+          "info"
+        );
+      }
 
       function abrirModalAluno(id = null) {
         document.getElementById("formAluno").reset();
         document.getElementById("alunoId").value = "";
+        document.getElementById("fotoUrl").value = "";
+        removerFoto();
         estado.alunoAtual = id ? String(id) : null;
-
+        estado.fotoArquivo = null;
         const firstTab = document.querySelector(".tab");
-        if (firstTab) {
-          mudarTab("dados", { target: firstTab });
-        }
-
+        if (firstTab) mudarTab("dados", { target: firstTab });
         const listaDocs = document.getElementById("listaDocumentos");
-        const listaEvos = document.getElementById("listaEvolucoes");
+        const listaEvos = document.getElementById("listaEvolucoesTimeline");
         if (listaDocs) listaDocs.innerHTML = "";
         if (listaEvos) listaEvos.innerHTML = "";
+
+        // Esconder barra de acesso rápido e indicadores de readonly
+        document.getElementById("quickAccessBar").style.display = "none";
+        document
+          .querySelectorAll(".readonly-indicator")
+          .forEach((el) => (el.style.display = "none"));
+        // Habilitar campos de dados pessoais e foto
+        document.getElementById("alunoNome").removeAttribute("readonly");
+        document.getElementById("alunoCpf").removeAttribute("readonly");
+        document.getElementById("alunoNascimento").removeAttribute("readonly");
+        document.getElementById("btnEscolherFoto").disabled = false;
+        // Esconder botão liberar edição (será mostrado apenas na edição)
+        document.getElementById("btnLiberarEdicao").style.display = "none";
 
         if (id) {
           const alunoIdStr = String(id);
           const aluno = estado.dados.alunos.data.find(
             (a) => String(a.id) === alunoIdStr
           );
-
           if (aluno) {
             document.getElementById("alunoId").value = aluno.id;
             document.getElementById("alunoNome").value = aluno.nome || "";
@@ -2813,6 +3842,7 @@
               aluno.data_expedicao || "";
             document.getElementById("alunoNascimento").value =
               aluno.nascimento || "";
+            atualizarIdade();
             document.getElementById("alunoSexo").value = aluno.sexo || "F";
             document.getElementById("alunoEstadoCivil").value =
               aluno.estado_civil || "";
@@ -2823,6 +3853,14 @@
             document.getElementById("alunoTelefone2").value =
               aluno.telefone2 || "";
             document.getElementById("alunoEmail").value = aluno.email || "";
+            document.getElementById("fotoUrl").value = aluno.foto_url || "";
+            if (aluno.foto_url) {
+              document.getElementById("fotoPreview").src = aluno.foto_url;
+              document.getElementById("fotoPreview").style.display = "block";
+              document.getElementById("fotoPlaceholder").style.display = "none";
+              document.getElementById("btnRemoverFoto").style.display =
+                "inline-flex";
+            }
 
             const end = estado.dados.enderecos.data[alunoIdStr];
             if (end) {
@@ -2859,40 +3897,35 @@
                 sau.contato_emergencia || "";
             }
 
-            const pla = estado.dados.planos.data[alunoIdStr];
-            if (pla) {
-              document.getElementById("alunoPlano").value =
-                pla.plano || "Mensal";
-              document.getElementById("alunoDataInicio").value =
-                pla.data_inicio || "";
-              document.getElementById("alunoStatus").value =
-                pla.status || "ativo";
-              document.getElementById("alunoIndicacao").value =
-                pla.indicacao || "";
-              document.getElementById("alunoRestricoes").value =
-                pla.restricoes || "";
-              document.getElementById("alunoOrientacoes").value =
-                pla.orientacoes || "";
-              document.getElementById("alunoObservacoes").value =
-                pla.observacoes || "";
-            }
-
             atualizarListaDocumentos(alunoIdStr);
-            atualizarListaEvolucoes(alunoIdStr);
+            atualizarListaEvolucoesTimeline(alunoIdStr);
+            atualizarGraficoEvolucao(alunoIdStr); // carregar gráfico real
+
+            // Bloquear campos de dados pessoais (readonly) e mostrar indicador, exceto telefone
+            document.getElementById("alunoNome").setAttribute("readonly", true);
+            document.getElementById("alunoCpf").setAttribute("readonly", true);
+            document
+              .getElementById("alunoNascimento")
+              .setAttribute("readonly", true);
+            // Telefone permanece editável
+            document.getElementById("btnEscolherFoto").disabled = true;
+            document
+              .querySelectorAll(".readonly-indicator")
+              .forEach((el) => (el.style.display = "inline-flex"));
+
+            // Mostrar barra de acesso rápido e botão de liberar edição
+            document.getElementById("quickAccessBar").style.display = "flex";
+            document.getElementById("btnLiberarEdicao").style.display =
+              "inline-block";
           }
           document.getElementById("modalAlunoTitle").textContent =
             "Editar Dossiê do Aluno";
         } else {
           document.getElementById("modalAlunoTitle").textContent =
             "Novo Aluno - Dossiê Completo";
-
           const hoje = new Date().toISOString().split("T")[0];
-          document.getElementById("alunoDataInicio").value = hoje;
-          document.getElementById("alunoStatus").value = "ativo";
-          document.getElementById("alunoSexo").value = "F";
           document.getElementById("evolucaoData").value = hoje;
         }
-
         document.getElementById("modalAluno").classList.add("show");
       }
 
@@ -2900,9 +3933,6 @@
         const nome = document.getElementById("alunoNome").value.trim();
         const telefone = document.getElementById("alunoTelefone").value.trim();
         const nascimento = document.getElementById("alunoNascimento").value;
-        const plano = document.getElementById("alunoPlano").value;
-        const dataInicio = document.getElementById("alunoDataInicio").value;
-
         if (!nome) {
           mostrarToast("Nome é obrigatório", "error");
           document.getElementById("alunoNome").focus();
@@ -2913,30 +3943,47 @@
           document.getElementById("alunoTelefone").focus();
           return;
         }
+        if (!validarTelefone(telefone)) {
+          mostrarToast("Telefone inválido", "error");
+          document.getElementById("alunoTelefone").focus();
+          return;
+        }
         if (!nascimento) {
           mostrarToast("Data de nascimento é obrigatória", "error");
           document.getElementById("alunoNascimento").focus();
           return;
         }
-        if (!plano) {
-          mostrarToast("Plano é obrigatório", "error");
-          document.getElementById("alunoPlano").focus();
+        const cpf = document.getElementById("alunoCpf").value;
+        if (cpf && !validarCPF(cpf)) {
+          mostrarToast("CPF inválido", "error");
+          document.getElementById("alunoCpf").focus();
           return;
         }
-        if (!dataInicio) {
-          mostrarToast("Data de início é obrigatória", "error");
-          document.getElementById("alunoDataInicio").focus();
+        const email = document.getElementById("alunoEmail").value;
+        if (email && !validarEmail(email)) {
+          mostrarToast("E-mail inválido", "error");
+          document.getElementById("alunoEmail").focus();
           return;
         }
-
         const id = document.getElementById("alunoId").value;
-
+        if (cpf) {
+          const cpfExistente = await verificarCpfExistente(cpf, id || null);
+          if (cpfExistente) {
+            mostrarToast("CPF já cadastrado para outro aluno", "error");
+            document.getElementById("alunoCpf").focus();
+            return;
+          }
+        }
         mostrarLoading();
-
         try {
+          let fotoUrl = document.getElementById("fotoUrl").value;
+          if (estado.fotoArquivo) {
+            const novaFotoUrl = await uploadFoto(id || "temp");
+            if (novaFotoUrl) fotoUrl = novaFotoUrl;
+          }
           const alunoData = {
             nome,
-            cpf: document.getElementById("alunoCpf").value || null,
+            cpf: cpf || null,
             rg: document.getElementById("alunoRg").value || null,
             orgao_emissor:
               document.getElementById("alunoOrgaoEmissor").value || null,
@@ -2950,29 +3997,43 @@
             telefone,
             telefone2: document.getElementById("alunoTelefone2").value || null,
             email: document.getElementById("alunoEmail").value || null,
-            ativo: document.getElementById("alunoStatus").value === "ativo",
+            foto_url: fotoUrl || null,
+            ativo: true,
           };
-
           let alunoId = id;
-
           if (id) {
             const { error } = await supabaseClient
               .from("alunos")
               .update(alunoData)
               .eq("id", id);
-
-            if (error) throw error;
+            if (error) {
+              if (error.code === "23505")
+                mostrarToast("CPF já cadastrado", "error");
+              else throw error;
+              return;
+            }
           } else {
             const { data, error } = await supabaseClient
               .from("alunos")
               .insert([alunoData])
               .select();
-
-            if (error) throw error;
+            if (error) {
+              if (error.code === "23505")
+                mostrarToast("CPF já cadastrado", "error");
+              else throw error;
+              return;
+            }
             alunoId = data[0].id;
             document.getElementById("alunoId").value = alunoId;
+            if (estado.fotoArquivo && !fotoUrl) {
+              const novaFotoUrl = await uploadFoto(alunoId);
+              if (novaFotoUrl)
+                await supabaseClient
+                  .from("alunos")
+                  .update({ foto_url: novaFotoUrl })
+                  .eq("id", alunoId);
+            }
           }
-
           const endData = {
             aluno_id: alunoId,
             cep: document.getElementById("alunoCep").value || null,
@@ -2984,16 +4045,13 @@
             cidade: document.getElementById("alunoCidade").value || null,
             estado: document.getElementById("alunoEstado").value || null,
           };
-
           const endExistente = estado.dados.enderecos.data[String(alunoId)];
-          if (endExistente) {
+          if (endExistente)
             await supabaseClient
               .from("enderecos")
               .update(endData)
               .eq("aluno_id", alunoId);
-          } else {
-            await supabaseClient.from("enderecos").insert([endData]);
-          }
+          else await supabaseClient.from("enderecos").insert([endData]);
 
           const sauData = {
             aluno_id: alunoId,
@@ -3014,130 +4072,86 @@
             contato_emergencia:
               document.getElementById("alunoContatoEmergencia").value || null,
           };
-
           const sauExistente = estado.dados.saude.data[String(alunoId)];
-          if (sauExistente) {
+          if (sauExistente)
             await supabaseClient
               .from("saude_alunos")
               .update(sauData)
               .eq("aluno_id", alunoId);
-          } else {
-            await supabaseClient.from("saude_alunos").insert([sauData]);
-          }
-
-          const plaData = {
-            aluno_id: alunoId,
-            plano,
-            data_inicio: dataInicio,
-            status: document.getElementById("alunoStatus").value,
-            indicacao: document.getElementById("alunoIndicacao").value || null,
-            restricoes:
-              document.getElementById("alunoRestricoes").value || null,
-            orientacoes:
-              document.getElementById("alunoOrientacoes").value || null,
-            observacoes:
-              document.getElementById("alunoObservacoes").value || null,
-          };
-
-          const plaExistente = estado.dados.planos.data[String(alunoId)];
-          if (plaExistente) {
-            await supabaseClient
-              .from("planos_alunos")
-              .update(plaData)
-              .eq("id", plaExistente.id);
-          } else {
-            await supabaseClient.from("planos_alunos").insert([plaData]);
-          }
+          else await supabaseClient.from("saude_alunos").insert([sauData]);
 
           mostrarToast("Dossiê salvo com sucesso!", "success");
-
           await carregarTodosDados(true);
-
-          if (id) {
-            fecharModal("modalAluno");
-          } else {
+          if (id) fecharModal("modalAluno");
+          else {
             estado.alunoAtual = String(alunoId);
             await carregarDocumentos(true);
             await carregarEvolucao(true);
             atualizarListaDocumentos(String(alunoId));
-            atualizarListaEvolucoes(String(alunoId));
+            atualizarListaEvolucoesTimeline(String(alunoId));
+            atualizarGraficoEvolucao(String(alunoId));
             mostrarToast(
               "Agora você pode anexar documentos e registrar evoluções",
               "info"
             );
+            // Após salvar novo aluno, bloquear campos e mostrar barra de acesso
+            document.getElementById("alunoNome").setAttribute("readonly", true);
+            document.getElementById("alunoCpf").setAttribute("readonly", true);
+            document
+              .getElementById("alunoNascimento")
+              .setAttribute("readonly", true);
+            document.getElementById("btnEscolherFoto").disabled = true;
+            document
+              .querySelectorAll(".readonly-indicator")
+              .forEach((el) => (el.style.display = "inline-flex"));
+            document.getElementById("quickAccessBar").style.display = "flex";
+            document.getElementById("btnLiberarEdicao").style.display =
+              "inline-block";
           }
         } catch (error) {
           console.error("Erro ao salvar:", error);
-          mostrarToast("Erro ao salvar: " + error.message, "error");
+          mostrarToast(
+            "Erro ao salvar: " + (error.message || "erro desconhecido"),
+            "error"
+          );
         } finally {
           esconderLoading();
         }
       }
 
       // ============================================================
-      // VARIÁVEL GLOBAL PARA CALLBACK DO MODAL DE CONFIRMAÇÃO
+      // CONFIRMAÇÃO
       // ============================================================
-
       let acaoConfirmarCallback = null;
-
-      // ============================================================
-      // FUNÇÃO PARA ABRIR MODAL DE CONFIRMAÇÃO PERSONALIZADO
-      // ============================================================
-
       function confirmarAcao(mensagem, callback, titulo = "Confirmar Ação") {
         document.getElementById("modalConfirmarTitulo").textContent = titulo;
         document.getElementById("modalConfirmarMensagem").textContent =
           mensagem;
-
-        // Guardar callback
         acaoConfirmarCallback = callback;
-
-        // Configurar botão de confirmação
         const btnAcao = document.getElementById("modalConfirmarBtnAcao");
         btnAcao.onclick = function () {
-          if (acaoConfirmarCallback) {
-            acaoConfirmarCallback();
-          }
+          if (acaoConfirmarCallback) acaoConfirmarCallback();
           fecharModal("modalConfirmar");
         };
-
-        // Abrir modal
         document.getElementById("modalConfirmar").classList.add("show");
       }
-
-      // ============================================================
-      // FUNÇÃO PARA ALTERNAR STATUS DO ALUNO (ativar/desativar)
-      // ============================================================
 
       async function toggleStatusAluno(id, statusAtual) {
         const acao = statusAtual ? "desativar" : "reativar";
         const mensagem = `Tem certeza que deseja ${acao} este aluno?`;
         const titulo =
           acao === "desativar" ? "Desativar Aluno" : "Reativar Aluno";
-
         confirmarAcao(
           mensagem,
           async () => {
             mostrarLoading();
-
             try {
               const { error } = await supabaseClient
                 .from("alunos")
                 .update({ ativo: !statusAtual })
                 .eq("id", id);
-
               if (error) throw error;
-
               mostrarToast(`Aluno ${acao}do com sucesso!`, "success");
-
-              // Atualizar estado local
-              const alunoIndex = estado.dados.alunos.data.findIndex(
-                (a) => String(a.id) === String(id)
-              );
-              if (alunoIndex !== -1) {
-                estado.dados.alunos.data[alunoIndex].ativo = !statusAtual;
-              }
-
               await carregarTodosDados(true);
             } catch (error) {
               console.error(`Erro ao ${acao} aluno:`, error);
@@ -3151,169 +4165,339 @@
       }
 
       // ============================================================
-      // FUNÇÃO CORRIGIDA: VISUALIZAR DOSSIÊ
+      // VISUALIZAR DOSSIÊ
       // ============================================================
-
-      function visualizarDossie(id) {
+      async function visualizarDossie(id) {
         const alunoIdStr = String(id);
-        console.log("Visualizando dossiê do aluno ID:", alunoIdStr);
-
         const aluno = estado.dados.alunos.data.find(
           (a) => String(a.id) === alunoIdStr
         );
-
         if (!aluno) {
-          console.error("Aluno não encontrado:", alunoIdStr);
           mostrarToast("Aluno não encontrado", "error");
           return;
         }
-
-        console.log("Aluno encontrado:", aluno);
-
-        const end = estado.dados.enderecos.data[alunoIdStr];
-        const pla = estado.dados.planos.data[alunoIdStr];
-        const sau = estado.dados.saude.data[alunoIdStr];
-        const docs = estado.dados.documentos.data[alunoIdStr] || [];
-        const evos = estado.dados.evolucao.data[alunoIdStr] || [];
-
-        const conteudo = `
-                <div class="dossie-section">
-                    <h3 class="section-title"><i class="fas fa-user"></i> ${
+        mostrarLoading();
+        try {
+          const end = estado.dados.enderecos.data[alunoIdStr];
+          const sau = estado.dados.saude.data[alunoIdStr];
+          const docs = estado.dados.documentos.data[alunoIdStr] || [];
+          const evos = estado.dados.evolucao.data[alunoIdStr] || [];
+          const [statusFinanceiro, ultimaAula, proximaAula] = await Promise.all(
+            [
+              carregarStatusFinanceiro(aluno.id),
+              carregarUltimaAula(aluno.id),
+              carregarProximaAula(aluno.id),
+            ]
+          );
+          const idade = calcularIdade(aluno.nascimento);
+          let fotoHtml = "";
+          if (aluno.foto_url)
+            fotoHtml = `<img src="${aluno.foto_url}" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:3px solid var(--verde-pastel); margin-bottom:1rem;" />`;
+          const conteudo = `
+                    <div style="display:flex; flex-direction:column; align-items:center;">${fotoHtml}</div>
+                    <div class="dossie-section"><h3 class="section-title"><i class="fas fa-user"></i> ${
                       aluno.nome || "Sem nome"
-                    }</h3>
-                    <div class="info-grid">
-                        <div class="info-item"><div class="info-label">CPF</div><div class="info-value">${
-                          aluno.cpf || "-"
-                        }</div></div>
-                        <div class="info-item"><div class="info-label">Telefone</div><div class="info-value">${formatarTelefone(
-                          aluno.telefone
-                        )}</div></div>
-                        <div class="info-item"><div class="info-label">E-mail</div><div class="info-value">${
-                          aluno.email || "-"
-                        }</div></div>
-                        <div class="info-item"><div class="info-label">Nascimento</div><div class="info-value">${formatarData(
-                          aluno.nascimento
-                        )}</div></div>
-                        <div class="info-item"><div class="info-label">Plano</div><div class="info-value">${
-                          pla ? pla.plano : "-"
-                        }</div></div>
-                        <div class="info-item"><div class="info-label">Status</div><div class="info-value">${
-                          aluno.ativo ? "Ativo" : "Inativo"
-                        }</div></div>
-                    </div>
-                </div>
-                
-                <div class="dossie-section">
-                    <h3 class="section-title"><i class="fas fa-map-marker-alt"></i> Endereço</h3>
-                    <div class="info-value">
-                        ${
-                          end
-                            ? `${end.endereco || ""}, ${end.numero || ""}${
-                                end.complemento ? " - " + end.complemento : ""
-                              }<br>${end.bairro || ""}, ${end.cidade || ""} - ${
-                                end.estado || ""
-                              }<br>CEP: ${end.cep || ""}`
-                            : "Não informado"
-                        }
-                    </div>
-                </div>
-                
-                <div class="dossie-section">
-                    <h3 class="section-title"><i class="fas fa-heartbeat"></i> Saúde</h3>
-                    <div class="info-grid">
-                        <div class="info-item"><div class="info-label">Tipo Sanguíneo</div><div class="info-value">${
-                          sau ? sau.tipo_sanguineo || "-" : "-"
-                        }</div></div>
-                        <div class="info-item"><div class="info-label">Plano de Saúde</div><div class="info-value">${
-                          sau ? sau.plano_saude || "-" : "-"
-                        }</div></div>
-                        <div class="info-item full-width"><div class="info-label">Alergias</div><div class="info-value">${
-                          sau ? sau.alergias || "Nenhuma" : "-"
-                        }</div></div>
-                        <div class="info-item full-width"><div class="info-label">Medicamentos</div><div class="info-value">${
-                          sau ? sau.medicamentos || "Nenhum" : "-"
-                        }</div></div>
-                        <div class="info-item full-width"><div class="info-label">Condições Crônicas</div><div class="info-value">${
-                          sau ? sau.condicoes_cronicas || "Nenhuma" : "-"
-                        }</div></div>
-                    </div>
-                </div>
-                
-                <div class="dossie-section">
-                    <h3 class="section-title"><i class="fas fa-file"></i> Documentos (${
+                    } ${
+            idade ? `(${idade} anos)` : ""
+          }</h3><div class="info-grid"><div class="info-item"><div class="info-label">CPF</div><div class="info-value">${
+            aluno.cpf ? mascaraCPF(aluno.cpf) : "-"
+          }</div></div><div class="info-item"><div class="info-label">Telefone</div><div class="info-value">${
+            aluno.telefone ? mascaraTelefone(aluno.telefone) : "-"
+          }</div></div><div class="info-item"><div class="info-label">E-mail</div><div class="info-value">${
+            aluno.email || "-"
+          }</div></div><div class="info-item"><div class="info-label">Nascimento</div><div class="info-value">${formatarData(
+            aluno.nascimento
+          )}</div></div><div class="info-item"><div class="info-label">Sexo</div><div class="info-value">${
+            aluno.sexo === "F"
+              ? "Feminino"
+              : aluno.sexo === "M"
+              ? "Masculino"
+              : "Outro"
+          }</div></div></div></div>
+                    <div class="dossie-section"><h3 class="section-title"><i class="fas fa-map-marker-alt"></i> Endereço</h3><div class="info-value">${
+                      end
+                        ? `${end.endereco || ""}, ${end.numero || ""}${
+                            end.complemento ? " - " + end.complemento : ""
+                          }<br>${end.bairro || ""}, ${end.cidade || ""} - ${
+                            end.estado || ""
+                          }<br>CEP: ${end.cep || ""}`
+                        : "Não informado"
+                    }</div></div>
+                    <div class="dossie-section"><h3 class="section-title"><i class="fas fa-heartbeat"></i> Saúde</h3><div class="info-grid"><div class="info-item"><div class="info-label">Tipo Sanguíneo</div><div class="info-value">${
+                      sau ? sau.tipo_sanguineo || "-" : "-"
+                    }</div></div><div class="info-item"><div class="info-label">Contato Emergência</div><div class="info-value">${
+            sau ? sau.contato_emergencia || "-" : "-"
+          }</div></div><div class="info-item full-width"><div class="info-label">Alergias</div><div class="info-value">${
+            sau ? sau.alergias || "Nenhuma" : "-"
+          }</div></div></div></div>
+                    <div class="dossie-section"><h3 class="section-title"><i class="fas fa-dollar-sign"></i> Financeiro</h3><div class="info-item"><div class="info-label">Status</div><div class="info-value">${
+                      statusFinanceiro === "em-dia"
+                        ? "Em dia"
+                        : statusFinanceiro === "pendente"
+                        ? "Pendente"
+                        : "Atrasado"
+                    }</div></div></div>
+                    <div class="dossie-section"><h3 class="section-title"><i class="fas fa-calendar-check"></i> Agenda</h3><div class="info-item"><div class="info-label">Última Aula</div><div class="info-value">${
+                      ultimaAula ? formatarData(ultimaAula) : "-"
+                    }</div></div><div class="info-item"><div class="info-label">Próxima Aula</div><div class="info-value">${
+            proximaAula ? formatarData(proximaAula) : "-"
+          }</div></div></div>
+                    <div class="dossie-section"><h3 class="section-title"><i class="fas fa-file"></i> Documentos (${
                       docs.length
-                    })</h3>
-                    ${
-                      docs.length > 0
-                        ? docs
-                            .map((doc) => {
-                              const iconType = doc.tipo?.includes("pdf")
-                                ? "fa-file-pdf"
-                                : doc.tipo?.includes("image")
-                                ? "fa-file-image"
-                                : "fa-file";
-                              return `
-                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem; background: var(--off-white); margin-bottom: 0.5rem; border-radius: 4px;">
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <i class="fas ${iconType}"></i>
-                                    <span>${doc.nome || "Documento"}</span>
-                                </div>
-                                <button class="btn-download" onclick="window.open('${
-                                  doc.url
-                                }', '_blank')" style="width: 32px; height: 32px;">
-                                    <i class="fas fa-download"></i>
-                                </button>
-                            </div>
-                        `;
-                            })
-                            .join("")
-                        : "<p>Nenhum documento anexado.</p>"
-                    }
-                </div>
-                
-                <div class="dossie-section">
-                    <h3 class="section-title"><i class="fas fa-chart-line"></i> Evoluções (${
+                    })</h3>${
+            docs.length > 0
+              ? docs
+                  .map(
+                    (doc) =>
+                      `<div style="display:flex; align-items:center; justify-content:space-between; padding:0.5rem; background:var(--off-white); margin-bottom:0.5rem; border-radius:4px;"><div style="display:flex; align-items:center; gap:0.5rem;"><i class="fas ${
+                        doc.tipo?.includes("pdf")
+                          ? "fa-file-pdf"
+                          : doc.tipo?.includes("image")
+                          ? "fa-file-image"
+                          : "fa-file"
+                      }"></i><span>${
+                        doc.nome || "Documento"
+                      }</span></div><span style="font-size:0.8rem; color:var(--grafite-claro);">${
+                        doc.observacao || ""
+                      }</span><button class="btn-download" onclick="window.open('${
+                        doc.url
+                      }', '_blank')" style="width:32px; height:32px;"><i class="fas fa-download"></i></button></div>`
+                  )
+                  .join("")
+              : "<p>Nenhum documento anexado.</p>"
+          }</div>
+                    <div class="dossie-section"><h3 class="section-title"><i class="fas fa-chart-line"></i> Evoluções (${
                       evos.length
-                    })</h3>
-                    ${
-                      evos.length > 0
-                        ? evos
-                            .map(
-                              (evo) => `
-                        <div style="padding: 0.8rem; background: var(--off-white); margin-bottom: 0.5rem; border-radius: 4px; border-left: 4px solid var(--verde-principal);">
-                            <strong>${formatarData(evo.data)}:</strong> ${
-                                evo.titulo || "Evolução"
-                              }
-                            <p style="margin-top: 0.3rem; font-size:0.8rem;">${
-                              evo.descricao || ""
-                            }</p>
+                    })</h3>${
+            evos.length > 0
+              ? evos
+                  .map(
+                    (evo) =>
+                      `<div style="padding:0.8rem; background:var(--off-white); margin-bottom:0.5rem; border-radius:4px; border-left:4px solid var(--verde-principal);"><strong>${formatarData(
+                        evo.data
+                      )}:</strong> ${
+                        evo.titulo || "Evolução"
+                      }<p style="margin-top:0.3rem; font-size:0.8rem;">${
+                        evo.descricao || ""
+                      }</p></div>`
+                  )
+                  .join("")
+              : "<p>Nenhuma evolução registrada.</p>"
+          }</div>
+                `;
+          document.getElementById("conteudoDossie").innerHTML = conteudo;
+          document.getElementById("modalDossie").classList.add("show");
+        } catch (error) {
+          console.error("Erro ao carregar dossiê:", error);
+          mostrarToast("Erro ao carregar dossiê", "error");
+        } finally {
+          esconderLoading();
+        }
+      }
+
+      function exportarDossiePDF() {
+        mostrarToast("Funcionalidade em desenvolvimento", "info");
+      }
+
+      // ============================================================
+      // FUNÇÕES DOS MODAIS DE ACESSO RÁPIDO
+      // ============================================================
+      function abrirModalAvaliacao(alunoId = null) {
+        const id = alunoId || estado.alunoAtual;
+        if (!id) {
+          mostrarToast("Selecione um aluno primeiro", "error");
+          return;
+        }
+        // Abre a página de avaliação em nova aba
+        window.open(`avaliacao.html?id=${id}`, "_blank");
+      }
+
+      function abrirModalAgenda(alunoId = null) {
+        const id = alunoId || estado.alunoAtual;
+        if (!id) {
+          mostrarToast("Selecione um aluno primeiro", "error");
+          return;
+        }
+        carregarAulasAlunoModal(id);
+        document.getElementById("modalAgenda").classList.add("show");
+      }
+
+      async function carregarAulasAlunoModal(alunoId) {
+        const listaDiv = document.getElementById("listaAulasAgenda");
+        listaDiv.innerHTML = '<p class="empty-state">Carregando aulas...</p>';
+        try {
+          const { data, error } = await supabaseClient
+            .from("aulas")
+            .select("data, horario, status, presenca")
+            .eq("aluno_id", alunoId)
+            .order("data", { ascending: true });
+          if (error) throw error;
+          if (!data || data.length === 0) {
+            listaDiv.innerHTML =
+              '<p class="empty-state">Nenhuma aula encontrada.</p>';
+            return;
+          }
+          let html = '<ul style="list-style: none;">';
+          data.forEach((aula) => {
+            const statusIcon =
+              aula.status === "confirmada"
+                ? "✅"
+                : aula.status === "cancelada"
+                ? "❌"
+                : "⏳";
+            html += `<li style="padding: 0.5rem; border-bottom: 1px solid #eee;">${formatarData(
+              aula.data
+            )} às ${aula.horario} - ${statusIcon} ${aula.status}</li>`;
+          });
+          html += "</ul>";
+          listaDiv.innerHTML = html;
+        } catch (error) {
+          console.error("Erro ao carregar aulas:", error);
+          listaDiv.innerHTML =
+            '<p class="empty-state">Erro ao carregar aulas.</p>';
+        }
+      }
+
+      function navegarAgenda(direcao) {
+        // Implementar navegação entre dias (simplificado)
+        mostrarToast("Navegação em desenvolvimento", "info");
+      }
+
+      function abrirModalFinanceiro(alunoId = null) {
+        const id = alunoId || estado.alunoAtual;
+        if (!id) {
+          mostrarToast("Selecione um aluno primeiro", "error");
+          return;
+        }
+        carregarFinanceiroAlunoModal(id);
+        document.getElementById("modalFinanceiro").classList.add("show");
+      }
+
+      async function carregarFinanceiroAlunoModal(alunoId) {
+        try {
+          const { data, error } = await supabaseClient
+            .from("mensalidades")
+            .select(
+              `
+                        id,
+                        valor_total,
+                        parcelas!inner(id, valor, status, vencimento, data_pagamento)
+                    `
+            )
+            .eq("aluno_id", alunoId);
+          if (error) throw error;
+
+          let totalPago = 0,
+            totalAberto = 0,
+            totalAtrasado = 0;
+          let parcelasList = [];
+          let pagamentosPorMes = {}; // para o gráfico
+          (data || []).forEach((m) => {
+            (m.parcelas || []).forEach((p) => {
+              if (p.status === "pago") {
+                totalPago += p.valor;
+                const mesAno = p.data_pagamento
+                  ? p.data_pagamento.substring(0, 7)
+                  : null;
+                if (mesAno) {
+                  pagamentosPorMes[mesAno] =
+                    (pagamentosPorMes[mesAno] || 0) + p.valor;
+                }
+              } else if (p.status === "pendente") totalAberto += p.valor;
+              else if (p.status === "atrasado") totalAtrasado += p.valor;
+              parcelasList.push(p);
+            });
+          });
+
+          document.getElementById("financeiroTotalPago").textContent =
+            formatarMoeda(totalPago);
+          document.getElementById("financeiroEmAberto").textContent =
+            formatarMoeda(totalAberto);
+          document.getElementById("financeiroAtrasado").textContent =
+            formatarMoeda(totalAtrasado);
+
+          // Lista de parcelas
+          const listaDiv = document.getElementById("listaParcelasFinanceiro");
+          if (parcelasList.length === 0) {
+            listaDiv.innerHTML =
+              '<p class="empty-state">Nenhuma parcela encontrada.</p>';
+          } else {
+            parcelasList.sort(
+              (a, b) => new Date(b.vencimento) - new Date(a.vencimento)
+            );
+            listaDiv.innerHTML = parcelasList
+              .map(
+                (p) => `
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem; border-bottom: 1px solid #eee;">
+                            <span>Venc: ${formatarData(p.vencimento)}</span>
+                            <span>${formatarMoeda(p.valor)}</span>
+                            <span class="badge ${
+                              p.status === "pago"
+                                ? "ativo"
+                                : p.status === "pendente"
+                                ? "amarelo"
+                                : "vermelho"
+                            }">${p.status}</span>
                         </div>
                     `
-                            )
-                            .join("")
-                        : "<p>Nenhuma evolução registrada.</p>"
-                    }
-                </div>
-            `;
+              )
+              .join("");
+          }
 
-        const modalDossie = document.getElementById("modalDossie");
-        const conteudoDossie = document.getElementById("conteudoDossie");
-
-        if (conteudoDossie) {
-          conteudoDossie.innerHTML = conteudo;
+          // Gráfico real
+          const meses = Object.keys(pagamentosPorMes).sort();
+          const valores = meses.map((m) => pagamentosPorMes[m]);
+          const ctx = document
+            .getElementById("graficoFinanceiro")
+            .getContext("2d");
+          if (estado.graficos.financeiro) estado.graficos.financeiro.destroy();
+          estado.graficos.financeiro = new Chart(ctx, {
+            type: "line",
+            data: {
+              labels: meses.map(
+                (m) => m.substring(5) + "/" + m.substring(0, 4)
+              ),
+              datasets: [
+                {
+                  label: "Pagamentos",
+                  data: valores,
+                  borderColor: "var(--verde-principal)",
+                  backgroundColor: "rgba(58,107,92,0.1)",
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+            },
+          });
+        } catch (error) {
+          console.error("Erro ao carregar financeiro:", error);
+          mostrarToast("Erro ao carregar dados financeiros", "error");
         }
+      }
 
-        if (modalDossie) {
-          modalDossie.classList.add("show");
-        } else {
-          console.error("Modal de dossiê não encontrado");
+      function exportarDadosAluno() {
+        const id = estado.alunoAtual;
+        if (!id) {
+          mostrarToast("Selecione um aluno", "error");
+          return;
+        }
+        // Gerar PDF ou CSV
+        mostrarToast("Exportação em desenvolvimento", "info");
+      }
+
+      function irParaAvaliacao() {
+        const id = estado.alunoAtual;
+        if (id) {
+          window.open(`avaliacao.html?id=${id}`, "_blank");
+          fecharModal("modalAvaliacao");
         }
       }
 
       // ============================================================
-      // FUNÇÕES DE UI
+      // UI
       // ============================================================
-
       function fecharModal(id) {
         const modal = document.getElementById(id);
         if (modal) {
@@ -3328,44 +4512,28 @@
       function mudarTab(nome, event) {
         const modal = event.target.closest(".modal");
         if (!modal) return;
-
         modal
           .querySelectorAll(".tab-pane")
           .forEach((p) => p.classList.remove("active"));
         modal
           .querySelectorAll(".tab")
           .forEach((t) => t.classList.remove("active"));
-
         const tabId = "tab" + nome.charAt(0).toUpperCase() + nome.slice(1);
         const tabElement = document.getElementById(tabId);
         if (tabElement) tabElement.classList.add("active");
-
         event.target.classList.add("active");
       }
 
       // ============================================================
       // INICIALIZAÇÃO
       // ============================================================
-
       document.addEventListener("DOMContentLoaded", async function () {
         mostrarLoading();
-
         try {
           const logado = await verificarLogin();
-
           if (logado) {
             document.getElementById("alunosContent").style.display = "block";
             document.getElementById("loginMessage").style.display = "none";
-
-            const lastUpdate = localStorage.getItem(CACHE_KEYS.LAST_UPDATE);
-            if (lastUpdate) {
-              try {
-                const { timestamp } = JSON.parse(lastUpdate);
-                estado.cache.lastUpdate = timestamp;
-              } catch (e) {}
-            }
-            atualizarIndicadorCache();
-
             await carregarTodosDados();
           } else {
             document.getElementById("alunosContent").style.display = "none";
