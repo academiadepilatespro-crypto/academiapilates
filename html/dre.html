@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DRE | Estúdio Rafaela Lisboa</title>
+
+    <!-- Fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Ícones -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Bibliotecas para exportação -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <!-- CSS externo -->
+    <link rel="stylesheet" href="../css/dre.css" />
+  </head>
+  <body>
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Calculando DRE...</p>
+    </div>
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-content">
+        <div class="logo-area">
+          <a href="../index.html" class="logo-icon"
+            ><i class="fas fa-spa"></i
+          ></a>
+          <div class="logo-text">
+            <h1>ESTÚDIO RAFAELA LISBOA</h1>
+            <span>Demonstrativo de Resultados</span>
+          </div>
+        </div>
+        <div class="user-area">
+          <div class="user-info">
+            <div class="user-name" id="userName">Carregando...</div>
+            <div class="user-role" id="userRole">Financeiro</div>
+          </div>
+          <div class="user-avatar" id="userAvatar">?</div>
+          <button
+            class="btn-icon"
+            id="notificationBell"
+            onclick="abrirListaNotificacoes()"
+            title="Notificações"
+          >
+            <i class="fas fa-bell"></i>
+            <span
+              id="notificationBadge"
+              class="badge"
+              style="display: none"
+            ></span>
+          </button>
+          <button class="btn-icon" onclick="fazerLogout()" title="Sair">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>Demonstrativo de Resultados (DRE)</h1>
+          <div class="subtitle">
+            Análise detalhada da performance financeira
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="btn-outline" onclick="exportarPDF()">
+            <i class="fas fa-file-pdf"></i> Exportar PDF
+          </button>
+          <button class="btn-outline" onclick="exportarExcel()">
+            <i class="fas fa-file-excel"></i> Exportar Excel
+          </button>
+        </div>
+      </div>
+
+      <!-- SELETOR DE PERÍODO -->
+      <div class="periodo-selector">
+        <div class="periodo-info">
+          <i class="fas fa-calendar-alt"></i>
+          <div>
+            <span class="periodo-atual" id="periodoAtual">Carregando...</span>
+            <span class="periodo-anterior" id="periodoAnterior"></span>
+          </div>
+        </div>
+        <div class="periodo-actions">
+          <button class="btn-outline" onclick="abrirSelecionarMes()">
+            <i class="fas fa-calendar"></i> Mês
+          </button>
+          <button class="btn-outline" onclick="abrirSelecionarPeriodo()">
+            <i class="fas fa-calendar-alt"></i> Período
+          </button>
+          <button class="btn-outline" onclick="aplicarAcumuladoAno()">
+            <i class="fas fa-chart-line"></i> Acumulado do Ano
+          </button>
+          <select
+            id="comparacaoTipo"
+            class="filter-select"
+            style="width: auto"
+            onchange="mudarComparacao()"
+          >
+            <option value="mes_anterior">Mês anterior</option>
+            <option value="ano_passado">Mesmo mês ano passado</option>
+            <option value="media_12">Média últimos 12 meses</option>
+          </select>
+          <button
+            class="btn-outline"
+            onclick="alternarComparacao()"
+            id="btnComparacao"
+          >
+            <i class="fas fa-chart-line"></i> Comparar
+          </button>
+        </div>
+      </div>
+
+      <!-- ABA DE VISUALIZAÇÃO -->
+      <div class="tabs-container">
+        <button class="tab-btn active" data-tab="principal">
+          DRE Principal
+        </button>
+        <button class="tab-btn" data-tab="projecao">Projeção (Forecast)</button>
+        <button class="tab-btn" data-tab="historico">Histórico Mensal</button>
+      </div>
+
+      <!-- PAINEL DE DIAGNÓSTICO AUTOMÁTICO -->
+      <div class="diagnostico-container" id="diagnosticoContainer"></div>
+
+      <!-- CARDS DE RESUMO (primeira linha) -->
+      <div class="stats-grid" id="resumoContainer"></div>
+
+      <!-- INDICADORES DE SAÚDE FINANCEIRA (novos) -->
+      <div class="indicadores-saude" id="indicadoresSaudeContainer"></div>
+
+      <!-- INDICADORES (KPIs) com tooltips -->
+      <div class="indicadores-grid" id="indicadoresContainer"></div>
+
+      <!-- PONTO DE EQUILÍBRIO -->
+      <div class="break-even-card" id="breakEvenContainer"></div>
+
+      <!-- CONTEÚDO DA ABA PRINCIPAL -->
+      <div id="tabPrincipal" class="tab-content active">
+        <div class="dre-container">
+          <table class="dre-tabela" id="tabelaDRE">
+            <thead>
+              <tr>
+                <th>Descrição</th>
+                <th>Valor (R$)</th>
+                <th id="thComparacao" style="display: none">Comparação</th>
+                <th id="thVariacao" style="display: none">Variação</th>
+                <th id="thMeta" style="display: none">Meta (R$)</th>
+                <th id="thAtingimento" style="display: none">Atingimento</th>
+              </tr>
+            </thead>
+            <tbody id="dreBody">
+              <!-- Preenchido via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- RANKING DE DESPESAS (clicável por categoria) -->
+        <div class="ranking-card">
+          <h3 class="chart-title">
+            <i
+              class="fas fa-chart-bar"
+              style="color: var(--roxo-celebracao)"
+            ></i>
+            Top Despesas do Período
+          </h3>
+          <div id="rankingDespesas" class="ranking-list"></div>
+        </div>
+
+        <!-- GRÁFICOS -->
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3 class="chart-title">
+                <i
+                  class="fas fa-chart-line"
+                  style="color: var(--verde-principal)"
+                ></i>
+                Evolução Mensal (Receitas, Despesas, Lucro)
+              </h3>
+            </div>
+            <div class="chart-wrapper">
+              <canvas id="graficoEvolucao"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3 class="chart-title">
+                <i
+                  class="fas fa-chart-pie"
+                  style="color: var(--roxo-celebracao)"
+                ></i>
+                Composição das Receitas
+              </h3>
+            </div>
+            <div class="chart-wrapper">
+              <canvas id="graficoComposicao"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABA PROJEÇÃO (FORECAST) -->
+      <div id="tabProjecao" class="tab-content">
+        <div class="forecast-container">
+          <h3>Projeção de Resultados (Próximos 12 Meses)</h3>
+          <div class="forecast-controls">
+            <label
+              ><input type="checkbox" id="considerarRecorrentes" checked />
+              Considerar contas recorrentes</label
+            >
+            <label
+              ><input
+                type="checkbox"
+                id="considerarMensalidadesAtivas"
+                checked
+              />
+              Considerar mensalidades ativas</label
+            >
+            <button class="btn-outline" onclick="calcularProjecao()">
+              Atualizar Projeção
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="forecast-tabela" id="tabelaProjecao">
+              <thead>
+                <tr>
+                  <th>Mês</th>
+                  <th>Receita Projetada</th>
+                  <th>Despesa Projetada</th>
+                  <th>Resultado Projetado</th>
+                  <th>Margem Projetada</th>
+                </tr>
+              </thead>
+              <tbody id="projecaoBody">
+                <tr>
+                  <td colspan="5" style="text-align: center">
+                    Clique em "Atualizar Projeção" para gerar
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="forecast-summary" id="projecaoResumo"></div>
+        </div>
+      </div>
+
+      <!-- ABA HISTÓRICO (comparativo anual) -->
+      <div id="tabHistorico" class="tab-content">
+        <div class="historico-container">
+          <h3>Histórico Mensal (últimos 12 meses)</h3>
+          <div class="table-responsive">
+            <table class="historico-tabela" id="tabelaHistorico">
+              <thead id="historicoHeader">
+                <tr>
+                  <th>Descrição</th>
+                  <!-- meses serão inseridos via JS -->
+                </tr>
+              </thead>
+              <tbody id="historicoBody">
+                <tr>
+                  <td colspan="13" style="text-align: center">
+                    Carregando histórico...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- MODAL SELECIONAR MÊS -->
+    <div class="modal" id="modalSelecionarMes">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h3 class="modal-title">Selecionar Mês</h3>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalSelecionarMes')"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom: 1rem">
+            <label class="form-label">Mês</label>
+            <select class="form-control" id="mesSelecionado">
+              <option value="1">Janeiro</option>
+              <option value="2">Fevereiro</option>
+              <option value="3">Março</option>
+              <option value="4">Abril</option>
+              <option value="5">Maio</option>
+              <option value="6">Junho</option>
+              <option value="7">Julho</option>
+              <option value="8">Agosto</option>
+              <option value="9">Setembro</option>
+              <option value="10">Outubro</option>
+              <option value="11">Novembro</option>
+              <option value="12">Dezembro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ano</label>
+            <select class="form-control" id="anoSelecionado"></select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalSelecionarMes')"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="aplicarMes()">Aplicar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL SELECIONAR PERÍODO -->
+    <div class="modal" id="modalSelecionarPeriodo">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h3 class="modal-title">Selecionar Período</h3>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalSelecionarPeriodo')"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Data Início</label>
+            <input type="date" class="form-control" id="periodoInicio" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Data Fim</label>
+            <input type="date" class="form-control" id="periodoFim" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalSelecionarPeriodo')"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="aplicarPeriodo()">
+            Aplicar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL GESTÃO DE METAS -->
+    <div class="modal" id="modalMetas">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h3 class="modal-title">Gerenciar Metas</h3>
+          <button class="close-modal" onclick="fecharModal('modalMetas')">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="formMetas">
+            <div class="form-group">
+              <label class="form-label">Meta de Receita (R$)</label>
+              <input
+                type="number"
+                step="0.01"
+                class="form-control"
+                id="metaReceita"
+                placeholder="0,00"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Meta de Lucro (R$)</label>
+              <input
+                type="number"
+                step="0.01"
+                class="form-control"
+                id="metaLucro"
+                placeholder="0,00"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Meta de Margem (%)</label>
+              <input
+                type="number"
+                step="0.1"
+                class="form-control"
+                id="metaMargem"
+                placeholder="0"
+              />
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalMetas')">
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="salvarMetas()">
+            Salvar Metas
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DETALHES (DRILL-DOWN) -->
+    <div class="modal" id="modalDetalhes">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title" id="detalhesTitulo">Detalhes</h3>
+          <button class="close-modal" onclick="fecharModal('modalDetalhes')">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body" id="detalhesBody"></div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalDetalhes')">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL NOTIFICAÇÕES -->
+    <div id="modalNotificacoes" class="modal">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h2 class="modal-title">Notificações</h2>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalNotificacoes')"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body" id="listaNotificacoesBody"></div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalNotificacoes')"
+          >
+            Fechar
+          </button>
+          <button class="btn-primary" onclick="marcarTodasComoLidas()">
+            Marcar todas como lidas
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- JavaScript externo -->
+    <script src="../js/dre.js"></script>
+  </body>
+</html>

@@ -1,0 +1,1013 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mensalidades | Estúdio Rafaela Lisboa</title>
+
+    <!-- Fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Ícones -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Chart.js (para os gráficos) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Bibliotecas para exportação -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <!-- CSS externo -->
+    <link rel="stylesheet" href="../css/mensalidades.css" />
+
+    <style>
+      /* Estilos provisórios para as novas classes – devem ser movidos para o CSS externo */
+      .avatar-placeholder {
+        width: 30px;
+        height: 30px;
+        background: var(--verde-pastel);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--verde-principal);
+        font-size: 1rem;
+      }
+      .avatar-placeholder i {
+        margin: 0;
+      }
+      .parcela-pago {
+        background-color: rgba(39, 174, 96, 0.1) !important;
+      }
+      .parcela-pendente {
+        background-color: rgba(243, 156, 18, 0.1) !important;
+      }
+      .parcela-atrasado {
+        background-color: rgba(231, 76, 60, 0.1) !important;
+      }
+      .saldo-devedor {
+        font-weight: 600;
+        color: var(--vermelho-urgente);
+      }
+      .dashboard-section {
+        background: var(--branco);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 1.5rem;
+      }
+      .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+      .dashboard-title {
+        font-family: var(--font-titulos);
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--grafite);
+      }
+      .dashboard-charts {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+      @media (max-width: 768px) {
+        .dashboard-charts {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Carregando...</p>
+    </div>
+
+    <header class="header">
+      <div class="header-content">
+        <div class="logo-area">
+          <a href="../index.html" class="logo-icon"
+            ><i class="fas fa-spa"></i
+          ></a>
+          <div class="logo-text">
+            <h1>ESTÚDIO RAFAELA LISBOA</h1>
+            <span>Mensalidades</span>
+          </div>
+        </div>
+        <div class="user-area">
+          <div class="user-info">
+            <div class="user-name" id="userName">Carregando...</div>
+            <div class="user-role" id="userRole">Financeiro</div>
+          </div>
+          <div class="user-avatar" id="userAvatar">?</div>
+          <button class="btn-icon" onclick="fazerLogout()" title="Sair">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>Mensalidades</h1>
+          <div class="subtitle" id="totalMensalidades">Carregando...</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn-outline" onclick="abrirRelatorioInadimplencia()">
+            <i class="fas fa-chart-line"></i> Relatório de Inadimplência
+          </button>
+          <button class="btn-outline" onclick="exportarPDF()">
+            <i class="fas fa-file-pdf"></i> PDF
+          </button>
+          <button class="btn-outline" onclick="exportarExcel()">
+            <i class="fas fa-file-excel"></i> Excel
+          </button>
+          <button class="btn-outline" onclick="abrirModalImportacao()">
+            <i class="fas fa-upload"></i> Importar (XLS)
+          </button>
+          <button class="btn-primary" onclick="abrirModalMensalidade()">
+            <i class="fas fa-plus"></i> Nova Mensalidade
+          </button>
+        </div>
+      </div>
+
+      <div class="stats-grid" id="resumoContainer"></div>
+
+      <div class="chart-card" style="margin-bottom: 1.5rem">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <i
+              class="fas fa-chart-bar"
+              style="color: var(--verde-principal)"
+            ></i>
+            Previsão de Recebimento (próximos 6 meses)
+          </h3>
+        </div>
+        <div class="chart-wrapper" style="height: 200px">
+          <canvas id="graficoPrevisao"></canvas>
+        </div>
+      </div>
+
+      <div class="stats-grid-2" id="cardsSecundarios"></div>
+
+      <!-- DASHBOARD EXECUTIVO -->
+      <div class="dashboard-section">
+        <div class="dashboard-header">
+          <h3 class="dashboard-title">
+            <i class="fas fa-chalkboard-user"></i> Dashboard Executivo
+          </h3>
+          <button
+            class="btn-icon"
+            id="toggleDashboardBtn"
+            onclick="toggleDashboard()"
+          >
+            <i class="fas fa-chevron-up"></i>
+          </button>
+        </div>
+        <div id="dashboardContent">
+          <div class="stats-grid" style="margin-bottom: 1rem">
+            <!-- Cards do dashboard serão preenchidos via JS -->
+          </div>
+          <div class="dashboard-charts">
+            <div class="compact-card">
+              <div class="compact-title">Receita Realizada vs Projetada</div>
+              <canvas id="graficoRealizadoProjetado" height="200"></canvas>
+            </div>
+            <div class="compact-card">
+              <div class="compact-title">Evolução do MRR</div>
+              <canvas id="graficoEvolucaoMRR" height="200"></canvas>
+            </div>
+          </div>
+          <div class="stats-grid-2" style="margin-bottom: 0">
+            <div class="compact-card">
+              <div class="compact-title">Distribuição por Plano</div>
+              <canvas id="graficoPlanos" height="200"></canvas>
+            </div>
+            <div class="compact-card">
+              <div class="compact-title">Top 5 Devedores</div>
+              <div id="topDevedoresList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="filters-advanced">
+        <div class="filters-title"><i class="fas fa-filter"></i> Filtros</div>
+        <div class="filters-grid">
+          <div class="filter-group">
+            <label class="filter-label">Buscar Aluno</label>
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input
+                type="text"
+                id="searchInput"
+                placeholder="Nome do aluno..."
+                oninput="filtrarMensalidades()"
+              />
+            </div>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Status</label>
+            <select
+              class="filter-select"
+              id="statusFilter"
+              onchange="filtrarMensalidades()"
+            >
+              <option value="">Todos</option>
+              <option value="pago">Pago</option>
+              <option value="pendente">Pendente</option>
+              <option value="atrasado">Atrasado</option>
+              <option value="parcial">Parcial</option>
+              <option value="cancelada">Cancelada</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Vencimento</label>
+            <select
+              class="filter-select"
+              id="vencimentoFilter"
+              onchange="filtrarMensalidades()"
+            >
+              <option value="">Todos</option>
+              <option value="hoje">Vence hoje</option>
+              <option value="semana">Vence esta semana</option>
+              <option value="mes">Vence este mês</option>
+              <option value="proximo-mes">Vence no próximo mês</option>
+              <option value="vencidas-30">Vencidas há mais de 30 dias</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <div class="table-header">
+          <h3 class="table-title">Todas as Mensalidades</h3>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th onclick="ordenarPor('aluno')">
+                  Aluno <i class="fas fa-sort" id="sortAluno"></i>
+                </th>
+                <th onclick="ordenarPor('plano')">
+                  Plano <i class="fas fa-sort" id="sortPlano"></i>
+                </th>
+                <th onclick="ordenarPor('valor')">
+                  Valor Total <i class="fas fa-sort" id="sortValor"></i>
+                </th>
+                <th>Parcelas</th>
+                <th onclick="ordenarPor('proximoVenc')">
+                  Próximo Venc. <i class="fas fa-sort" id="sortProximo"></i>
+                </th>
+                <th onclick="ordenarPor('aReceber')">
+                  Valor a Receber <i class="fas fa-sort" id="sortAReceber"></i>
+                </th>
+                <th>Saldo Devedor</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaMensalidades"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <!-- MODAL NOVA MENSALIDADE -->
+    <div class="modal" id="modalMensalidade">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalMensalidadeTitle">
+            Nova Mensalidade
+          </h2>
+          <button class="close-modal" onclick="fecharModal('modalMensalidade')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div
+            id="unlockEditContainer"
+            style="display: none; margin-bottom: 15px"
+          >
+            <button type="button" class="btn-warning" id="unlockEditBtn">
+              <i class="fas fa-unlock-alt"></i> Liberar edição (campos críticos)
+            </button>
+            <small
+              style="
+                display: block;
+                color: var(--grafite-claro);
+                margin-top: 5px;
+              "
+            >
+              Ao liberar, você poderá alterar valores e datas. Isto pode afetar
+              parcelas já geradas.
+            </small>
+          </div>
+
+          <form
+            id="formMensalidade"
+            onsubmit="
+              event.preventDefault();
+              salvarMensalidade();
+            "
+          >
+            <input type="hidden" id="mensalidadeId" />
+            <input type="hidden" id="mensalidadeDescontoSalvo" value="0" />
+
+            <div class="form-group">
+              <label class="form-label required">Aluno</label>
+              <div class="aluno-search-container">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="buscaAlunoInput"
+                  placeholder="Digite nome ou CPF..."
+                  autocomplete="off"
+                  oninput="buscarAluno()"
+                />
+                <div id="alunoSearchResults" class="aluno-search-results"></div>
+              </div>
+              <div
+                id="alunoMiniatura"
+                class="aluno-miniatura"
+                style="display: none"
+              >
+                <div id="alunoFotoContainer" class="avatar-placeholder">
+                  <i class="fas fa-user"></i>
+                </div>
+                <span id="alunoNomeSelecionado"></span>
+              </div>
+              <input type="hidden" id="mensalidadeAlunoId" />
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label required">Plano</label>
+                <select class="form-control" id="mensalidadePlano" required>
+                  <option value="">Selecione um plano</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label required">Nº de Parcelas</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="mensalidadeParcelas"
+                  min="1"
+                  max="12"
+                  value="1"
+                  oninput="calcularValoresMensalidade()"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Valor Total (R$)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="mensalidadeValorTotal"
+                  step="0.01"
+                  oninput="calcularValoresMensalidade()"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Valor de Cada Parcela (R$)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="mensalidadeValorParcela"
+                  step="0.01"
+                  oninput="calcularValoresMensalidade()"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Desconto (%)</label>
+              <input
+                type="number"
+                class="form-control"
+                id="mensalidadeDesconto"
+                step="0.1"
+                min="0"
+                max="100"
+                value="0"
+                oninput="calcularValoresMensalidade()"
+              />
+            </div>
+
+            <div
+              class="form-group"
+              style="
+                background: var(--verde-pastel);
+                padding: 0.8rem;
+                border-radius: 8px;
+              "
+            >
+              <div style="display: flex; justify-content: space-between">
+                <span>Total com desconto:</span>
+                <span id="totalComDesconto">R$ 0,00</span>
+              </div>
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  margin-top: 0.3rem;
+                "
+              >
+                <span>Valor de cada parcela com desconto:</span>
+                <span id="parcelaComDesconto">R$ 0,00</span>
+              </div>
+              <div id="descontoDetalhes" style="margin-top: 0.5rem"></div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label required">1º Vencimento</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="mensalidadeVencimento"
+                  onchange="calcularValoresMensalidade()"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Dia das demais parcelas</label>
+                <div style="display: flex; gap: 0.5rem; align-items: center">
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="diaDemaisParcelas"
+                    min="1"
+                    max="31"
+                    style="width: 80px"
+                    oninput="calcularValoresMensalidade()"
+                  />
+                  <span
+                    >(deixe em branco para usar o mesmo dia do 1º
+                    vencimento)</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Observações</label>
+              <textarea
+                class="form-textarea"
+                id="mensalidadeObs"
+                rows="2"
+              ></textarea>
+            </div>
+
+            <div
+              id="parcelasContainer"
+              class="parcelas-container"
+              style="display: none"
+            >
+              <div class="parcelas-title">
+                <i class="fas fa-list-ol"></i> Pré-visualização das Parcelas
+              </div>
+              <div id="listaParcelas"></div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalMensalidade')"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="salvarMensalidade()">
+            <i class="fas fa-save"></i> Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DETALHES DA MENSALIDADE -->
+    <div class="modal" id="modalDetalhesMensalidade">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Detalhes da Mensalidade</h2>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalDetalhesMensalidade')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body" id="detalhesMensalidadeBody"></div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalDetalhesMensalidade')"
+          >
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL BAIXA PARCELA -->
+    <div class="modal" id="modalBaixaParcela">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h2 class="modal-title">Registrar Pagamento</h2>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalBaixaParcela')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="formBaixa" onsubmit="event.preventDefault()">
+            <input type="hidden" id="baixaParcelaId" />
+            <div class="form-group">
+              <label class="form-label required">Data do Pagamento</label>
+              <input type="date" class="form-control" id="baixaData" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Valor Recebido (R$)</label>
+              <input
+                type="number"
+                class="form-control"
+                id="baixaValor"
+                step="0.01"
+                readonly
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Forma de Pagamento</label>
+              <select class="form-control" id="baixaForma" required>
+                <option value="PIX">PIX</option>
+                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Transferência">Transferência</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Observações (opcional)</label>
+              <textarea class="form-textarea" id="baixaObs" rows="2"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalBaixaParcela')"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="registrarBaixa()">
+            <i class="fas fa-check"></i> Confirmar Pagamento
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL BAIXA LOTE -->
+    <div class="modal" id="modalBaixaLote">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h2 class="modal-title">Pagar parcelas selecionadas</h2>
+          <button class="close-modal" onclick="fecharModal('modalBaixaLote')">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="formBaixaLote" onsubmit="event.preventDefault()">
+            <input type="hidden" id="loteIds" value="" />
+            <div class="form-group">
+              <label class="form-label required">Data do Pagamento</label>
+              <input type="date" class="form-control" id="loteData" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Forma de Pagamento</label>
+              <select class="form-control" id="loteForma" required>
+                <option value="PIX">PIX</option>
+                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Transferência">Transferência</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Observações (opcional)</label>
+              <textarea class="form-textarea" id="loteObs" rows="2"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalBaixaLote')">
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="registrarBaixaLote()">
+            <i class="fas fa-check"></i> Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL EDITAR PARCELA -->
+    <div class="modal" id="modalEditarParcela">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h2 class="modal-title">Editar Parcela</h2>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalEditarParcela')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="formEditarParcela" onsubmit="event.preventDefault()">
+            <input type="hidden" id="editarParcelaId" />
+            <div class="form-group">
+              <label class="form-label">Valor (R$)</label>
+              <input
+                type="number"
+                class="form-control"
+                id="editarParcelaValor"
+                step="0.01"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Vencimento</label>
+              <input
+                type="date"
+                class="form-control"
+                id="editarParcelaVencimento"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select class="form-control" id="editarParcelaStatus">
+                <option value="pendente">Pendente</option>
+                <option value="pago">Pago</option>
+                <option value="atrasado">Atrasado</option>
+                <option value="parcial">Parcial</option>
+                <option value="cancelada">Cancelada</option>
+              </select>
+            </div>
+            <div
+              class="form-group"
+              id="grupoDataPagamento"
+              style="display: none"
+            >
+              <label class="form-label">Data de Pagamento</label>
+              <input
+                type="date"
+                class="form-control"
+                id="editarParcelaDataPagamento"
+              />
+            </div>
+            <div class="form-group" id="grupoForma" style="display: none">
+              <label class="form-label">Forma de Pagamento</label>
+              <select class="form-control" id="editarParcelaForma">
+                <option value="PIX">PIX</option>
+                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Transferência">Transferência</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Observações</label>
+              <textarea
+                class="form-textarea"
+                id="editarParcelaObs"
+                rows="2"
+              ></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalEditarParcela')"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="salvarEdicaoParcela()">
+            <i class="fas fa-save"></i> Salvar Alterações
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL RELATÓRIO DE INADIMPLÊNCIA -->
+    <div class="modal" id="modalRelatorioInadimplencia">
+      <div class="modal-content" style="max-width: 1000px">
+        <div class="modal-header">
+          <h2 class="modal-title">Relatório de Inadimplência</h2>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalRelatorioInadimplencia')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div
+            style="
+              display: flex;
+              gap: 1rem;
+              margin-bottom: 1.5rem;
+              flex-wrap: wrap;
+            "
+          >
+            <div class="filter-group">
+              <label>Mês inicial</label>
+              <input type="month" id="iniMes" class="form-control" />
+            </div>
+            <div class="filter-group">
+              <label>Mês final</label>
+              <input type="month" id="fimMes" class="form-control" />
+            </div>
+            <button
+              class="btn-primary"
+              onclick="carregarRelatorioInadimplencia()"
+            >
+              Aplicar
+            </button>
+          </div>
+          <canvas id="graficoInadimplencia" height="200"></canvas>
+          <div class="table-responsive" style="margin-top: 1.5rem">
+            <table class="tabela-inadimplencia">
+              <thead>
+                <tr>
+                  <th>Aluno</th>
+                  <th>Total em atraso</th>
+                  <th>Qtd. parcelas atrasadas</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaInadimplenciaBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="exportarRelatorioInadimplenciaPDF()"
+          >
+            PDF
+          </button>
+          <button
+            class="btn-secondary"
+            onclick="exportarRelatorioInadimplenciaExcel()"
+          >
+            Excel
+          </button>
+          <button
+            class="btn-primary"
+            onclick="fecharModal('modalRelatorioInadimplencia')"
+          >
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL IMPORTAÇÃO XLS/CSV -->
+    <div class="modal" id="modalImportacao">
+      <div class="modal-content" style="max-width: 900px">
+        <div class="modal-header">
+          <h2 class="modal-title">Importar Mensalidades (XLS/CSV)</h2>
+          <button class="close-modal" onclick="fecharModal('modalImportacao')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div
+            class="file-upload-area"
+            style="
+              margin-bottom: 1rem;
+              padding: 1rem;
+              border: 2px dashed var(--verde-claro);
+              border-radius: 12px;
+              text-align: center;
+            "
+          >
+            <input
+              type="file"
+              id="arquivoImportacao"
+              accept=".xlsx,.xls,.csv"
+              style="display: none"
+              onchange="processarArquivoImportacao(this.files[0])"
+            />
+            <button
+              class="btn-outline"
+              onclick="document.getElementById('arquivoImportacao').click()"
+            >
+              <i class="fas fa-file-excel"></i> Selecionar arquivo
+            </button>
+            <p style="font-size: 0.8rem; margin-top: 0.5rem">
+              Formatos aceitos: .xlsx, .xls, .csv
+            </p>
+          </div>
+          <div id="previewImportacaoContainer" style="display: none">
+            <h3 style="font-size: 1rem; margin-bottom: 0.5rem">
+              Prévia dos dados
+            </h3>
+            <div
+              class="table-responsive"
+              style="max-height: 300px; overflow-y: auto"
+            >
+              <table
+                class="preview-table"
+                style="width: 100%; border-collapse: collapse"
+              >
+                <thead id="previewHeader"></thead>
+                <tbody id="previewBody"></tbody>
+              </table>
+            </div>
+            <div class="filter-group" style="margin-top: 1rem">
+              <label class="filter-label">Mapeamento de colunas</label>
+              <div
+                id="mapeamentoColunas"
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                  gap: 0.5rem;
+                "
+              ></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalImportacao')"
+          >
+            Cancelar
+          </button>
+          <button
+            class="btn-primary"
+            id="btnConfirmarImportacao"
+            onclick="confirmarImportacao()"
+            disabled
+          >
+            Confirmar Importação
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL CANCELAMENTO COM ESTORNO -->
+    <div class="modal" id="modalCancelamento">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h2 class="modal-title">Cancelar Mensalidade</h2>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalCancelamento')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="formCancelamento" onsubmit="event.preventDefault()">
+            <input type="hidden" id="cancelamentoMensalidadeId" />
+            <div class="form-group">
+              <label class="form-label required">Tipo de cancelamento</label>
+              <div style="display: flex; gap: 1rem">
+                <label style="display: flex; align-items: center; gap: 0.5rem">
+                  <input
+                    type="radio"
+                    name="tipoCancelamento"
+                    value="sem_estorno"
+                    checked
+                  />
+                  Sem estorno
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem">
+                  <input
+                    type="radio"
+                    name="tipoCancelamento"
+                    value="com_estorno"
+                  />
+                  Com estorno
+                </label>
+              </div>
+            </div>
+            <div
+              class="form-group"
+              id="grupoValorEstorno"
+              style="display: none"
+            >
+              <label class="form-label">Valor a estornar (R$)</label>
+              <input
+                type="number"
+                class="form-control"
+                id="valorEstorno"
+                step="0.01"
+                readonly
+                style="background: var(--off-white)"
+              />
+              <small
+                >Total já pago até a data de cancelamento (sem multas).</small
+              >
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Data do cancelamento</label>
+              <input
+                type="date"
+                class="form-control"
+                id="cancelamentoData"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Motivo (opcional)</label>
+              <textarea
+                class="form-textarea"
+                id="cancelamentoMotivo"
+                rows="2"
+                placeholder="Ex: desistência, mudança de plano, etc."
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Observações</label>
+              <textarea
+                class="form-textarea"
+                id="cancelamentoObs"
+                rows="2"
+              ></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalCancelamento')"
+          >
+            Cancelar
+          </button>
+          <button class="btn-danger" onclick="confirmarCancelamento()">
+            <i class="fas fa-ban"></i> Confirmar Cancelamento
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL CONFIRMAR EXCLUSÃO -->
+    <div class="modal" id="modalConfirmar">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h2 class="modal-title">Confirmar Exclusão</h2>
+          <button class="close-modal" onclick="fecharModal('modalConfirmar')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p
+            id="confirmarMensagem"
+            style="font-size: 0.95rem; line-height: 1.6"
+          ></p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalConfirmar')">
+            Cancelar
+          </button>
+          <button class="btn-danger" id="confirmarBotao">
+            <i class="fas fa-trash"></i> Excluir
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Script principal -->
+    <script src="../js/mensalidades.js"></script>
+  </body>
+</html>

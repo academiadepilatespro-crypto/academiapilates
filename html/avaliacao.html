@@ -1,0 +1,1064 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Avaliação Detalhada do Aluno | Pilates Nobility</title>
+
+    <!-- Fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Ícones -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Bibliotecas para exportação -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <!-- CSS externo -->
+    <link rel="stylesheet" href="../css/avaliacao.css" />
+  </head>
+
+  <body>
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Carregando...</p>
+    </div>
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-content">
+        <div class="logo-area">
+          <a href="../index.html" class="logo-icon">
+            <i class="fas fa-spa"></i>
+          </a>
+          <div class="logo-text">
+            <h1>Pilates Nobility</h1>
+            <span>Avaliação Detalhada</span>
+          </div>
+        </div>
+        <div class="user-area">
+          <div class="user-info">
+            <div class="user-name" id="userName">Instrutor</div>
+            <div class="user-role">Avaliação</div>
+          </div>
+          <div class="user-avatar" id="userAvatar">I</div>
+          <button class="btn-icon" onclick="fazerLogout()" title="Sair">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>Avaliação Detalhada do Aluno</h1>
+          <p class="subtitle">Conhecer profundamente para treinar melhor</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem">
+          <button class="btn-success" onclick="salvarAvaliacao()">
+            <i class="fas fa-save"></i> Salvar
+          </button>
+          <button class="btn-outline" onclick="exportarPDF()">
+            <i class="fas fa-file-pdf"></i> PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- SELETOR DE ALUNO -->
+      <div class="aluno-selector-bar">
+        <div class="aluno-selector">
+          <i class="fas fa-user"></i>
+          <select id="seletorAluno" onchange="selecionarAluno()">
+            <option value="">Selecione um aluno...</option>
+          </select>
+        </div>
+        <div class="busca-aluno">
+          <i class="fas fa-search"></i>
+          <input
+            type="text"
+            id="buscaAluno"
+            placeholder="Buscar por nome ou CPF..."
+            autocomplete="off"
+            onkeyup="buscarAlunosTempoReal()"
+          />
+          <div class="busca-resultados" id="buscaResultados"></div>
+        </div>
+        <button class="btn-outline" onclick="novaAvaliacao()">
+          <i class="fas fa-plus"></i> Nova Avaliação
+        </button>
+      </div>
+
+      <!-- BARRA DE PROGRESSO -->
+      <div class="progress-section" id="progressSection">
+        <div class="progress-stats">
+          <div class="progress-stat-item">
+            <div class="progress-stat-value" id="progressPercent">0%</div>
+            <div class="progress-stat-label">Preenchido</div>
+          </div>
+          <div class="progress-stat-item">
+            <div class="progress-stat-value" id="progressCompleted">0</div>
+            <div class="progress-stat-label">Seções</div>
+          </div>
+          <div class="progress-stat-item">
+            <div class="progress-stat-value" id="progressTotal">9</div>
+            <div class="progress-stat-label">Total</div>
+          </div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-header">
+            <span>Progresso da Avaliação</span>
+            <span id="progressText">0/9 seções</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div
+              class="progress-bar-fill"
+              id="progressBar"
+              style="width: 0%"
+            ></div>
+          </div>
+        </div>
+        <div class="next-steps" id="nextSteps">
+          <i class="fas fa-arrow-right"></i>
+          <span>Próximo: Informações Básicas</span>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab active" onclick="mudarTab('form')">
+          <i class="fas fa-edit"></i> Nova Avaliação
+        </button>
+        <button class="tab" onclick="mudarTab('historico')">
+          <i class="fas fa-history"></i> Histórico de Avaliações
+        </button>
+      </div>
+
+      <!-- TAB 1: FORMULÁRIO DE AVALIAÇÃO -->
+      <div id="tabForm" class="tab-pane active">
+        <form id="formAvaliacao">
+          <!-- SEÇÃO 1: INFORMAÇÕES BÁSICAS DO ALUNO -->
+          <div class="avaliacao-section" id="secao1">
+            <div class="section-header" onclick="toggleSection('secao1')">
+              <div class="section-header-left">
+                <div class="section-icon">
+                  <i class="fas fa-user-circle"></i>
+                </div>
+                <span class="section-title">Informações Básicas do Aluno</span>
+                <span class="section-status incompleto" id="status1"
+                  >Incompleto</span
+                >
+              </div>
+              <i class="fas fa-chevron-down section-arrow" id="arrow1"></i>
+            </div>
+            <div class="section-content" id="content1">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label required">Nome do Aluno</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="nomeAluno"
+                    placeholder="Nome do aluno"
+                    readonly
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label required">Data de Nascimento</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="dataNascimento"
+                    readonly
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">CPF</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="cpf"
+                    placeholder="CPF do aluno"
+                    readonly
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label required"
+                    >Contato (Telefone/Email)</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="contato"
+                    placeholder="Contato do aluno"
+                    readonly
+                  />
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Profissão / Ocupação</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="profissao"
+                    placeholder="Profissão do aluno"
+                    readonly
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Objetivo Principal</label>
+                  <select
+                    class="form-select"
+                    id="objetivoPrincipal"
+                    onchange="calcularProgresso()"
+                  >
+                    <option value="">Selecione...</option>
+                    <option value="emagrecimento">Emagrecimento</option>
+                    <option value="ganho-massa">Ganho de Massa Muscular</option>
+                    <option value="reabilitacao">Reabilitação</option>
+                    <option value="flexibilidade">Flexibilidade</option>
+                    <option value="postura">Correção de Postura</option>
+                    <option value="bem-estar">Bem-estar Geral</option>
+                    <option value="performance">Performance Esportiva</option>
+                    <option value="outro">Outro</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Tempo de Prática de Pilates</label>
+                  <select
+                    class="form-select"
+                    id="tempoExperiencia"
+                    onchange="calcularProgresso()"
+                  >
+                    <option value="">Selecione...</option>
+                    <option value="primeira-vez">Primeira vez</option>
+                    <option value="menos-3-meses">Menos de 3 meses</option>
+                    <option value="3-6-meses">3 a 6 meses</option>
+                    <option value="6-12-meses">6 a 12 meses</option>
+                    <option value="1-2-anos">1 a 2 anos</option>
+                    <option value="mais-2-anos">Mais de 2 anos</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SEÇÃO 2: HISTÓRICO MÉDICO E EXAMES -->
+          <div class="avaliacao-section" id="secao2">
+            <div class="section-header" onclick="toggleSection('secao2')">
+              <div class="section-header-left">
+                <div class="section-icon">
+                  <i class="fas fa-stethoscope"></i>
+                </div>
+                <span class="section-title">Histórico Médico e Exames</span>
+                <span class="section-status incompleto" id="status2"
+                  >Incompleto</span
+                >
+              </div>
+              <i class="fas fa-chevron-down section-arrow" id="arrow2"></i>
+            </div>
+            <div class="section-content" id="content2">
+              <div class="form-grid">
+                <div class="form-group full-width">
+                  <label class="form-label"
+                    >Médico Responsável / Cardiologista</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="medicoResponsavel"
+                    placeholder="Nome do médico e especialidade"
+                    onchange="calcularProgresso()"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Data do Último Checkup</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="dataCheckup"
+                    onchange="calcularProgresso()"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Pressão Arterial (mmHg)</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="pressaoArterial"
+                    placeholder="Ex: 120/80"
+                    onchange="calcularProgresso()"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Frequência Cardíaca (bpm)</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="frequenciaCardiaca"
+                    placeholder="Ex: 72"
+                    onchange="calcularProgresso()"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Peso Atual (kg)</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="pesoAtual"
+                    placeholder="Ex: 70"
+                    step="0.1"
+                    onchange="calcularProgresso()"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Altura (cm)</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="altura"
+                    placeholder="Ex: 170"
+                    onchange="calcularProgresso()"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">IMC</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="imc"
+                    placeholder="Calculado automaticamente"
+                    readonly
+                  />
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Exames Recentes</label>
+                  <div class="checkbox-group">
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="exameECG"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="exameECG">ECG (Eletrocardiograma)</label>
+                    </div>
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="exameErgometria"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="exameErgometria"
+                        >Teste de Esforço / Ergometria</label
+                      >
+                    </div>
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="exameRaioX"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="exameRaioX"
+                        >Raio-X (Coluna/Articulações)</label
+                      >
+                    </div>
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="exameRessonancia"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="exameRessonancia"
+                        >Ressonância Magnética</label
+                      >
+                    </div>
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="exameTomografia"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="exameTomografia">Tomografia</label>
+                    </div>
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="exameUltrassom"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="exameUltrassom">Ultrassom</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Resultados dos Exames</label>
+                  <textarea
+                    class="form-textarea"
+                    id="resultadosExames"
+                    placeholder="Descreva os resultados relevantes..."
+                    onchange="calcularProgresso()"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SEÇÃO 3: CONDIÇÕES DE SAÚDE E RESTRIÇÕES -->
+          <div class="avaliacao-section" id="secao3">
+            <div class="section-header" onclick="toggleSection('secao3')">
+              <div class="section-header-left">
+                <div class="section-icon">
+                  <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <span class="section-title"
+                  >Condições de Saúde e Restrições</span
+                >
+                <span class="section-status incompleto" id="status3"
+                  >Incompleto</span
+                >
+              </div>
+              <i class="fas fa-chevron-down section-arrow" id="arrow3"></i>
+            </div>
+            <div class="section-content" id="content3">
+              <div class="form-grid">
+                <div class="form-group full-width">
+                  <label class="form-label">Doenças Crônicas</label>
+                  <div class="checkbox-group">
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="hipertensao"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="hipertensao">Hipertensão Arterial</label>
+                    </div>
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="diabetes"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="diabetes">Diabetes</label>
+                    </div>
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="doencaCardiaca"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="doencaCardiaca">Doença Cardíaca</label>
+                    </div>
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="osteoporose"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="osteoporose">Osteoporose</label>
+                    </div>
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="artrite"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="artrite">Artrite / Artrose</label>
+                    </div>
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="asma"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="asma">Asma / Doença Respiratória</label>
+                    </div>
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="tiroideia"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="tiroideia">Problemas de Tireoide</label>
+                    </div>
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="depressao"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="depressao">Depressão / Ansiedade</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Outras Doenças ou Condições</label>
+                  <textarea
+                    class="form-textarea"
+                    id="outrasDoencas"
+                    placeholder="Descreva outras condições de saúde relevantes..."
+                    onchange="calcularProgresso()"
+                  ></textarea>
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Cirurgias Anteriores</label>
+                  <textarea
+                    class="form-textarea"
+                    id="cirurgias"
+                    placeholder="Descreva cirurgias realizadas, datas e motivos..."
+                    onchange="calcularProgresso()"
+                  ></textarea>
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Medicamentos em Uso</label>
+                  <textarea
+                    class="form-textarea"
+                    id="medicamentos"
+                    placeholder="Liste todos os medicamentos em uso, dosagem e frequência..."
+                    onchange="calcularProgresso()"
+                  ></textarea>
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Alergias Conhecidas</label>
+                  <textarea
+                    class="form-textarea"
+                    id="alergias"
+                    placeholder="Descreva alergias a medicamentos, alimentos ou outras substâncias..."
+                    onchange="calcularProgresso()"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SEÇÃO 4: ORIENTAÇÕES MÉDICAS -->
+          <div class="avaliacao-section" id="secao4">
+            <div class="section-header" onclick="toggleSection('secao4')">
+              <div class="section-header-left">
+                <div class="section-icon">
+                  <i class="fas fa-clipboard-list"></i>
+                </div>
+                <span class="section-title">Orientações Médicas</span>
+                <span class="section-status incompleto" id="status4"
+                  >Incompleto</span
+                >
+              </div>
+              <i class="fas fa-chevron-down section-arrow" id="arrow4"></i>
+            </div>
+            <div class="section-content" id="content4">
+              <div class="form-grid">
+                <div class="form-group full-width">
+                  <label class="form-label">Restrições de Movimento</label>
+                  <textarea
+                    class="form-textarea"
+                    id="restricoesMovimento"
+                    placeholder="Ex: Evitar flexão de coluna, não fazer rotações..."
+                    onchange="calcularProgresso()"
+                  ></textarea>
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Exercícios Contraindicados</label>
+                  <textarea
+                    class="form-textarea"
+                    id="exerciciosProibidos"
+                    placeholder="Descreva quais exercícios devem ser evitados..."
+                    onchange="calcularProgresso()"
+                  ></textarea>
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Exercícios Recomendados</label>
+                  <textarea
+                    class="form-textarea"
+                    id="exerciciosRecomendados"
+                    placeholder="Descreva exercícios específicos recomendados pelo médico..."
+                    onchange="calcularProgresso()"
+                  ></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Acompanhamento Médico</label>
+                  <select
+                    class="form-select"
+                    id="acompanhamentoMedico"
+                    onchange="calcularProgresso()"
+                  >
+                    <option value="">Selecione...</option>
+                    <option value="nao">Não</option>
+                    <option value="sim-inicial">
+                      Sim, apenas na avaliação inicial
+                    </option>
+                    <option value="sim-periodico">Sim, periodicamente</option>
+                    <option value="sim-sempre">
+                      Sim, sempre durante os treinos
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SEÇÃO 5: AVALIAÇÃO POSTURAL -->
+          <div class="avaliacao-section" id="secao5">
+            <div class="section-header" onclick="toggleSection('secao5')">
+              <div class="section-header-left">
+                <div class="section-icon">
+                  <i class="fas fa-person-hiking"></i>
+                </div>
+                <span class="section-title">Avaliação Postural</span>
+                <span class="section-status incompleto" id="status5"
+                  >Incompleto</span
+                >
+              </div>
+              <i class="fas fa-chevron-down section-arrow" id="arrow5"></i>
+            </div>
+            <div class="section-content" id="content5">
+              <div class="form-grid">
+                <div class="form-group full-width">
+                  <label class="form-label">Postura em Pé</label>
+                  <textarea
+                    class="form-textarea"
+                    id="posturaEmPe"
+                    placeholder="Descreva a postura em pé..."
+                    onchange="calcularProgresso()"
+                  ></textarea>
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Postura Sentada</label>
+                  <textarea
+                    class="form-textarea"
+                    id="posturaSentada"
+                    placeholder="Descreva a postura sentada..."
+                    onchange="calcularProgresso()"
+                  ></textarea>
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Amplitude de Movimento</label>
+                  <textarea
+                    class="form-textarea"
+                    id="amplitudeMovimento"
+                    placeholder="Descreva limitações de movimento..."
+                    onchange="calcularProgresso()"
+                  ></textarea>
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Simetrias e Desequilíbrios</label>
+                  <textarea
+                    class="form-textarea"
+                    id="simetriaDesequilibrios"
+                    placeholder="Descreva assimetrias observadas..."
+                    onchange="calcularProgresso()"
+                  ></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Flexibilidade (1-10)</label>
+                  <div class="rating-scale" id="escalaFlexibilidade"></div>
+                  <input type="hidden" id="flexibilidadeValue" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Força Muscular (1-10)</label>
+                  <div class="rating-scale" id="escalaForca"></div>
+                  <input type="hidden" id="forcaValue" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Equilíbrio (1-10)</label>
+                  <div class="rating-scale" id="escalaEquilibrio"></div>
+                  <input type="hidden" id="equilibrioValue" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SEÇÃO 6: AVALIAÇÃO FUNCIONAL E DORES - CORRIGIDA COM ÍCONE -->
+          <div class="avaliacao-section" id="secao6">
+            <div class="section-header" onclick="toggleSection('secao6')">
+              <div class="section-header-left">
+                <div class="section-icon">
+                  <i class="fas fa-pain"></i>
+                </div>
+                <span class="section-title">Avaliação Funcional e Dores</span>
+                <span class="section-status incompleto" id="status6"
+                  >Incompleto</span
+                >
+              </div>
+              <i class="fas fa-chevron-down section-arrow" id="arrow6"></i>
+            </div>
+            <div class="section-content" id="content6">
+              <div class="form-grid">
+                <div class="form-group full-width">
+                  <label class="form-label">Principais Queixas de Dor</label>
+                  <textarea
+                    class="form-textarea"
+                    id="queixasDor"
+                    placeholder="Descreva as principais dores..."
+                    onchange="calcularProgresso()"
+                  ></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Intensidade da Dor (0-10)</label>
+                  <div class="rating-scale" id="escalaDor"></div>
+                  <input type="hidden" id="dorValue" />
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Áreas com Dor</label>
+                  <div class="checkbox-group">
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="dorCervical"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="dorCervical">Cervical (Pescoço)</label>
+                    </div>
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="dorOmbro"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="dorOmbro">Ombros</label>
+                    </div>
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="dorTorax"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="dorTorax">Tórax / Costas Altas</label>
+                    </div>
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="dorLombar"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="dorLombar">Lombar</label>
+                    </div>
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="dorQuadril"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="dorQuadril">Quadril</label>
+                    </div>
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="dorJoelho"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="dorJoelho">Joelho</label>
+                    </div>
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="dorTornozelo"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="dorTornozelo">Tornozelo / Pé</label>
+                    </div>
+                    <div class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        id="dorMembros"
+                        onchange="calcularProgresso()"
+                      />
+                      <label for="dorMembros">Membros Superiores</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Histórico de Lesões</label>
+                  <textarea
+                    class="form-textarea"
+                    id="historicoLesoes"
+                    placeholder="Descreva lesões anteriores..."
+                    onchange="calcularProgresso()"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SEÇÃO 7: HÁBITOS E ESTILO DE VIDA -->
+          <div class="avaliacao-section" id="secao7">
+            <div class="section-header" onclick="toggleSection('secao7')">
+              <div class="section-header-left">
+                <div class="section-icon">
+                  <i class="fas fa-dumbbell"></i>
+                </div>
+                <span class="section-title">Hábitos e Estilo de Vida</span>
+                <span class="section-status incompleto" id="status7"
+                  >Incompleto</span
+                >
+              </div>
+              <i class="fas fa-chevron-down section-arrow" id="arrow7"></i>
+            </div>
+            <div class="section-content" id="content7">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Nível de Atividade Física</label>
+                  <select
+                    class="form-select"
+                    id="nivelAtividadeFisica"
+                    onchange="calcularProgresso()"
+                  >
+                    <option value="">Selecione...</option>
+                    <option value="sedentario">Sedentário</option>
+                    <option value="leve">Leve (1-2 dias)</option>
+                    <option value="moderado">Moderado (3-4 dias)</option>
+                    <option value="intenso">Intenso (5+ dias)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Outras Atividades</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="outrasAtividades"
+                    placeholder="Ex: Corrida, natação..."
+                    onchange="calcularProgresso()"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Qualidade do Sono (1-10)</label>
+                  <div class="rating-scale" id="escalaSono"></div>
+                  <input type="hidden" id="sonoValue" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Horas de Sono</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="horasSono"
+                    placeholder="Ex: 7"
+                    step="0.5"
+                    onchange="calcularProgresso()"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Nível de Estresse (1-10)</label>
+                  <div class="rating-scale" id="escalaEstresse"></div>
+                  <input type="hidden" id="estresseValue" />
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Hábitos Alimentares</label>
+                  <textarea
+                    class="form-textarea"
+                    id="habitosAlimentares"
+                    placeholder="Descreva hábitos alimentares..."
+                    onchange="calcularProgresso()"
+                  ></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Tabagismo</label>
+                  <select
+                    class="form-select"
+                    id="tabagismo"
+                    onchange="calcularProgresso()"
+                  >
+                    <option value="">Selecione...</option>
+                    <option value="nao">Não fuma</option>
+                    <option value="ex-fumante">Ex-fumante</option>
+                    <option value="ocasional">Ocasional</option>
+                    <option value="regular">Regular</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Consumo de Álcool</label>
+                  <select
+                    class="form-select"
+                    id="consumoAlcool"
+                    onchange="calcularProgresso()"
+                  >
+                    <option value="">Selecione...</option>
+                    <option value="nao">Não consome</option>
+                    <option value="ocasional">Ocasional</option>
+                    <option value="regular">Regular</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SEÇÃO 8: DOCUMENTOS MÉDICOS -->
+          <div class="avaliacao-section" id="secao8">
+            <div class="section-header" onclick="toggleSection('secao8')">
+              <div class="section-header-left">
+                <div class="section-icon">
+                  <i class="fas fa-file-medical"></i>
+                </div>
+                <span class="section-title">Documentos Médicos</span>
+                <span class="section-status incompleto" id="status8"
+                  >Incompleto</span
+                >
+              </div>
+              <i class="fas fa-chevron-down section-arrow" id="arrow8"></i>
+            </div>
+            <div class="section-content" id="content8">
+              <div class="upload-area" id="uploadArea">
+                <label class="upload-label">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                  <span>Clique ou arraste arquivos aqui</span>
+                  <small>Aceita: PDF, JPG, PNG (máx. 10MB)</small>
+                  <input
+                    type="file"
+                    id="fileInput"
+                    multiple
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onchange="adicionarArquivos(this.files)"
+                  />
+                </label>
+              </div>
+              <div id="documentosList" style="margin-top: 1rem"></div>
+            </div>
+          </div>
+
+          <!-- SEÇÃO 9: OBSERVAÇÕES E RECOMENDAÇÕES -->
+          <div class="avaliacao-section" id="secao9">
+            <div class="section-header" onclick="toggleSection('secao9')">
+              <div class="section-header-left">
+                <div class="section-icon">
+                  <i class="fas fa-notes-medical"></i>
+                </div>
+                <span class="section-title">Observações e Recomendações</span>
+                <span class="section-status incompleto" id="status9"
+                  >Incompleto</span
+                >
+              </div>
+              <i class="fas fa-chevron-down section-arrow" id="arrow9"></i>
+            </div>
+            <div class="section-content" id="content9">
+              <div class="form-grid">
+                <div class="form-group full-width">
+                  <label class="form-label">Observações Gerais</label>
+                  <textarea
+                    class="form-textarea"
+                    id="observacoesGerais"
+                    placeholder="Descreva observações gerais..."
+                    onchange="calcularProgresso()"
+                  ></textarea>
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Recomendações para Treino</label>
+                  <textarea
+                    class="form-textarea"
+                    id="recomendacoesTreino"
+                    placeholder="Descreva recomendações específicas..."
+                    onchange="calcularProgresso()"
+                  ></textarea>
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">Pontos de Atenção Especial</label>
+                  <textarea
+                    class="form-textarea"
+                    id="pontosAtencao"
+                    placeholder="Descreva pontos que precisam de atenção..."
+                    onchange="calcularProgresso()"
+                  ></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label required">Data da Avaliação</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="dataAvaliacao"
+                    onchange="calcularProgresso()"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Próxima Reavaliação</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="proximaReavaliacao"
+                    onchange="calcularProgresso()"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- TAB 2: HISTÓRICO DE AVALIAÇÕES -->
+      <div id="tabHistorico" class="tab-pane">
+        <div class="historico-grid" id="historicoGrid">
+          <div class="empty-state">
+            <i class="fas fa-history"></i>
+            <p>Selecione um aluno para ver o histórico de avaliações</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTÕES DE AÇÃO -->
+      <div
+        style="
+          display: flex;
+          gap: 1rem;
+          margin-top: 2rem;
+          justify-content: flex-end;
+        "
+      >
+        <button class="btn-primary" onclick="gerarFichaTreino()">
+          <i class="fas fa-clipboard-list"></i> Gerar Ficha de Treino
+        </button>
+        <button class="btn-success" onclick="salvarAvaliacao()">
+          <i class="fas fa-save"></i> Salvar Avaliação
+        </button>
+        <button class="btn-secondary" onclick="limparFormulario()">
+          <i class="fas fa-eraser"></i> Limpar
+        </button>
+      </div>
+    </div>
+
+    <!-- MODAL FICHA DE TREINO -->
+    <div class="modal" id="modalFichaTreino">
+      <div class="modal-content large">
+        <div class="modal-header">
+          <h2 class="modal-title">Ficha de Treino Personalizada</h2>
+          <button class="close-modal" onclick="fecharModal('modalFichaTreino')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div id="fichaConteudo" class="ficha-container">
+            <!-- Conteúdo gerado dinamicamente -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalFichaTreino')"
+          >
+            Fechar
+          </button>
+          <button class="btn-primary" onclick="exportarFichaPDF()">
+            <i class="fas fa-file-pdf"></i> Exportar PDF
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- JavaScript externo -->
+    <script src="../js/avaliacao.js"></script>
+  </body>
+</html>

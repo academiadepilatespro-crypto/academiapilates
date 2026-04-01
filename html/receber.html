@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Receitas | Estúdio Rafaela Lisboa</title>
+
+    <!-- Fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Ícones -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Bibliotecas para exportação -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <!-- CSS externo -->
+    <link rel="stylesheet" href="../css/receber.css" />
+  </head>
+  <body>
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Carregando...</p>
+    </div>
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-content">
+        <div class="logo-area">
+          <a href="../index.html" class="logo-icon" title="Página inicial"
+            ><i class="fas fa-spa"></i
+          ></a>
+          <div class="logo-text">
+            <h1>ESTÚDIO RAFAELA LISBOA</h1>
+            <span>Outras Receitas</span>
+          </div>
+        </div>
+        <div class="user-area">
+          <div class="user-info">
+            <div class="user-name" id="userName">Carregando...</div>
+            <div class="user-role" id="userRole">Financeiro</div>
+          </div>
+          <div class="user-avatar" id="userAvatar">?</div>
+          <button class="btn-icon" onclick="fazerLogout()" title="Sair">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>Receitas</h1>
+          <div class="subtitle" id="totalReceitas">Carregando...</div>
+        </div>
+        <div class="header-actions">
+          <button
+            class="btn-outline"
+            onclick="exportarPDF()"
+            title="Exportar para PDF"
+          >
+            <i class="fas fa-file-pdf"></i> PDF
+          </button>
+          <button
+            class="btn-outline"
+            onclick="exportarExcel()"
+            title="Exportar para Excel"
+          >
+            <i class="fas fa-file-excel"></i> Excel
+          </button>
+          <button
+            class="btn-outline"
+            onclick="abrirModalImportarCSV()"
+            title="Importar CSV"
+          >
+            <i class="fas fa-file-csv"></i> Importar CSV
+          </button>
+          <button
+            class="btn-outline"
+            onclick="toggleDashboard()"
+            title="Dashboard"
+          >
+            <i class="fas fa-chart-line"></i> Dashboard
+          </button>
+          <button
+            class="btn-primary"
+            onclick="abrirModalReceita()"
+            title="Adicionar nova receita"
+          >
+            <i class="fas fa-plus"></i> Nova Receita
+          </button>
+        </div>
+      </div>
+
+      <!-- CARDS DE RESUMO (4) -->
+      <div class="stats-grid" id="resumoContainer">
+        <!-- Preenchido via JS -->
+      </div>
+
+      <!-- FILTROS -->
+      <div class="filters-advanced">
+        <div class="filters-title"><i class="fas fa-filter"></i> Filtros</div>
+        <div class="filters-grid">
+          <div class="filter-group">
+            <label class="filter-label" for="filtroVencInicio"
+              >Período de Vencimento</label
+            >
+            <div class="date-range">
+              <input
+                type="date"
+                class="filter-input"
+                id="filtroVencInicio"
+                onchange="filtrarReceitas()"
+              />
+              <span>até</span>
+              <input
+                type="date"
+                class="filter-input"
+                id="filtroVencFim"
+                onchange="filtrarReceitas()"
+              />
+            </div>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label" for="filtroRecInicio"
+              >Período de Recebimento</label
+            >
+            <div class="date-range">
+              <input
+                type="date"
+                class="filter-input"
+                id="filtroRecInicio"
+                onchange="filtrarReceitas()"
+              />
+              <span>até</span>
+              <input
+                type="date"
+                class="filter-input"
+                id="filtroRecFim"
+                onchange="filtrarReceitas()"
+              />
+            </div>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label" for="filtroStatus">Status</label>
+            <select
+              class="filter-select"
+              id="filtroStatus"
+              onchange="filtrarReceitas()"
+            >
+              <option value="">Todos</option>
+              <option value="pendente">Pendente</option>
+              <option value="recebido">Recebido</option>
+              <option value="vencido">Vencido</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label" for="filtroCategoria">Categoria</label>
+            <select
+              class="filter-select"
+              id="filtroCategoria"
+              onchange="filtrarReceitas()"
+            >
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label" for="searchInput">Buscar</label>
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input
+                type="text"
+                id="searchInput"
+                placeholder="Descrição ou cliente..."
+                oninput="filtrarReceitas()"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="filter-actions">
+          <button class="btn-outline" onclick="limparFiltros()">
+            Limpar Filtros
+          </button>
+        </div>
+      </div>
+
+      <!-- GRÁFICOS (Receita por Categoria e Evolução Mensal) -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">
+              <i
+                class="fas fa-chart-pie"
+                style="color: var(--roxo-celebracao)"
+              ></i>
+              Receita por Categoria
+            </h3>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="graficoPizza"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">
+              <i class="fas fa-chart-line" style="color: var(--azul-info)"></i>
+              Evolução Mensal
+            </h3>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="graficoLinha"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- DASHBOARD (seção adicional) -->
+      <div
+        class="dashboard-section"
+        id="dashboardSection"
+        style="display: none"
+      >
+        <div class="section-header">
+          <h2 class="section-title">
+            <i class="fas fa-chart-line"></i> Dashboard Executivo
+          </h2>
+          <button class="btn-outline" onclick="toggleDashboard()">
+            Fechar
+          </button>
+        </div>
+        <div class="dashboard-grid">
+          <div class="dashboard-card">
+            <h4>Receitas por Dia da Semana</h4>
+            <canvas id="graficoDiaSemana" height="200"></canvas>
+          </div>
+          <div class="dashboard-card">
+            <h4>Comparativo Mês Atual x Anterior</h4>
+            <canvas id="graficoComparativo" height="200"></canvas>
+          </div>
+          <div class="dashboard-card">
+            <h4>Previsão Próximos 30 Dias</h4>
+            <canvas id="graficoPrevisao" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- RANKINGS (Categorias e Clientes) -->
+      <div
+        style="
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: var(--grid-gap);
+          margin-bottom: 1.5rem;
+        "
+      >
+        <div class="compact-card">
+          <div class="compact-title">
+            <i class="fas fa-tag"></i> Top Categorias
+          </div>
+          <div id="rankingCategorias"></div>
+        </div>
+        <div class="compact-card">
+          <div class="compact-title">
+            <i class="fas fa-users"></i> Top Clientes
+          </div>
+          <div id="rankingClientes"></div>
+        </div>
+      </div>
+
+      <!-- TABELA DE RECEITAS -->
+      <div class="table-container">
+        <div class="table-header">
+          <h3 class="table-title">Todas as Receitas</h3>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th onclick="ordenarPor('descricao')">
+                  Descrição <i class="fas fa-sort" id="sortDescricao"></i>
+                </th>
+                <th onclick="ordenarPor('cliente')">
+                  Cliente <i class="fas fa-sort" id="sortCliente"></i>
+                </th>
+                <th onclick="ordenarPor('valor')">
+                  Valor <i class="fas fa-sort" id="sortValor"></i>
+                </th>
+                <th onclick="ordenarPor('vencimento')">
+                  Vencimento <i class="fas fa-sort" id="sortVencimento"></i>
+                </th>
+                <th>Recebimento</th>
+                <th>Status</th>
+                <th onclick="ordenarPor('categoria')">
+                  Categoria <i class="fas fa-sort" id="sortCategoria"></i>
+                </th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaReceitas">
+              <!-- Preenchido via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <!-- MODAL CADASTRO/EDIÇÃO DE RECEITA -->
+    <div class="modal" id="modalReceita">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalReceitaTitle">Nova Receita</h2>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalReceita')"
+            title="Fechar"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form
+            id="formReceita"
+            onsubmit="
+              event.preventDefault();
+              salvarReceita();
+            "
+          >
+            <input type="hidden" id="receitaId" />
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label required" for="receitaDescricao"
+                  >Descrição</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="receitaDescricao"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="receitaCliente">Cliente</label>
+                <input type="text" class="form-control" id="receitaCliente" />
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="receitaCpfCnpj">CPF/CNPJ</label>
+                <input type="text" class="form-control" id="receitaCpfCnpj" />
+              </div>
+              <div class="form-group">
+                <label class="form-label required" for="receitaValor"
+                  >Valor (R$)</label
+                >
+                <input
+                  type="number"
+                  class="form-control"
+                  id="receitaValor"
+                  step="0.01"
+                  min="0.01"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="receitaEmissao"
+                  >Data de Emissão</label
+                >
+                <input type="date" class="form-control" id="receitaEmissao" />
+              </div>
+              <div class="form-group">
+                <label class="form-label required" for="receitaVencimento"
+                  >Data de Vencimento</label
+                >
+                <input
+                  type="date"
+                  class="form-control"
+                  id="receitaVencimento"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label required" for="receitaCategoria"
+                  >Categoria</label
+                >
+                <select class="form-control" id="receitaCategoria" required>
+                  <!-- Preenchido via JS -->
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="receitaForma"
+                  >Forma de Recebimento</label
+                >
+                <select class="form-control" id="receitaForma">
+                  <option value="">Selecione (se já recebido)</option>
+                  <option value="PIX">PIX</option>
+                  <option value="Cartão de Crédito">Cartão de Crédito</option>
+                  <option value="Dinheiro">Dinheiro</option>
+                  <option value="Transferência">Transferência</option>
+                </select>
+              </div>
+            </div>
+            <div
+              class="form-grid"
+              id="receitaRecebimentoGroup"
+              style="display: none"
+            >
+              <div class="form-group">
+                <label class="form-label" for="receitaDataRecebimento"
+                  >Data de Recebimento</label
+                >
+                <input
+                  type="date"
+                  class="form-control"
+                  id="receitaDataRecebimento"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="receitaValorRecebido"
+                  >Valor Recebido</label
+                >
+                <input
+                  type="number"
+                  class="form-control"
+                  id="receitaValorRecebido"
+                  step="0.01"
+                  min="0.01"
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="receitaObs">Observações</label>
+              <textarea
+                class="form-textarea"
+                id="receitaObs"
+                rows="2"
+              ></textarea>
+            </div>
+            <div class="form-group checkbox-group">
+              <input
+                type="checkbox"
+                id="receitaJaRecebido"
+                onchange="toggleRecebido()"
+              />
+              <label for="receitaJaRecebido">Marcar como já recebido</label>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalReceita')">
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="salvarReceita()">
+            <i class="fas fa-save"></i> Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL RECEBIMENTO (BAIXA) -->
+    <div class="modal" id="modalRecebimento">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h2 class="modal-title">Registrar Recebimento</h2>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalRecebimento')"
+            title="Fechar"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form
+            id="formRecebimento"
+            onsubmit="
+              event.preventDefault();
+              registrarRecebimento();
+            "
+          >
+            <input type="hidden" id="recebimentoReceitaId" />
+            <div class="form-group">
+              <label class="form-label required" for="recebimentoData"
+                >Data do Recebimento</label
+              >
+              <input
+                type="date"
+                class="form-control"
+                id="recebimentoData"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label required" for="recebimentoValor"
+                >Valor Recebido (R$)</label
+              >
+              <input
+                type="number"
+                class="form-control"
+                id="recebimentoValor"
+                step="0.01"
+                min="0.01"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label required" for="recebimentoForma"
+                >Forma de Recebimento</label
+              >
+              <select class="form-control" id="recebimentoForma" required>
+                <option value="PIX">PIX</option>
+                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Transferência">Transferência</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="recebimentoObs">Observações</label>
+              <textarea
+                class="form-textarea"
+                id="recebimentoObs"
+                rows="2"
+              ></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalRecebimento')"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="registrarRecebimento()">
+            <i class="fas fa-check"></i> Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DETALHES DA RECEITA -->
+    <div class="modal" id="modalDetalhes">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Detalhes da Receita</h2>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalDetalhes')"
+            title="Fechar"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body" id="detalhesBody">
+          <!-- Conteúdo dinâmico -->
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalDetalhes')">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL CONFIRMAR EXCLUSÃO -->
+    <div class="modal" id="modalConfirmar">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h2 class="modal-title">Confirmar Exclusão</h2>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalConfirmar')"
+            title="Fechar"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p
+            id="confirmarMensagem"
+            style="font-size: 0.95rem; line-height: 1.6"
+          ></p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalConfirmar')">
+            Cancelar
+          </button>
+          <button class="btn-danger" id="confirmarBotao">
+            <i class="fas fa-trash"></i> Excluir
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL IMPORTAR CSV -->
+    <div class="modal" id="modalImportarCSV">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Importar Receitas (CSV)</h2>
+          <button class="close-modal" onclick="fecharModal('modalImportarCSV')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Arquivo CSV</label>
+            <input
+              type="file"
+              id="csvFile"
+              accept=".csv"
+              class="form-control"
+            />
+            <small style="color: var(--grafite-claro)"
+              >Formato esperado:
+              descrição,cliente,cpf_cnpj,valor,data_emissao,data_vencimento,categoria_id,observacoes
+              (cabeçalho opcional)</small
+            >
+          </div>
+          <div class="form-group">
+            <label class="form-label">Preview</label>
+            <div
+              id="csvPreview"
+              style="
+                max-height: 300px;
+                overflow: auto;
+                border: 1px solid var(--verde-claro);
+                padding: 0.5rem;
+              "
+            ></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalImportarCSV')"
+          >
+            Cancelar
+          </button>
+          <button
+            class="btn-primary"
+            id="btnImportarCSV"
+            onclick="importarCSV()"
+          >
+            <i class="fas fa-upload"></i> Importar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL RELATÓRIO POR CLIENTE -->
+    <div class="modal" id="modalRelatorioCliente">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title" id="relatorioClienteTitulo">
+            Relatório do Cliente
+          </h2>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalRelatorioCliente')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body" id="relatorioClienteBody">
+          <!-- Conteúdo dinâmico -->
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalRelatorioCliente')"
+          >
+            Fechar
+          </button>
+          <button class="btn-primary" onclick="exportarRelatorioCliente()">
+            <i class="fas fa-file-pdf"></i> Exportar PDF
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- JavaScript externo (será atualizado para suportar as novas funcionalidades) -->
+    <script src="../js/receber.js"></script>
+  </body>
+</html>

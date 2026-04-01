@@ -1,0 +1,3810 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestão de Treinos | Pilates Nobility</title>
+
+    <!-- Fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Ícones -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Bibliotecas para exportação -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --verde-principal: #3a6b5c;
+        --verde-claro: #8fc1b0;
+        --verde-pastel: #d4ede4;
+        --grafite: #2c2c2c;
+        --grafite-claro: #4a4a4a;
+        --off-white: #f5f5f5;
+        --branco: #ffffff;
+
+        --vermelho-urgente: #e74c3c;
+        --vermelho-suave: #ffe5e5;
+        --laranja-atencao: #f39c12;
+        --laranja-suave: #fff3cd;
+        --roxo-celebracao: #9b59b6;
+        --roxo-suave: #f3e5f5;
+        --verde-sucesso: #27ae60;
+        --azul-info: #3498db;
+        --azul-suave: #e3f2fd;
+
+        --font-titulos: "Cormorant Garamond", serif;
+        --font-corpo: "Montserrat", sans-serif;
+
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        --shadow-hover: 0 8px 24px rgba(58, 107, 92, 0.15);
+
+        --card-padding: 20px;
+        --grid-gap: 20px;
+      }
+
+      html {
+        font-size: 14px;
+      }
+
+      body {
+        font-family: var(--font-corpo);
+        background: var(--off-white);
+        color: var(--grafite);
+        min-height: 100vh;
+      }
+
+      /* ===== HEADER ===== */
+      .header {
+        background: var(--branco);
+        box-shadow: var(--shadow);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .header-content {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 0.8rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .logo-area {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      .logo-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--verde-principal);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+      }
+
+      .logo-icon i {
+        font-size: 1.5rem;
+        color: var(--branco);
+      }
+
+      .logo-text h1 {
+        font-family: var(--font-titulos);
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--grafite);
+        line-height: 1.2;
+      }
+
+      .logo-text span {
+        font-size: 0.7rem;
+        color: var(--verde-principal);
+      }
+
+      .user-area {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      .user-info {
+        text-align: right;
+      }
+
+      .user-name {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--grafite);
+      }
+
+      .user-role {
+        font-size: 0.7rem;
+        color: var(--verde-principal);
+      }
+
+      .user-avatar {
+        width: 38px;
+        height: 38px;
+        background: var(--verde-pastel);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--verde-principal);
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+
+      .btn-icon {
+        width: 35px;
+        height: 35px;
+        border: none;
+        border-radius: 8px;
+        background: var(--off-white);
+        color: var(--grafite);
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+      }
+
+      .btn-icon:hover {
+        background: var(--verde-pastel);
+        color: var(--verde-principal);
+      }
+
+      /* ===== TOOLTIPS ===== */
+      [data-tooltip] {
+        position: relative;
+        cursor: help;
+      }
+
+      [data-tooltip]:before {
+        content: "";
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 5px solid transparent;
+        border-top-color: var(--grafite);
+        margin-bottom: 5px;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s, visibility 0.3s;
+        z-index: 100;
+        pointer-events: none;
+      }
+
+      [data-tooltip]:after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--grafite);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s, visibility 0.3s;
+        margin-bottom: 10px;
+        box-shadow: var(--shadow);
+        z-index: 100;
+        pointer-events: none;
+      }
+
+      [data-tooltip]:hover:before,
+      [data-tooltip]:hover:after {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      /* ===== ONBOARDING TOUR ===== */
+      .tour-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .tour-overlay.show {
+        display: flex;
+      }
+
+      .tour-card {
+        background: var(--branco);
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: var(--shadow-hover);
+        animation: slideIn 0.3s;
+      }
+
+      .tour-card h3 {
+        font-family: var(--font-titulos);
+        font-size: 1.5rem;
+        color: var(--verde-principal);
+        margin-bottom: 1rem;
+      }
+
+      .tour-card p {
+        font-size: 0.95rem;
+        color: var(--grafite);
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+      }
+
+      .tour-card .btn-group {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+      }
+
+      .tour-highlight {
+        position: relative;
+        z-index: 2001;
+        box-shadow: 0 0 0 4px var(--verde-principal),
+          0 0 0 8px rgba(58, 107, 92, 0.2);
+        border-radius: 8px;
+        transition: box-shadow 0.3s;
+      }
+
+      /* ===== SELETOR DE ALUNO ===== */
+      .aluno-selector-bar {
+        background: var(--branco);
+        border-radius: 16px;
+        padding: 1.2rem 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .aluno-selector {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--verde-pastel);
+        padding: 0.3rem 1rem;
+        border-radius: 40px;
+        min-width: 250px;
+      }
+
+      .aluno-selector i {
+        color: var(--verde-principal);
+        font-size: 1rem;
+      }
+
+      .aluno-selector select {
+        border: none;
+        background: transparent;
+        padding: 0.5rem 0;
+        font-size: 0.9rem;
+        color: var(--grafite);
+        cursor: pointer;
+        outline: none;
+        flex: 1;
+      }
+
+      .busca-aluno {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: var(--off-white);
+        border-radius: 40px;
+        border: 1px solid var(--verde-claro);
+        position: relative;
+      }
+
+      .busca-aluno i {
+        color: var(--verde-principal);
+      }
+
+      .busca-aluno input {
+        border: none;
+        background: transparent;
+        outline: none;
+        font-size: 0.9rem;
+        width: 100%;
+      }
+
+      .busca-resultados {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--branco);
+        border-radius: 8px;
+        box-shadow: var(--shadow-hover);
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 1000;
+        margin-top: 0.3rem;
+        display: none;
+      }
+
+      .busca-resultados.show {
+        display: block;
+      }
+
+      .busca-item {
+        padding: 0.8rem 1rem;
+        cursor: pointer;
+        border-bottom: 1px solid var(--verde-pastel);
+        transition: background 0.2s;
+      }
+
+      .busca-item:hover {
+        background: var(--verde-pastel);
+      }
+
+      .busca-item:last-child {
+        border-bottom: none;
+      }
+
+      .busca-item-nome {
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      .busca-item-info {
+        font-size: 0.75rem;
+        color: var(--grafite-claro);
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.2rem;
+      }
+
+      /* ===== CONTEÚDO PRINCIPAL ===== */
+      .main-content {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 1.5rem;
+      }
+
+      /* PAGE HEADER */
+      .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .page-header h1 {
+        font-family: var(--font-titulos);
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--grafite);
+        margin-bottom: 0.2rem;
+      }
+
+      .page-header .subtitle {
+        color: var(--verde-principal);
+        font-size: 0.9rem;
+      }
+
+      .page-actions {
+        display: flex;
+        gap: 0.8rem;
+      }
+
+      .btn-primary {
+        background: var(--verde-sucesso);
+        color: var(--branco);
+        border: none;
+        padding: 0.6rem 1.5rem;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.3s;
+        text-decoration: none;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+      }
+
+      .btn-secondary {
+        background: #95a5a6;
+        color: var(--branco);
+        border: none;
+        padding: 0.5rem 1.2rem;
+        border-radius: 30px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.3s;
+        text-decoration: none;
+      }
+
+      .btn-secondary:hover {
+        background: #7f8c8d;
+      }
+
+      .btn-outline {
+        background: none;
+        border: 1px solid var(--verde-principal);
+        color: var(--verde-principal);
+        padding: 0.5rem 1.2rem;
+        border-radius: 30px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.3s;
+        text-decoration: none;
+      }
+
+      .btn-outline:hover {
+        background: var(--verde-principal);
+        color: var(--branco);
+      }
+
+      .btn-outline.btn-small {
+        padding: 0.3rem 0.8rem;
+        font-size: 0.75rem;
+      }
+
+      .btn-success {
+        background: var(--verde-sucesso);
+        color: var(--branco);
+        border: none;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        transition: all 0.3s;
+      }
+
+      .btn-success:hover {
+        filter: brightness(1.1);
+      }
+
+      /* ===== HELP BUTTON ===== */
+      .help-button {
+        background: var(--azul-info);
+        color: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        transition: all 0.3s;
+        box-shadow: var(--shadow);
+      }
+
+      .help-button:hover {
+        transform: scale(1.1);
+        background: #2980b9;
+      }
+
+      /* ===== TABS ===== */
+      .tabs {
+        display: flex;
+        gap: 0.3rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #e8e8e8;
+        flex-wrap: wrap;
+      }
+
+      .tab {
+        background: none;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        cursor: pointer;
+        font-size: 0.9rem;
+        color: var(--grafite-claro);
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .tab:hover {
+        color: var(--verde-principal);
+      }
+
+      .tab.active {
+        color: var(--verde-principal);
+        border-bottom-color: var(--verde-principal);
+      }
+
+      .tab-pane {
+        display: none;
+      }
+
+      .tab-pane.active {
+        display: block;
+      }
+
+      /* ===== SEÇÕES COLAPSÁVEIS ===== */
+      .section-card {
+        background: var(--branco);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow);
+        transition: all 0.3s;
+      }
+
+      .section-card:hover {
+        box-shadow: var(--shadow-hover);
+      }
+
+      .section-title {
+        font-family: var(--font-titulos);
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--verde-principal);
+        margin-bottom: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        border-bottom: 1px solid var(--verde-pastel);
+        padding-bottom: 0.5rem;
+      }
+
+      .section-title i {
+        font-size: 1.2rem;
+      }
+
+      .section-subtitle {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--grafite);
+        margin: 1rem 0 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      /* ===== ACCORDION ===== */
+      .accordion-item {
+        margin-bottom: 0.5rem;
+        border: 1px solid var(--verde-claro);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .accordion-header {
+        background: var(--off-white);
+        padding: 1rem 1.2rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: background 0.2s;
+      }
+
+      .accordion-header:hover {
+        background: var(--verde-pastel);
+      }
+
+      .accordion-title {
+        font-weight: 600;
+        color: var(--verde-principal);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .accordion-icon {
+        transition: transform 0.3s;
+      }
+
+      .accordion-icon.rotated {
+        transform: rotate(180deg);
+      }
+
+      .accordion-content {
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: all 0.3s ease-in-out;
+        background: var(--branco);
+      }
+
+      .accordion-content.expanded {
+        padding: 1.5rem;
+        max-height: 2000px;
+      }
+
+      /* ===== FORMULÁRIOS ===== */
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .form-group.full-width {
+        grid-column: 1 / -1;
+      }
+
+      .form-label {
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin-bottom: 0.4rem;
+        color: var(--grafite);
+      }
+
+      .form-label.required::after {
+        content: " *";
+        color: var(--vermelho-urgente);
+      }
+
+      .form-control,
+      .form-select,
+      .form-textarea {
+        padding: 0.6rem 0.8rem;
+        border: 1px solid #d0d0d0;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-family: var(--font-corpo);
+        transition: border-color 0.2s;
+        background: var(--branco);
+      }
+
+      .form-control:focus,
+      .form-select:focus,
+      .form-textarea:focus {
+        outline: none;
+        border-color: var(--verde-principal);
+        box-shadow: 0 0 0 3px var(--verde-pastel);
+      }
+
+      .form-control[readonly] {
+        background-color: var(--off-white);
+        cursor: default;
+        opacity: 0.9;
+      }
+
+      .form-textarea {
+        resize: vertical;
+        min-height: 80px;
+      }
+
+      /* ===== LISTA DE AULAS ===== */
+      .aulas-container {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid var(--verde-claro);
+        border-radius: 12px;
+        padding: 0.5rem;
+        background: var(--off-white);
+      }
+
+      .aula-item {
+        background: var(--branco);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 0.8rem;
+        border: 1px solid transparent;
+        transition: all 0.2s;
+      }
+
+      .aula-item:hover {
+        border-color: var(--verde-principal);
+        box-shadow: var(--shadow);
+      }
+
+      .aula-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.8rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .aula-data {
+        font-weight: 600;
+        color: var(--verde-principal);
+        font-size: 0.95rem;
+      }
+
+      .aula-foco {
+        font-size: 0.8rem;
+        color: var(--grafite-claro);
+        background: var(--verde-pastel);
+        padding: 0.2rem 0.8rem;
+        border-radius: 30px;
+      }
+
+      .aula-atribuicao {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .aula-select {
+        flex: 1;
+        min-width: 200px;
+        padding: 0.5rem;
+        border: 1px solid var(--verde-claro);
+        border-radius: 6px;
+        font-size: 0.85rem;
+      }
+
+      .aula-treino-badge {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 30px;
+        background: var(--verde-pastel);
+        color: var(--verde-principal);
+        white-space: nowrap;
+      }
+
+      .aula-treino-badge.pendente {
+        background: var(--laranja-suave);
+        color: var(--laranja-atencao);
+      }
+
+      .aula-actions {
+        display: flex;
+        gap: 0.3rem;
+      }
+
+      .aula-btn {
+        padding: 0.3rem 0.8rem;
+        border: 1px solid var(--verde-claro);
+        border-radius: 6px;
+        background: none;
+        cursor: pointer;
+        font-size: 0.75rem;
+        transition: all 0.2s;
+      }
+
+      .aula-btn:hover {
+        background: var(--verde-pastel);
+      }
+
+      /* ===== MEUS TREINOS SALVOS ===== */
+      .treinos-container {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid var(--verde-claro);
+        border-radius: 12px;
+        padding: 0.5rem;
+        background: var(--off-white);
+      }
+
+      .treino-item {
+        background: var(--branco);
+        border-radius: 8px;
+        padding: 0.8rem;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.2s;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .treino-item:hover {
+        border-color: var(--verde-principal);
+        background: var(--verde-pastel);
+      }
+
+      .treino-nome {
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      .treino-info {
+        font-size: 0.75rem;
+        color: var(--grafite-claro);
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .treino-badge {
+        background: var(--azul-suave);
+        color: var(--azul-info);
+        padding: 0.2rem 0.5rem;
+        border-radius: 30px;
+        font-size: 0.65rem;
+      }
+
+      .progresso-plano {
+        background: var(--off-white);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-top: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .progresso-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .progresso-label {
+        font-size: 0.8rem;
+        color: var(--grafite-claro);
+      }
+
+      .progresso-value {
+        font-weight: 600;
+        color: var(--verde-principal);
+        font-size: 1.1rem;
+      }
+
+      /* ===== CONSTRUTOR DE TREINO ===== */
+      .workout-builder {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 1.5rem;
+        margin-top: 1rem;
+      }
+
+      .exercise-library {
+        background: var(--off-white);
+        border-radius: 12px;
+        padding: 1rem;
+        border: 1px solid var(--verde-claro);
+        max-height: 500px;
+        overflow-y: auto;
+        box-shadow: var(--shadow);
+      }
+
+      .library-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+      }
+
+      .library-title {
+        font-family: var(--font-titulos);
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--verde-principal);
+      }
+
+      .library-search {
+        margin-bottom: 1rem;
+      }
+
+      .library-filters {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .library-filters select {
+        flex: 1;
+        padding: 0.4rem;
+        border: 1px solid var(--verde-claro);
+        border-radius: 6px;
+        font-size: 0.8rem;
+      }
+
+      .exercise-item {
+        background: var(--branco);
+        border-radius: 8px;
+        padding: 0.8rem;
+        margin-bottom: 0.8rem;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      .exercise-item:hover {
+        border-color: var(--verde-principal);
+        transform: translateX(5px);
+        background: var(--verde-pastel);
+      }
+
+      .exercise-item .icon {
+        width: 40px;
+        height: 40px;
+        background: var(--verde-pastel);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--verde-principal);
+        flex-shrink: 0;
+      }
+
+      .exercise-item .icon i {
+        font-size: 1.2rem;
+      }
+
+      .exercise-item .info {
+        flex: 1;
+      }
+
+      .exercise-item .info h4 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+      }
+
+      .exercise-item .info .tags {
+        display: flex;
+        gap: 0.3rem;
+        flex-wrap: wrap;
+      }
+
+      .exercise-item .info .tag {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.5rem;
+        border-radius: 30px;
+        background: var(--azul-suave);
+        color: var(--azul-info);
+      }
+
+      .exercise-item .info .tag.equip {
+        background: var(--laranja-suave);
+        color: var(--laranja-atencao);
+      }
+
+      .workout-sheet {
+        background: var(--branco);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid var(--verde-claro);
+        box-shadow: var(--shadow);
+      }
+
+      .sheet-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--verde-pastel);
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .sheet-title h2 {
+        font-family: var(--font-titulos);
+        font-size: 1.2rem;
+        color: var(--verde-principal);
+        margin-bottom: 0.2rem;
+      }
+
+      .sheet-exercise-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+      }
+
+      .sheet-item {
+        background: var(--off-white);
+        border-radius: 10px;
+        padding: 1.2rem;
+        border-left: 4px solid var(--verde-principal);
+        position: relative;
+        transition: all 0.2s;
+      }
+
+      .sheet-item:hover {
+        box-shadow: var(--shadow);
+      }
+
+      .sheet-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .sheet-item-title {
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--verde-principal);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .sheet-item-badge {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 30px;
+        background: var(--azul-suave);
+        color: var(--azul-info);
+      }
+
+      .sheet-item-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.8rem;
+      }
+
+      .sheet-item-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+      }
+
+      .sheet-item-field label {
+        font-size: 0.65rem;
+        color: var(--grafite-claro);
+        font-weight: 600;
+      }
+
+      .sheet-item-field input {
+        padding: 0.4rem;
+        border: 1px solid var(--verde-claro);
+        border-radius: 4px;
+        font-size: 0.8rem;
+        background: var(--branco);
+      }
+
+      .remove-exercise {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        width: 24px;
+        height: 24px;
+        border: none;
+        background: var(--vermelho-suave);
+        color: var(--vermelho-urgente);
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        transition: all 0.2s;
+      }
+
+      .remove-exercise:hover {
+        background: var(--vermelho-urgente);
+        color: white;
+      }
+
+      .sheet-empty {
+        text-align: center;
+        padding: 2rem;
+        color: var(--grafite-claro);
+      }
+
+      .sheet-empty i {
+        font-size: 2.5rem;
+        color: var(--verde-pastel);
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+
+      /* ===== TABELAS ===== */
+      .table-container {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      thead tr {
+        background: var(--verde-pastel);
+      }
+
+      thead th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--verde-principal);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+      }
+
+      tbody tr {
+        border-bottom: 1px solid #e8e8e8;
+        transition: background 0.2s;
+      }
+
+      tbody tr:hover {
+        background: var(--off-white);
+      }
+
+      tbody td {
+        padding: 1rem;
+        font-size: 0.85rem;
+      }
+
+      .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.8rem;
+        border-radius: 30px;
+        font-size: 0.7rem;
+        font-weight: 600;
+      }
+
+      .status-badge.ativo {
+        background: var(--verde-pastel);
+        color: var(--verde-principal);
+      }
+
+      .status-badge.inativo {
+        background: var(--vermelho-suave);
+        color: var(--vermelho-urgente);
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .action-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+      }
+
+      .action-btn:hover {
+        transform: scale(1.1);
+      }
+
+      .action-btn.edit {
+        background: var(--laranja-suave);
+        color: var(--laranja-atencao);
+      }
+
+      .action-btn.delete {
+        background: var(--vermelho-suave);
+        color: var(--vermelho-urgente);
+      }
+
+      .action-btn.view {
+        background: var(--azul-suave);
+        color: var(--azul-info);
+      }
+
+      .action-btn.toggle {
+        background: var(--azul-suave);
+        color: var(--azul-info);
+      }
+
+      /* ===== HISTÓRICO CARDS ===== */
+      .historico-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .historico-card {
+        background: var(--branco);
+        border-radius: 12px;
+        padding: 1.2rem;
+        border: 1px solid var(--verde-claro);
+        transition: all 0.3s;
+        cursor: pointer;
+        position: relative;
+      }
+
+      .historico-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-hover);
+        border-color: var(--verde-principal);
+      }
+
+      .historico-card.inativo {
+        opacity: 0.7;
+        background: #f8f8f8;
+      }
+
+      .historico-card.inativo::after {
+        content: "INATIVO";
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: var(--vermelho-urgente);
+        background: var(--vermelho-suave);
+        padding: 0.2rem 0.5rem;
+        border-radius: 30px;
+      }
+
+      .historico-data {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--verde-principal);
+        margin-bottom: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .historico-aluno {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+      }
+
+      .historico-resumo {
+        font-size: 0.85rem;
+        color: var(--grafite-claro);
+        margin-bottom: 0.5rem;
+      }
+
+      .historico-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.75rem;
+        color: var(--grafite-claro);
+        margin-top: 0.5rem;
+      }
+
+      .historico-badge {
+        padding: 0.2rem 0.8rem;
+        border-radius: 30px;
+        background: var(--verde-pastel);
+        color: var(--verde-principal);
+      }
+
+      .historico-actions {
+        display: flex;
+        gap: 0.3rem;
+        margin-top: 0.8rem;
+        padding-top: 0.8rem;
+        border-top: 1px dashed var(--verde-pastel);
+        justify-content: flex-end;
+      }
+
+      /* ===== MODAL ===== */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        animation: fadeIn 0.3s;
+      }
+
+      .modal.show {
+        display: flex;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .modal-content {
+        background: var(--branco);
+        border-radius: 16px;
+        width: 90%;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        animation: slideIn 0.3s;
+      }
+
+      .modal-content.small {
+        max-width: 500px;
+      }
+
+      .modal-content.large {
+        max-width: 1000px;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateY(-50px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .modal-header {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid #e8e8e8;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        background: var(--branco);
+        z-index: 10;
+      }
+
+      .modal-title {
+        font-family: var(--font-titulos);
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--grafite);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .modal-title i {
+        color: var(--verde-principal);
+      }
+
+      .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--grafite-claro);
+        transition: all 0.3s;
+      }
+
+      .close-modal:hover {
+        color: var(--grafite);
+        transform: rotate(90deg);
+      }
+
+      .modal-body {
+        padding: 1.5rem 2rem;
+      }
+
+      .modal-footer {
+        padding: 1.5rem 2rem;
+        border-top: 1px solid #e8e8e8;
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        position: sticky;
+        bottom: 0;
+        background: var(--branco);
+      }
+
+      /* ===== VISUALIZAÇÃO DE FICHA ===== */
+      .ficha-view {
+        font-family: var(--font-corpo);
+      }
+
+      .ficha-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .ficha-header h2 {
+        color: var(--verde-principal);
+        font-family: var(--font-titulos);
+        font-size: 1.8rem;
+        margin-bottom: 0.3rem;
+      }
+
+      .ficha-info {
+        background: var(--off-white);
+        padding: 1.2rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+      }
+
+      .ficha-info-item {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .ficha-info-label {
+        font-size: 0.7rem;
+        color: var(--grafite-claro);
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+      }
+
+      .ficha-info-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--grafite);
+      }
+
+      .ficha-tabela {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+
+      .ficha-tabela th {
+        background: var(--verde-pastel);
+        color: var(--verde-principal);
+        padding: 0.8rem;
+        text-align: left;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      .ficha-tabela td {
+        padding: 0.8rem;
+        border-bottom: 1px solid #e8e8e8;
+        font-size: 0.85rem;
+      }
+
+      .ficha-tabela tr:hover td {
+        background: var(--off-white);
+      }
+
+      .ficha-rodape {
+        margin-top: 2rem;
+        font-size: 0.8rem;
+        color: var(--grafite-claro);
+        text-align: center;
+        border-top: 1px dashed var(--verde-pastel);
+        padding-top: 1rem;
+      }
+
+      /* ===== TOAST ===== */
+      .toast-container {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        z-index: 2000;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .toast {
+        background: var(--branco);
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: var(--shadow-hover);
+        border-left: 4px solid var(--verde-principal);
+        animation: slideInRight 0.3s;
+        min-width: 300px;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      .toast.success {
+        border-left-color: var(--verde-sucesso);
+      }
+
+      .toast.error {
+        border-left-color: var(--vermelho-urgente);
+      }
+
+      .toast.warning {
+        border-left-color: var(--laranja-atencao);
+      }
+
+      .toast.info {
+        border-left-color: var(--azul-info);
+      }
+
+      @keyframes slideInRight {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      /* ===== LOADING ===== */
+      .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        z-index: 3000;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .loading-overlay.show {
+        display: flex;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid var(--verde-pastel);
+        border-top-color: var(--verde-principal);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ===== RESPONSIVE ===== */
+      @media (max-width: 1200px) {
+        .workout-builder {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .page-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .modal-content {
+          width: 95%;
+          height: 95vh;
+        }
+
+        .sheet-item-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .aluno-selector-bar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .historico-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .ficha-info {
+          grid-template-columns: 1fr;
+        }
+
+        .aula-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .sheet-item-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Carregando...</p>
+    </div>
+
+    <!-- TOUR OVERLAY -->
+    <div class="tour-overlay" id="tourOverlay">
+      <div class="tour-card">
+        <h3>✨ Bem-vindo ao Gestão de Treinos!</h3>
+        <p>
+          Vamos fazer um tour rápido de 30 segundos para você conhecer as
+          principais funcionalidades.
+        </p>
+        <div class="btn-group">
+          <button class="btn-outline" onclick="fecharTour()">Pular</button>
+          <button class="btn-primary" onclick="iniciarTour()">
+            Iniciar Tour
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-content">
+        <div class="logo-area">
+          <a href="index.html" class="logo-icon">
+            <i class="fas fa-dumbbell"></i>
+          </a>
+          <div class="logo-text">
+            <h1>Pilates Nobility</h1>
+            <span>Planos de Treino</span>
+          </div>
+        </div>
+        <div class="user-area">
+          <div class="user-info">
+            <div class="user-name" id="userName">Instrutor</div>
+            <div class="user-role" id="userRole">Treinos</div>
+          </div>
+          <div class="user-avatar" id="userAvatar">I</div>
+          <button
+            class="help-button"
+            onclick="iniciarTour()"
+            data-tooltip="Ajuda - Tour guiado"
+          >
+            <i class="fas fa-question"></i>
+          </button>
+          <button class="btn-icon" onclick="fazerLogout()" title="Sair">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>Planos de Treino</h1>
+          <p class="subtitle">Organize os treinos do seu aluno por período</p>
+        </div>
+        <div class="page-actions">
+          <button
+            class="btn-outline"
+            onclick="exportarRelatorio()"
+            data-tooltip="Exportar relatório geral"
+          >
+            <i class="fas fa-file-pdf"></i> Exportar
+          </button>
+          <button
+            class="btn-primary"
+            onclick="abrirModalExercicio()"
+            data-tooltip="Cadastrar novo exercício na biblioteca"
+          >
+            <i class="fas fa-plus"></i> Novo Exercício
+          </button>
+        </div>
+      </div>
+
+      <!-- SELETOR DE ALUNO -->
+      <div class="aluno-selector-bar" id="tourAluno">
+        <div class="aluno-selector">
+          <i class="fas fa-user"></i>
+          <select id="seletorAluno" onchange="selecionarAluno()">
+            <option value="">Selecione um aluno...</option>
+          </select>
+        </div>
+        <div class="busca-aluno">
+          <i class="fas fa-search"></i>
+          <input
+            type="text"
+            id="buscaAluno"
+            placeholder="Buscar por nome ou CPF..."
+            autocomplete="off"
+            onkeyup="buscarAlunos()"
+          />
+          <div class="busca-resultados" id="buscaResultados"></div>
+        </div>
+        <button
+          class="btn-outline"
+          onclick="novoPlano()"
+          data-tooltip="Começar um novo plano do zero"
+        >
+          <i class="fas fa-file"></i> Novo Plano
+        </button>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab active" onclick="mudarTab('elaborar')">
+          <i class="fas fa-pen-nib"></i> Elaborar Plano
+        </button>
+        <button class="tab" onclick="mudarTab('biblioteca')">
+          <i class="fas fa-book"></i> Biblioteca
+        </button>
+        <button class="tab" onclick="mudarTab('historico')">
+          <i class="fas fa-history"></i> Histórico
+        </button>
+      </div>
+
+      <!-- TAB 1: ELABORAR PLANO -->
+      <div id="tabElaborar" class="tab-pane active">
+        <!-- ACCORDION: Dados do Plano -->
+        <div class="accordion-item" id="tourDadosPlano">
+          <div
+            class="accordion-header"
+            onclick="toggleAccordion('accordionDados')"
+          >
+            <span class="accordion-title">
+              <i class="fas fa-clipboard-list"></i> Dados do Plano
+            </span>
+            <i class="fas fa-chevron-down accordion-icon" id="iconDados"></i>
+          </div>
+          <div class="accordion-content expanded" id="accordionDados">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label required">Aluno</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="alunoNome"
+                  placeholder="Selecione um aluno"
+                  readonly
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label required">Nome do Plano</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="nomePlano"
+                  placeholder="Ex: Plano de Março/2024"
+                  data-tooltip="Dê um nome fácil de identificar, como 'Plano de Março'"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Período</label>
+                <div class="periodo-inputs" style="display: flex; gap: 0.5rem">
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="dataInicio"
+                    style="flex: 1"
+                    data-tooltip="Data de início do plano"
+                  />
+                  <span>até</span>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="dataFim"
+                    style="flex: 1"
+                    data-tooltip="Data de término (opcional)"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACCORDION: Aulas do Mês -->
+        <div class="accordion-item" id="tourAulas">
+          <div
+            class="accordion-header"
+            onclick="toggleAccordion('accordionAulas')"
+          >
+            <span class="accordion-title">
+              <i class="fas fa-calendar-check"></i> Aulas do Mês
+              <span
+                class="historico-badge"
+                style="margin-left: 0.5rem"
+                id="aulasCount"
+                >0 aulas</span
+              >
+            </span>
+            <i
+              class="fas fa-chevron-down accordion-icon rotated"
+              id="iconAulas"
+            ></i>
+          </div>
+          <div class="accordion-content expanded" id="accordionAulas">
+            <div class="aulas-container" id="aulasContainer">
+              <p
+                style="
+                  text-align: center;
+                  padding: 2rem;
+                  color: var(--grafite-claro);
+                "
+              >
+                Selecione um aluno para ver as aulas
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACCORDION: Meus Treinos Salvos -->
+        <div class="accordion-item" id="tourTreinos">
+          <div
+            class="accordion-header"
+            onclick="toggleAccordion('accordionTreinos')"
+          >
+            <span class="accordion-title">
+              <i class="fas fa-dumbbell"></i> Meus Treinos Salvos
+            </span>
+            <i
+              class="fas fa-chevron-down accordion-icon rotated"
+              id="iconTreinos"
+            ></i>
+          </div>
+          <div class="accordion-content expanded" id="accordionTreinos">
+            <div class="treinos-container" id="treinosContainer">
+              <!-- Treinos serão carregados aqui -->
+            </div>
+          </div>
+        </div>
+
+        <!-- PROGRESSO DO PLANO (sempre visível) -->
+        <div class="progresso-plano" id="tourProgresso">
+          <div class="progresso-item">
+            <span class="progresso-label">Total de aulas:</span>
+            <span class="progresso-value" id="totalAulas">0</span>
+          </div>
+          <div class="progresso-item">
+            <span class="progresso-label">Com treino:</span>
+            <span class="progresso-value" id="aulasComTreino">0</span>
+          </div>
+          <div class="progresso-item">
+            <span class="progresso-label">Pendentes:</span>
+            <span class="progresso-value" id="aulasPendentes">0</span>
+          </div>
+        </div>
+
+        <!-- CONSTRUTOR DE TREINO (aparece ao criar/editar) -->
+        <div id="construtorTreino" style="display: none">
+          <div class="section-card">
+            <div class="section-title">
+              <i class="fas fa-pen-nib"></i> Construtor de Treino
+              <button
+                class="btn-outline btn-small"
+                onclick="fecharConstrutor()"
+                style="margin-left: auto"
+                data-tooltip="Fechar construtor"
+              >
+                <i class="fas fa-times"></i> Fechar
+              </button>
+            </div>
+
+            <div class="workout-builder">
+              <!-- Biblioteca Lateral de Exercícios -->
+              <div class="exercise-library">
+                <div class="library-header">
+                  <span class="library-title">
+                    <i class="fas fa-book-open"></i> Exercícios
+                  </span>
+                  <span class="library-title" id="exerciciosCount"
+                    >0 itens</span
+                  >
+                </div>
+
+                <div class="library-search">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Buscar exercício..."
+                    id="buscaExercicio"
+                    onkeyup="filtrarBiblioteca()"
+                    data-tooltip="Digite para filtrar exercícios"
+                  />
+                </div>
+
+                <div class="library-filters">
+                  <select
+                    id="filtroEquipamento"
+                    onchange="filtrarBiblioteca()"
+                    data-tooltip="Filtrar por equipamento"
+                  >
+                    <option value="">Todos equipamentos</option>
+                  </select>
+                  <select
+                    id="filtroCategoria"
+                    onchange="filtrarBiblioteca()"
+                    data-tooltip="Filtrar por categoria"
+                  >
+                    <option value="">Todas categorias</option>
+                  </select>
+                </div>
+
+                <div id="libraryItems">
+                  <!-- Items serão carregados dinamicamente -->
+                </div>
+              </div>
+
+              <!-- Ficha do Treino Sendo Criado -->
+              <div class="workout-sheet">
+                <div class="sheet-header">
+                  <div class="sheet-title">
+                    <h2 id="treinoEditandoNome">Novo Treino</h2>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="nomeNovoTreino"
+                      placeholder="Ex: Treino Força Básica"
+                      data-tooltip="Dê um nome para este treino"
+                    />
+                  </div>
+                  <div class="sheet-actions">
+                    <button
+                      class="btn-success"
+                      onclick="salvarTreino()"
+                      data-tooltip="Salvar este treino na sua biblioteca"
+                    >
+                      <i class="fas fa-save"></i> Salvar Treino
+                    </button>
+                  </div>
+                </div>
+
+                <div class="sheet-exercise-list" id="sheetList">
+                  <div class="sheet-empty">
+                    <i class="fas fa-arrow-left"></i>
+                    <p>Clique nos exercícios para adicionar</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOTÕES FINAIS -->
+        <div
+          style="
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1rem;
+          "
+        >
+          <button
+            class="btn-secondary"
+            onclick="novoPlano()"
+            data-tooltip="Limpar e começar um novo plano"
+          >
+            <i class="fas fa-redo"></i> Limpar
+          </button>
+          <button
+            class="btn-primary"
+            onclick="salvarPlano()"
+            data-tooltip="Salvar todas as atribuições deste plano"
+          >
+            <i class="fas fa-save"></i> Salvar Plano
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB 2: BIBLIOTECA DE EXERCÍCIOS -->
+      <div id="tabBiblioteca" class="tab-pane">
+        <div class="section-card">
+          <div class="section-title">
+            <i class="fas fa-database"></i> Biblioteca de Exercícios
+          </div>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Equipamento</th>
+                  <th>Categoria</th>
+                  <th>Nível</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="exerciciosTableBody">
+                <!-- Será preenchido via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: HISTÓRICO DE PLANOS -->
+      <div id="tabHistorico" class="tab-pane">
+        <div class="section-card">
+          <div class="section-title">
+            <i class="fas fa-history"></i> Histórico de Planos
+          </div>
+
+          <div class="historico-grid" id="historicoGrid">
+            <!-- Cards serão gerados dinamicamente -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL NOVO EXERCÍCIO -->
+    <div class="modal" id="modalExercicio">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Novo Exercício</h2>
+          <button class="close-modal" onclick="fecharModal('modalExercicio')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="formExercicio">
+            <div class="form-group">
+              <label class="form-label required">Nome do Exercício</label>
+              <input
+                type="text"
+                class="form-control"
+                id="exercicioNome"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Equipamento</label>
+              <input
+                type="text"
+                class="form-control"
+                id="exercicioEquipamento"
+                list="equipamentosList"
+                placeholder="Digite ou selecione..."
+                autocomplete="off"
+                required
+              />
+              <datalist id="equipamentosList"></datalist>
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Categoria</label>
+              <input
+                type="text"
+                class="form-control"
+                id="exercicioCategoria"
+                list="categoriasList"
+                placeholder="Digite ou selecione..."
+                autocomplete="off"
+                required
+              />
+              <datalist id="categoriasList"></datalist>
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Nível</label>
+              <select class="form-select" id="exercicioNivel" required>
+                <option value="1">Iniciante</option>
+                <option value="2">Iniciante - Intermediário</option>
+                <option value="3">Intermediário</option>
+                <option value="4">Intermediário - Avançado</option>
+                <option value="5">Avançado</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Instruções</label>
+              <textarea
+                class="form-textarea"
+                id="exercicioInstrucoes"
+                placeholder="Descreva a execução correta..."
+              ></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalExercicio')">
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="salvarExercicio()">
+            Salvar Exercício
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL EDITAR EXERCÍCIO -->
+    <div class="modal" id="modalEditarExercicio">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Editar Exercício</h2>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalEditarExercicio')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="formEditarExercicio">
+            <input type="hidden" id="editExercicioId" />
+            <div class="form-group">
+              <label class="form-label required">Nome</label>
+              <input
+                type="text"
+                class="form-control"
+                id="editExercicioNome"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Equipamento</label>
+              <input
+                type="text"
+                class="form-control"
+                id="editExercicioEquipamento"
+                list="editEquipamentosList"
+                autocomplete="off"
+                required
+              />
+              <datalist id="editEquipamentosList"></datalist>
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Categoria</label>
+              <input
+                type="text"
+                class="form-control"
+                id="editExercicioCategoria"
+                list="editCategoriasList"
+                autocomplete="off"
+                required
+              />
+              <datalist id="editCategoriasList"></datalist>
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Nível</label>
+              <select class="form-select" id="editExercicioNivel" required>
+                <option value="1">Iniciante</option>
+                <option value="2">Iniciante - Intermediário</option>
+                <option value="3">Intermediário</option>
+                <option value="4">Intermediário - Avançado</option>
+                <option value="5">Avançado</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Instruções</label>
+              <textarea
+                class="form-textarea"
+                id="editExercicioInstrucoes"
+              ></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalEditarExercicio')"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="salvarEdicaoExercicio()">
+            Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL VISUALIZAR PLANO -->
+    <div class="modal" id="modalPlano">
+      <div class="modal-content large">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalPlanoTitulo">
+            <i class="fas fa-eye"></i> Visualizar Plano
+          </h2>
+          <button class="close-modal" onclick="fecharModal('modalPlano')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body" id="modalPlanoConteudo">
+          <!-- Conteúdo gerado dinamicamente -->
+        </div>
+        <div class="modal-footer" id="modalPlanoFooter">
+          <button class="btn-secondary" onclick="fecharModal('modalPlano')">
+            Fechar
+          </button>
+          <button class="btn-outline" onclick="exportarPlanoAtualPDF()">
+            <i class="fas fa-file-pdf"></i> Exportar PDF
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script>
+      // ============================================================
+      // ESTADO GLOBAL
+      // ============================================================
+      const estado = {
+        usuario: {
+          nome: "Instrutor Master",
+          role: "admin",
+          id: 1,
+        },
+        alunoSelecionado: null,
+        planosSalvos: [
+          {
+            id: 1,
+            aluno_id: 1,
+            aluno_nome: "João Silva",
+            nome: "Plano de Março/2024",
+            data_inicio: "2026-03-01",
+            data_fim: "2026-03-31",
+            ativo: true,
+            instrutor: "Instrutor Master",
+            atribuicoes: [
+              { aula_id: 1, treino_id: 1 },
+              { aula_id: 4, treino_id: 1 },
+              { aula_id: 6, treino_id: 2 },
+              { aula_id: 7, treino_id: null },
+            ],
+          },
+          {
+            id: 2,
+            aluno_id: 2,
+            aluno_nome: "Maria Oliveira",
+            nome: "Plano de Março/2024",
+            data_inicio: "2026-03-01",
+            data_fim: "2026-03-31",
+            ativo: true,
+            instrutor: "Instrutor Master",
+            atribuicoes: [
+              { aula_id: 2, treino_id: 2 },
+              { aula_id: 9, treino_id: 3 },
+              { aula_id: 10, treino_id: 1 },
+            ],
+          },
+        ],
+        treinos: [
+          {
+            id: 1,
+            nome: "Treino Força Básica",
+            criado_em: "2026-03-01",
+            exercicios: [
+              {
+                id: 1,
+                nome: "The Hundred",
+                equipamento: "Solo",
+                categoria: "Core",
+                series: 3,
+                repeticoes: "10",
+                carga: "",
+                obs: "",
+              },
+              {
+                id: 2,
+                nome: "Footwork",
+                equipamento: "Reformer",
+                categoria: "MMII",
+                series: 3,
+                repeticoes: "15",
+                carga: "2 molas vermelhas",
+                obs: "",
+              },
+              {
+                id: 8,
+                nome: "Roll Up",
+                equipamento: "Solo",
+                categoria: "Mobilidade",
+                series: 3,
+                repeticoes: "8",
+                carga: "",
+                obs: "",
+              },
+            ],
+          },
+          {
+            id: 2,
+            nome: "Treino Mobilidade",
+            criado_em: "2026-03-01",
+            exercicios: [
+              {
+                id: 4,
+                nome: "Short Box Series",
+                equipamento: "Reformer",
+                categoria: "Mobilidade",
+                series: 3,
+                repeticoes: "12",
+                carga: "Mola leve",
+                obs: "",
+              },
+              {
+                id: 5,
+                nome: "Elephant",
+                equipamento: "Reformer",
+                categoria: "Alongamento",
+                series: 3,
+                repeticoes: "8",
+                carga: "Mola média",
+                obs: "",
+              },
+              {
+                id: 8,
+                nome: "Roll Up",
+                equipamento: "Solo",
+                categoria: "Mobilidade",
+                series: 3,
+                repeticoes: "8",
+                carga: "",
+                obs: "",
+              },
+            ],
+          },
+          {
+            id: 3,
+            nome: "Treino Avançado",
+            criado_em: "2026-03-01",
+            exercicios: [
+              {
+                id: 1,
+                nome: "The Hundred",
+                equipamento: "Solo",
+                categoria: "Core",
+                series: 3,
+                repeticoes: "10",
+                carga: "",
+                obs: "",
+              },
+              {
+                id: 3,
+                nome: "Swan",
+                equipamento: "Cadillac",
+                categoria: "Extensão",
+                series: 3,
+                repeticoes: "8",
+                carga: "Mola média",
+                obs: "",
+              },
+              {
+                id: 7,
+                nome: "Teaser",
+                equipamento: "Solo",
+                categoria: "Core",
+                series: 3,
+                repeticoes: "6",
+                carga: "",
+                obs: "",
+              },
+            ],
+          },
+        ],
+        exercicios: [
+          {
+            id: 1,
+            nome: "The Hundred",
+            equipamento: "Solo",
+            categoria: "Core",
+            nivel: 1,
+            instrucoes: "Exercício clássico de aquecimento",
+            ativo: true,
+          },
+          {
+            id: 2,
+            nome: "Footwork",
+            equipamento: "Reformer",
+            categoria: "MMII",
+            nivel: 1,
+            instrucoes: "Trabalho de pernas no reformer",
+            ativo: true,
+          },
+          {
+            id: 3,
+            nome: "Swan",
+            equipamento: "Cadillac",
+            categoria: "Extensão",
+            nivel: 2,
+            instrucoes: "Extensão de tronco",
+            ativo: true,
+          },
+          {
+            id: 4,
+            nome: "Short Box Series",
+            equipamento: "Reformer",
+            categoria: "Mobilidade",
+            nivel: 2,
+            instrucoes: "Série de mobilidade",
+            ativo: true,
+          },
+          {
+            id: 5,
+            nome: "Elephant",
+            equipamento: "Reformer",
+            categoria: "Alongamento",
+            nivel: 1,
+            instrucoes: "Alongamento de cadeia posterior",
+            ativo: true,
+          },
+          {
+            id: 6,
+            nome: "Leg Springs",
+            equipamento: "Wall Unit",
+            categoria: "MMII",
+            nivel: 2,
+            instrucoes: "Trabalho de pernas no wall unit",
+            ativo: true,
+          },
+          {
+            id: 7,
+            nome: "Teaser",
+            equipamento: "Solo",
+            categoria: "Core",
+            nivel: 3,
+            instrucoes: "Exercício avançado de core",
+            ativo: false,
+          },
+          {
+            id: 8,
+            nome: "Roll Up",
+            equipamento: "Solo",
+            categoria: "Mobilidade",
+            nivel: 1,
+            instrucoes: "Mobilidade de coluna",
+            ativo: true,
+          },
+        ],
+        alunos: [
+          { id: 1, nome: "João Silva", cpf: "123.456.789-00" },
+          { id: 2, nome: "Maria Oliveira", cpf: "987.654.321-00" },
+          { id: 3, nome: "Ana Santos", cpf: "456.789.123-00" },
+          { id: 4, nome: "Pedro Costa", cpf: "789.123.456-00" },
+          { id: 5, nome: "Carlos Souza", cpf: "321.654.987-00" },
+        ],
+        aulas: [
+          {
+            id: 1,
+            aluno_id: 1,
+            data: "2026-03-06",
+            horario: "08:00",
+            foco: "Pilates Solo",
+          },
+          {
+            id: 2,
+            aluno_id: 2,
+            data: "2026-03-06",
+            horario: "14:00",
+            foco: "Reformer",
+          },
+          {
+            id: 3,
+            aluno_id: 3,
+            data: "2026-03-07",
+            horario: "09:00",
+            foco: "Cadillac",
+          },
+          {
+            id: 4,
+            aluno_id: 1,
+            data: "2026-03-08",
+            horario: "08:00",
+            foco: "Pilates Solo",
+          },
+          {
+            id: 5,
+            aluno_id: 4,
+            data: "2026-03-06",
+            horario: "16:00",
+            foco: "Reformer",
+          },
+          {
+            id: 6,
+            aluno_id: 1,
+            data: "2026-03-10",
+            horario: "08:00",
+            foco: "Pilates Solo",
+          },
+          {
+            id: 7,
+            aluno_id: 1,
+            data: "2026-03-12",
+            horario: "08:00",
+            foco: "Pilates Solo",
+          },
+          {
+            id: 8,
+            aluno_id: 1,
+            data: "2026-03-15",
+            horario: "08:00",
+            foco: "Pilates Solo",
+          },
+          {
+            id: 9,
+            aluno_id: 2,
+            data: "2026-03-09",
+            horario: "14:00",
+            foco: "Reformer",
+          },
+          {
+            id: 10,
+            aluno_id: 2,
+            data: "2026-03-11",
+            horario: "14:00",
+            foco: "Reformer",
+          },
+        ],
+        planoAtual: {
+          id: null,
+          aluno_id: null,
+          nome: "",
+          data_inicio: new Date().toISOString().split("T")[0],
+          data_fim: "",
+          atribuicoes: [],
+        },
+        treinoEditando: null,
+        timeoutBusca: null,
+        tourAtivo: false,
+        tourPasso: 0,
+      };
+
+      // ============================================================
+      // FUNÇÕES DE UTILIDADE
+      // ============================================================
+      function mostrarLoading() {
+        document.getElementById("loadingOverlay").classList.add("show");
+      }
+
+      function esconderLoading() {
+        document.getElementById("loadingOverlay").classList.remove("show");
+      }
+
+      function mostrarToast(msg, tipo = "info") {
+        const container = document.getElementById("toastContainer");
+        const toast = document.createElement("div");
+        toast.className = `toast ${tipo}`;
+        let icone = "fa-info-circle";
+        if (tipo === "success") icone = "fa-check-circle";
+        if (tipo === "error") icone = "fa-exclamation-circle";
+        if (tipo === "warning") icone = "fa-exclamation-triangle";
+
+        toast.innerHTML = `<i class="fas ${icone}"></i> ${msg}`;
+        container.appendChild(toast);
+
+        setTimeout(() => toast.remove(), 3000);
+      }
+
+      function fecharModal(id) {
+        document.getElementById(id).classList.remove("show");
+      }
+
+      function formatarData(dataStr) {
+        if (!dataStr) return "";
+        const [ano, mes, dia] = dataStr.split("-");
+        return `${dia}/${mes}/${ano}`;
+      }
+
+      // ============================================================
+      // FUNÇÕES DE AUTOCOMPLETE
+      // ============================================================
+      function atualizarSugestoes() {
+        const equipamentos = [
+          ...new Set(estado.exercicios.map((ex) => ex.equipamento)),
+        ].sort();
+        const categorias = [
+          ...new Set(estado.exercicios.map((ex) => ex.categoria)),
+        ].sort();
+
+        const equipList = document.getElementById("equipamentosList");
+        const catList = document.getElementById("categoriasList");
+        const editEquipList = document.getElementById("editEquipamentosList");
+        const editCatList = document.getElementById("editCategoriasList");
+
+        if (equipList) {
+          equipList.innerHTML = equipamentos
+            .map((eq) => `<option value="${eq}">`)
+            .join("");
+        }
+        if (catList) {
+          catList.innerHTML = categorias
+            .map((cat) => `<option value="${cat}">`)
+            .join("");
+        }
+        if (editEquipList) {
+          editEquipList.innerHTML = equipamentos
+            .map((eq) => `<option value="${eq}">`)
+            .join("");
+        }
+        if (editCatList) {
+          editCatList.innerHTML = categorias
+            .map((cat) => `<option value="${cat}">`)
+            .join("");
+        }
+
+        const filtroEquip = document.getElementById("filtroEquipamento");
+        const filtroCat = document.getElementById("filtroCategoria");
+
+        if (filtroEquip) {
+          filtroEquip.innerHTML =
+            '<option value="">Todos equipamentos</option>' +
+            equipamentos
+              .map((eq) => `<option value="${eq}">${eq}</option>`)
+              .join("");
+        }
+        if (filtroCat) {
+          filtroCat.innerHTML =
+            '<option value="">Todas categorias</option>' +
+            categorias
+              .map((cat) => `<option value="${cat}">${cat}</option>`)
+              .join("");
+        }
+      }
+
+      // ============================================================
+      // FUNÇÕES DE TOUR GUIADO
+      // ============================================================
+      function iniciarTour() {
+        document.getElementById("tourOverlay").classList.remove("show");
+        estado.tourAtivo = true;
+        estado.tourPasso = 1;
+
+        mostrarToast("Tour iniciado! Siga as instruções.", "info");
+
+        // Destacar primeiro elemento
+        destacarElemento("tourAluno");
+
+        setTimeout(() => {
+          mostrarToast("Passo 1: Selecione um aluno para começar", "info");
+        }, 500);
+      }
+
+      function fecharTour() {
+        document.getElementById("tourOverlay").classList.remove("show");
+        localStorage.setItem("tour_visto", "true");
+      }
+
+      function destacarElemento(id) {
+        // Remover destaque anterior
+        document.querySelectorAll(".tour-highlight").forEach((el) => {
+          el.classList.remove("tour-highlight");
+        });
+
+        const elemento = document.getElementById(id);
+        if (elemento) {
+          elemento.classList.add("tour-highlight");
+        }
+      }
+
+      // ============================================================
+      // FUNÇÕES DE ACCORDION
+      // ============================================================
+      function toggleAccordion(id) {
+        const content = document.getElementById(id);
+        const icon = document.getElementById(
+          "icon" + id.replace("accordion", "")
+        );
+
+        content.classList.toggle("expanded");
+        icon.classList.toggle("rotated");
+      }
+
+      // ============================================================
+      // FUNÇÕES DE AUTENTICAÇÃO
+      // ============================================================
+      function verificarLogin() {
+        document.getElementById("userName").textContent = estado.usuario.nome;
+        document.getElementById("userRole").textContent = "Instrutor";
+        document.getElementById("userAvatar").textContent = "IM";
+        return true;
+      }
+
+      function fazerLogout() {
+        window.location.href = "index.html";
+      }
+
+      // ============================================================
+      // FUNÇÕES DE ALUNOS
+      // ============================================================
+      function carregarAlunosSelect() {
+        const select = document.getElementById("seletorAluno");
+        select.innerHTML = '<option value="">Selecione um aluno...</option>';
+
+        estado.alunos.forEach((aluno) => {
+          const option = document.createElement("option");
+          option.value = aluno.id;
+          option.textContent = `${aluno.nome} ${
+            aluno.cpf ? `- ${aluno.cpf}` : ""
+          }`;
+          select.appendChild(option);
+        });
+      }
+
+      function buscarAlunos() {
+        const termo = document.getElementById("buscaAluno").value.toLowerCase();
+        const resultadosDiv = document.getElementById("buscaResultados");
+
+        if (estado.timeoutBusca) {
+          clearTimeout(estado.timeoutBusca);
+        }
+
+        if (termo.length < 2) {
+          resultadosDiv.classList.remove("show");
+          return;
+        }
+
+        estado.timeoutBusca = setTimeout(() => {
+          const resultados = estado.alunos.filter(
+            (aluno) =>
+              aluno.nome.toLowerCase().includes(termo) ||
+              (aluno.cpf && aluno.cpf.includes(termo))
+          );
+
+          if (resultados.length > 0) {
+            resultadosDiv.innerHTML = resultados
+              .map(
+                (aluno) => `
+              <div class="busca-item" onclick="selecionarAlunoPorBusca(${
+                aluno.id
+              }, '${aluno.nome}')">
+                <div class="busca-item-nome">${aluno.nome}</div>
+                <div class="busca-item-info">
+                  ${aluno.cpf ? `<span>CPF: ${aluno.cpf}</span>` : ""}
+                </div>
+              </div>
+            `
+              )
+              .join("");
+            resultadosDiv.classList.add("show");
+          } else {
+            resultadosDiv.innerHTML =
+              '<div class="busca-item" style="color: var(--grafite-claro);">Nenhum aluno encontrado</div>';
+            resultadosDiv.classList.add("show");
+          }
+        }, 300);
+      }
+
+      function selecionarAlunoPorBusca(id, nome) {
+        document.getElementById("buscaAluno").value = nome;
+        document.getElementById("buscaResultados").classList.remove("show");
+
+        const aluno = estado.alunos.find((a) => a.id === id);
+        estado.alunoSelecionado = aluno;
+
+        document.getElementById("alunoNome").value = aluno.nome;
+
+        const select = document.getElementById("seletorAluno");
+        select.value = id;
+
+        carregarAulasAluno(id);
+        mostrarToast(`Aluno ${aluno.nome} selecionado`, "success");
+
+        if (estado.tourAtivo && estado.tourPasso === 1) {
+          estado.tourPasso = 2;
+          destacarElemento("tourDadosPlano");
+          mostrarToast(
+            "Passo 2: Preencha os dados do plano (nome e período)",
+            "info"
+          );
+        }
+      }
+
+      function selecionarAluno() {
+        const select = document.getElementById("seletorAluno");
+        const alunoId = parseInt(select.value);
+
+        if (!alunoId) {
+          estado.alunoSelecionado = null;
+          document.getElementById("alunoNome").value = "";
+          document.getElementById("buscaAluno").value = "";
+          document.getElementById("aulasContainer").innerHTML =
+            '<p style="text-align: center; padding: 2rem; color: var(--grafite-claro);">Selecione um aluno para ver as aulas</p>';
+          return;
+        }
+
+        const aluno = estado.alunos.find((a) => a.id === alunoId);
+        estado.alunoSelecionado = aluno;
+
+        document.getElementById("alunoNome").value = aluno.nome;
+        document.getElementById("buscaAluno").value = aluno.nome;
+
+        carregarAulasAluno(alunoId);
+        mostrarToast(`Aluno ${aluno.nome} selecionado`, "success");
+      }
+
+      function carregarAulasAluno(alunoId) {
+        const container = document.getElementById("aulasContainer");
+        const aulasAluno = estado.aulas
+          .filter((a) => a.aluno_id === alunoId)
+          .sort((a, b) => a.data.localeCompare(b.data));
+
+        document.getElementById(
+          "aulasCount"
+        ).textContent = `${aulasAluno.length} aulas`;
+
+        if (aulasAluno.length === 0) {
+          container.innerHTML =
+            '<p style="text-align: center; padding: 2rem; color: var(--grafite-claro);">Nenhuma aula encontrada para este aluno</p>';
+          return;
+        }
+
+        // Inicializar atribuições se necessário
+        aulasAluno.forEach((aula) => {
+          if (
+            !estado.planoAtual.atribuicoes.find(
+              (attr) => attr.aula_id === aula.id
+            )
+          ) {
+            estado.planoAtual.atribuicoes.push({
+              aula_id: aula.id,
+              treino_id: null,
+            });
+          }
+        });
+
+        container.innerHTML = aulasAluno
+          .map((aula) => {
+            const atribuicao = estado.planoAtual.atribuicoes.find(
+              (attr) => attr.aula_id === aula.id
+            );
+            const treinoId = atribuicao ? atribuicao.treino_id : null;
+            const treino = treinoId
+              ? estado.treinos.find((t) => t.id === treinoId)
+              : null;
+
+            return `
+            <div class="aula-item">
+              <div class="aula-header">
+                <div>
+                  <span class="aula-data">${formatarData(aula.data)} - ${
+              aula.horario
+            }</span>
+                  <span class="aula-foco">${aula.foco}</span>
+                </div>
+                <span class="aula-treino-badge ${!treino ? "pendente" : ""}">
+                  ${treino ? treino.nome : "Aguardando"}
+                </span>
+              </div>
+              <div class="aula-atribuicao">
+                <select class="aula-select" id="select-${
+                  aula.id
+                }" onchange="atribuirTreino(${aula.id}, this.value)">
+                  <option value="">-- Escolha um treino --</option>
+                  ${estado.treinos
+                    .map(
+                      (t) => `
+                    <option value="${t.id}" ${
+                        treinoId === t.id ? "selected" : ""
+                      }>${t.nome}</option>
+                  `
+                    )
+                    .join("")}
+                </select>
+                <button class="aula-btn" onclick="criarTreinoParaAula(${
+                  aula.id
+                })" data-tooltip="Criar novo treino">
+                  <i class="fas fa-plus"></i>
+                </button>
+                ${
+                  treino
+                    ? `
+                  <button class="aula-btn" onclick="visualizarTreino(${treino.id})" data-tooltip="Ver treino">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                `
+                    : ""
+                }
+              </div>
+            </div>
+          `;
+          })
+          .join("");
+
+        atualizarResumo();
+        renderizarTreinosContainer();
+      }
+
+      function atribuirTreino(aulaId, treinoId) {
+        const atribuicao = estado.planoAtual.atribuicoes.find(
+          (attr) => attr.aula_id === aulaId
+        );
+        if (atribuicao) {
+          atribuicao.treino_id = treinoId ? parseInt(treinoId) : null;
+        } else {
+          estado.planoAtual.atribuicoes.push({
+            aula_id: aulaId,
+            treino_id: treinoId ? parseInt(treinoId) : null,
+          });
+        }
+
+        const select = document.getElementById(`select-${aulaId}`);
+        if (select) {
+          const badge = select
+            .closest(".aula-item")
+            .querySelector(".aula-treino-badge");
+          if (treinoId) {
+            const treino = estado.treinos.find(
+              (t) => t.id === parseInt(treinoId)
+            );
+            badge.textContent = treino ? treino.nome : "Aguardando";
+            badge.classList.remove("pendente");
+          } else {
+            badge.textContent = "Aguardando";
+            badge.classList.add("pendente");
+          }
+        }
+
+        atualizarResumo();
+      }
+
+      function criarTreinoParaAula(aulaId) {
+        estado.treinoEditando = {
+          id: null,
+          nome: "",
+          exercicios: [],
+        };
+        document.getElementById("construtorTreino").style.display = "block";
+        document.getElementById("nomeNovoTreino").value = "";
+        renderizarFicha();
+        mostrarToast("Crie o treino e depois atribua à aula", "info");
+
+        document
+          .getElementById("construtorTreino")
+          .scrollIntoView({ behavior: "smooth" });
+
+        if (estado.tourAtivo && estado.tourPasso === 3) {
+          estado.tourPasso = 4;
+          mostrarToast(
+            "Passo 4: Monte o treino clicando nos exercícios",
+            "info"
+          );
+        }
+      }
+
+      function renderizarTreinosContainer() {
+        const container = document.getElementById("treinosContainer");
+
+        container.innerHTML = estado.treinos
+          .map(
+            (treino) => `
+          <div class="treino-item" onclick="visualizarTreino(${treino.id})">
+            <div>
+              <div class="treino-nome">${treino.nome}</div>
+              <div class="treino-info">
+                <span>${treino.exercicios.length} exercícios</span>
+              </div>
+            </div>
+            <span class="treino-badge">${treino.exercicios.length} ex</span>
+          </div>
+        `
+          )
+          .join("");
+      }
+
+      function visualizarTreino(treinoId) {
+        const treino = estado.treinos.find((t) => t.id === treinoId);
+        if (!treino) return;
+
+        let html = `
+          <div class="ficha-view">
+            <div class="ficha-header">
+              <h2>${treino.nome}</h2>
+            </div>
+            
+            <table class="ficha-tabela">
+              <thead>
+                <tr>
+                  <th>Exercício</th>
+                  <th>Equipamento</th>
+                  <th>Séries</th>
+                  <th>Repetições</th>
+                  <th>Carga</th>
+                  <th>Observação</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+
+        treino.exercicios.forEach((ex) => {
+          html += `
+            <tr>
+              <td><strong>${ex.nome}</strong></td>
+              <td>${ex.equipamento}</td>
+              <td>${ex.series}</td>
+              <td>${ex.repeticoes}</td>
+              <td>${ex.carga || "-"}</td>
+              <td>${ex.obs || "-"}</td>
+            </tr>
+          `;
+        });
+
+        html += `
+              </tbody>
+            </table>
+          </div>
+        `;
+
+        document.getElementById(
+          "modalPlanoTitulo"
+        ).innerHTML = `<i class="fas fa-eye"></i> ${treino.nome}`;
+        document.getElementById("modalPlanoConteudo").innerHTML = html;
+        document.getElementById("modalPlanoFooter").innerHTML = `
+          <button class="btn-secondary" onclick="fecharModal('modalPlano')">Fechar</button>
+          <button class="btn-outline" onclick="exportarTreinoPDF(${treino.id})">
+            <i class="fas fa-file-pdf"></i> Exportar PDF
+          </button>
+        `;
+        document.getElementById("modalPlano").classList.add("show");
+      }
+
+      function atualizarResumo() {
+        const total = estado.planoAtual.atribuicoes.length;
+        const comTreino = estado.planoAtual.atribuicoes.filter(
+          (attr) => attr.treino_id !== null
+        ).length;
+
+        document.getElementById("totalAulas").textContent = total;
+        document.getElementById("aulasComTreino").textContent = comTreino;
+        document.getElementById("aulasPendentes").textContent =
+          total - comTreino;
+      }
+
+      // ============================================================
+      // FUNÇÕES DO CONSTRUTOR DE TREINO
+      // ============================================================
+      function renderizarBibliotecaExercicios() {
+        const container = document.getElementById("libraryItems");
+        container.innerHTML = estado.exercicios
+          .filter((ex) => ex.ativo)
+          .map(
+            (ex) => `
+            <div class="exercise-item" onclick="adicionarExercicio(${ex.id}, '${ex.nome}', '${ex.equipamento}', '${ex.categoria}')">
+              <div class="icon"><i class="fas fa-dumbbell"></i></div>
+              <div class="info">
+                <h4>${ex.nome}</h4>
+                <div class="tags">
+                  <span class="tag">${ex.categoria}</span>
+                  <span class="tag equip">${ex.equipamento}</span>
+                </div>
+              </div>
+            </div>
+          `
+          )
+          .join("");
+
+        document.getElementById("exerciciosCount").textContent = `${
+          estado.exercicios.filter((ex) => ex.ativo).length
+        } itens`;
+      }
+
+      function filtrarBiblioteca() {
+        const termo = document
+          .getElementById("buscaExercicio")
+          .value.toLowerCase();
+        const equipamento = document.getElementById("filtroEquipamento").value;
+        const categoria = document.getElementById("filtroCategoria").value;
+
+        const items = document.querySelectorAll("#libraryItems .exercise-item");
+        let visiveis = 0;
+
+        items.forEach((item) => {
+          const nome = item.querySelector("h4").textContent.toLowerCase();
+          const tags = item.querySelectorAll(".tag");
+          const equipItem = tags[1]?.textContent || "";
+          const catItem = tags[0]?.textContent || "";
+
+          const matchesTermo = termo === "" || nome.includes(termo);
+          const matchesEquip = equipamento === "" || equipItem === equipamento;
+          const matchesCategoria = categoria === "" || catItem === categoria;
+
+          if (matchesTermo && matchesEquip && matchesCategoria) {
+            item.style.display = "flex";
+            visiveis++;
+          } else {
+            item.style.display = "none";
+          }
+        });
+
+        document.getElementById(
+          "exerciciosCount"
+        ).textContent = `${visiveis} itens`;
+      }
+
+      function adicionarExercicio(id, nome, equipamento, categoria) {
+        if (!estado.treinoEditando) {
+          estado.treinoEditando = {
+            id: null,
+            nome: "",
+            exercicios: [],
+          };
+        }
+
+        const existe = estado.treinoEditando.exercicios.some(
+          (ex) => ex.id === id
+        );
+        if (existe) {
+          mostrarToast("Exercício já adicionado", "warning");
+          return;
+        }
+
+        const exercicio = {
+          id,
+          nome,
+          equipamento,
+          categoria,
+          series: 3,
+          repeticoes: "10",
+          carga: "",
+          obs: "",
+        };
+
+        estado.treinoEditando.exercicios.push(exercicio);
+        renderizarFicha();
+      }
+
+      function removerExercicio(id) {
+        if (estado.treinoEditando) {
+          estado.treinoEditando.exercicios =
+            estado.treinoEditando.exercicios.filter((ex) => ex.id !== id);
+          renderizarFicha();
+        }
+      }
+
+      function atualizarExercicio(id, campo, valor) {
+        if (estado.treinoEditando) {
+          const exercicio = estado.treinoEditando.exercicios.find(
+            (ex) => ex.id === id
+          );
+          if (exercicio) {
+            exercicio[campo] = valor;
+          }
+        }
+      }
+
+      function renderizarFicha() {
+        const list = document.getElementById("sheetList");
+
+        if (
+          !estado.treinoEditando ||
+          estado.treinoEditando.exercicios.length === 0
+        ) {
+          list.innerHTML = `
+            <div class="sheet-empty">
+              <i class="fas fa-arrow-left"></i>
+              <p>Clique nos exercícios para adicionar</p>
+            </div>
+          `;
+          return;
+        }
+
+        list.innerHTML = estado.treinoEditando.exercicios
+          .map(
+            (ex) => `
+          <div class="sheet-item" id="ex-${ex.id}">
+            <div class="sheet-item-header">
+              <span class="sheet-item-title">
+                ${ex.nome}
+                <span class="sheet-item-badge">${ex.equipamento}</span>
+              </span>
+            </div>
+            <div class="sheet-item-grid">
+              <div class="sheet-item-field">
+                <label>Séries</label>
+                <input 
+                  type="number" 
+                  value="${ex.series}" 
+                  onchange="atualizarExercicio(${ex.id}, 'series', this.value)"
+                >
+              </div>
+              <div class="sheet-item-field">
+                <label>Repetições</label>
+                <input 
+                  type="text" 
+                  value="${ex.repeticoes}" 
+                  onchange="atualizarExercicio(${ex.id}, 'repeticoes', this.value)"
+                >
+              </div>
+              <div class="sheet-item-field">
+                <label>Carga/Mola</label>
+                <input 
+                  type="text" 
+                  value="${ex.carga}" 
+                  placeholder="Ex: 1 azul"
+                  onchange="atualizarExercicio(${ex.id}, 'carga', this.value)"
+                >
+              </div>
+              <div class="sheet-item-field">
+                <label>Observação</label>
+                <input 
+                  type="text" 
+                  value="${ex.obs}" 
+                  placeholder="Dica técnica..."
+                  onchange="atualizarExercicio(${ex.id}, 'obs', this.value)"
+                >
+              </div>
+            </div>
+            <button class="remove-exercise" onclick="removerExercicio(${ex.id})">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        `
+          )
+          .join("");
+      }
+
+      function salvarTreino() {
+        const nome = document.getElementById("nomeNovoTreino").value;
+        if (!nome) {
+          mostrarToast("Dê um nome ao treino", "error");
+          return;
+        }
+
+        if (
+          !estado.treinoEditando ||
+          estado.treinoEditando.exercicios.length === 0
+        ) {
+          mostrarToast("Adicione exercícios ao treino", "error");
+          return;
+        }
+
+        const novoTreino = {
+          id: estado.treinos.length + 1,
+          nome: nome,
+          criado_em: new Date().toISOString().split("T")[0],
+          exercicios: estado.treinoEditando.exercicios.map((ex) => ({ ...ex })),
+        };
+
+        estado.treinos.push(novoTreino);
+        renderizarTreinosContainer();
+        renderizarBibliotecaExercicios();
+
+        if (estado.tourAtivo && estado.tourPasso === 4) {
+          estado.tourPasso = 5;
+          destacarElemento("tourAulas");
+          mostrarToast(
+            "Passo 5: Agora atribua o treino à aula desejada",
+            "info"
+          );
+        }
+
+        fecharConstrutor();
+        mostrarToast(`Treino "${nome}" salvo com sucesso!`, "success");
+      }
+
+      function fecharConstrutor() {
+        document.getElementById("construtorTreino").style.display = "none";
+        estado.treinoEditando = null;
+      }
+
+      // ============================================================
+      // FUNÇÕES DO PLANO
+      // ============================================================
+      function novoPlano() {
+        estado.planoAtual = {
+          id: null,
+          aluno_id: estado.alunoSelecionado?.id || null,
+          nome: "",
+          data_inicio: new Date().toISOString().split("T")[0],
+          data_fim: "",
+          atribuicoes: [],
+        };
+
+        document.getElementById("nomePlano").value = "";
+        document.getElementById("dataInicio").value =
+          estado.planoAtual.data_inicio;
+        document.getElementById("dataFim").value = "";
+
+        if (estado.alunoSelecionado) {
+          carregarAulasAluno(estado.alunoSelecionado.id);
+        }
+
+        fecharConstrutor();
+        mostrarToast("Novo plano criado", "success");
+      }
+
+      function salvarPlano() {
+        if (!estado.alunoSelecionado) {
+          mostrarToast("Selecione um aluno", "error");
+          return;
+        }
+
+        const nome =
+          document.getElementById("nomePlano").value ||
+          `Plano de ${new Date().toLocaleString("pt-BR", {
+            month: "long",
+            year: "numeric",
+          })}`;
+        const dataInicio = document.getElementById("dataInicio").value;
+        const dataFim = document.getElementById("dataFim").value;
+
+        const novoPlano = {
+          id: estado.planosSalvos.length + 1,
+          aluno_id: estado.alunoSelecionado.id,
+          aluno_nome: estado.alunoSelecionado.nome,
+          nome: nome,
+          data_inicio: dataInicio,
+          data_fim: dataFim,
+          ativo: true,
+          instrutor: estado.usuario.nome,
+          atribuicoes: estado.planoAtual.atribuicoes.map((attr) => ({
+            ...attr,
+          })),
+        };
+
+        estado.planosSalvos.push(novoPlano);
+        renderizarHistorico();
+
+        mostrarToast(
+          `Plano salvo com ${
+            novoPlano.atribuicoes.filter((a) => a.treino_id).length
+          } treinos atribuídos!`,
+          "success"
+        );
+        novoPlano();
+      }
+
+      // ============================================================
+      // FUNÇÕES DE HISTÓRICO
+      // ============================================================
+      function renderizarHistorico() {
+        const grid = document.getElementById("historicoGrid");
+
+        if (estado.planosSalvos.length === 0) {
+          grid.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-history"></i>
+              <p>Nenhum plano encontrado no histórico</p>
+            </div>
+          `;
+          return;
+        }
+
+        grid.innerHTML = estado.planosSalvos
+          .map((plano) => {
+            const totalAulas = plano.atribuicoes.length;
+            const comTreino = plano.atribuicoes.filter(
+              (a) => a.treino_id
+            ).length;
+
+            return `
+            <div class="historico-card ${
+              !plano.ativo ? "inativo" : ""
+            }" onclick="visualizarPlano(${plano.id})">
+              <div class="historico-data">
+                <span><i class="fas fa-calendar"></i> ${formatarData(
+                  plano.data_inicio
+                )}</span>
+                <span class="historico-badge" data-tooltip="Aulas com treino / Total">${comTreino}/${totalAulas}</span>
+              </div>
+              <div class="historico-aluno">${plano.aluno_nome}</div>
+              <div class="historico-resumo">
+                <i class="fas fa-tag"></i> ${plano.nome}
+              </div>
+              <div class="historico-footer">
+                <span><i class="fas fa-user"></i> ${plano.instrutor}</span>
+                <span>${comTreino} de ${totalAulas} aulas</span>
+              </div>
+              <div class="historico-actions" onclick="event.stopPropagation()">
+                <button class="btn-outline btn-small" onclick="editarPlano(${
+                  plano.id
+                })" data-tooltip="Editar plano">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn-outline btn-small" onclick="togglePlanoStatus(${
+                  plano.id
+                })" data-tooltip="${plano.ativo ? "Inativar" : "Ativar"}">
+                  <i class="fas ${
+                    plano.ativo ? "fa-power-off" : "fa-check-circle"
+                  }"></i>
+                </button>
+                <button class="btn-outline btn-small" onclick="exportarPlano(${
+                  plano.id
+                })" data-tooltip="Exportar PDF">
+                  <i class="fas fa-file-pdf"></i>
+                </button>
+              </div>
+            </div>
+          `;
+          })
+          .join("");
+      }
+
+      function visualizarPlano(id) {
+        const plano = estado.planosSalvos.find((p) => p.id === id);
+        if (!plano) return;
+
+        let html = `
+          <div class="ficha-view">
+            <div class="ficha-header">
+              <h2>${plano.nome}</h2>
+              <p>${plano.aluno_nome}</p>
+            </div>
+            
+            <div class="ficha-info">
+              <div class="ficha-info-item">
+                <span class="ficha-info-label">Período</span>
+                <span class="ficha-info-value">${formatarData(
+                  plano.data_inicio
+                )} até ${
+          plano.data_fim ? formatarData(plano.data_fim) : "..."
+        }</span>
+              </div>
+              <div class="ficha-info-item">
+                <span class="ficha-info-label">Status</span>
+                <span class="ficha-info-value"><span class="status-badge ${
+                  plano.ativo ? "ativo" : "inativo"
+                }">${plano.ativo ? "Ativo" : "Inativo"}</span></span>
+              </div>
+            </div>
+
+            <h4 style="margin: 1rem 0 0.5rem;">Aulas e Treinos</h4>
+        `;
+
+        plano.atribuicoes.forEach((attr) => {
+          const aula = estado.aulas.find((a) => a.id === attr.aula_id);
+          const treino = attr.treino_id
+            ? estado.treinos.find((t) => t.id === attr.treino_id)
+            : null;
+
+          if (aula) {
+            html += `
+              <div style="background: var(--off-white); padding: 0.8rem; border-radius: 8px; margin-bottom: 0.5rem;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span><strong>${formatarData(aula.data)} - ${
+              aula.horario
+            }</strong> (${aula.foco})</span>
+                  <span class="aula-treino-badge ${!treino ? "pendente" : ""}">
+                    ${treino ? treino.nome : "Pendente"}
+                  </span>
+                </div>
+              </div>
+            `;
+          }
+        });
+
+        html += `</div>`;
+
+        document.getElementById(
+          "modalPlanoTitulo"
+        ).innerHTML = `<i class="fas fa-eye"></i> ${plano.nome} - ${plano.aluno_nome}`;
+        document.getElementById("modalPlanoConteudo").innerHTML = html;
+        document.getElementById("modalPlanoFooter").innerHTML = `
+          <button class="btn-secondary" onclick="fecharModal('modalPlano')">Fechar</button>
+          <button class="btn-outline" onclick="editarPlano(${plano.id}); fecharModal('modalPlano')">
+            <i class="fas fa-edit"></i> Editar
+          </button>
+          <button class="btn-primary" onclick="exportarPlano(${plano.id})">
+            <i class="fas fa-file-pdf"></i> Exportar PDF
+          </button>
+        `;
+
+        document.getElementById("modalPlano").classList.add("show");
+      }
+
+      function editarPlano(id) {
+        const plano = estado.planosSalvos.find((p) => p.id === id);
+        if (!plano) return;
+
+        estado.planoAtual = {
+          id: plano.id,
+          aluno_id: plano.aluno_id,
+          nome: plano.nome,
+          data_inicio: plano.data_inicio,
+          data_fim: plano.data_fim || "",
+          atribuicoes: plano.atribuicoes.map((attr) => ({ ...attr })),
+        };
+
+        const aluno = estado.alunos.find((a) => a.id === plano.aluno_id);
+        if (aluno) {
+          estado.alunoSelecionado = aluno;
+          document.getElementById("alunoNome").value = aluno.nome;
+          document.getElementById("buscaAluno").value = aluno.nome;
+
+          const select = document.getElementById("seletorAluno");
+          select.value = aluno.id;
+        }
+
+        document.getElementById("nomePlano").value = plano.nome;
+        document.getElementById("dataInicio").value = plano.data_inicio;
+        document.getElementById("dataFim").value = plano.data_fim || "";
+
+        if (plano.aluno_id) {
+          carregarAulasAluno(plano.aluno_id);
+        }
+
+        mudarTab("elaborar");
+        mostrarToast("Plano carregado para edição", "success");
+      }
+
+      function togglePlanoStatus(id) {
+        const plano = estado.planosSalvos.find((p) => p.id === id);
+        if (plano) {
+          plano.ativo = !plano.ativo;
+          renderizarHistorico();
+          mostrarToast(
+            `Plano ${plano.ativo ? "ativado" : "inativado"}!`,
+            "success"
+          );
+        }
+      }
+
+      function exportarPlano(id) {
+        mostrarToast("PDF gerado com sucesso!", "success");
+      }
+
+      function exportarTreinoPDF(id) {
+        mostrarToast("PDF do treino gerado!", "success");
+      }
+
+      function exportarPlanoAtualPDF() {
+        mostrarToast("PDF gerado com sucesso!", "success");
+      }
+
+      function exportarRelatorio() {
+        mostrarToast("Relatório exportado com sucesso!", "success");
+      }
+
+      // ============================================================
+      // FUNÇÕES DE EXERCÍCIOS
+      // ============================================================
+      function renderizarTabelaExercicios() {
+        const tbody = document.getElementById("exerciciosTableBody");
+        tbody.innerHTML = estado.exercicios
+          .map(
+            (ex) => `
+          <tr>
+            <td><strong>${ex.nome}</strong></td>
+            <td>${ex.equipamento}</td>
+            <td>${ex.categoria}</td>
+            <td>${obterNivelTexto(ex.nivel)}</td>
+            <td><span class="status-badge ${ex.ativo ? "ativo" : "inativo"}">${
+              ex.ativo ? "Ativo" : "Inativo"
+            }</span></td>
+            <td>
+              <div class="action-buttons">
+                <button class="action-btn edit" data-tooltip="Editar" onclick="abrirEditarExercicio(${
+                  ex.id
+                })">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn toggle" data-tooltip="${
+                  ex.ativo ? "Desativar" : "Ativar"
+                }" onclick="toggleExercicioStatus(${ex.id})">
+                  <i class="fas fa-power-off"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `
+          )
+          .join("");
+      }
+
+      function obterNivelTexto(nivel) {
+        const niveis = {
+          1: "Iniciante",
+          2: "Iniciante-Intermediário",
+          3: "Intermediário",
+          4: "Intermediário-Avançado",
+          5: "Avançado",
+        };
+        return niveis[nivel] || "Desconhecido";
+      }
+
+      function abrirEditarExercicio(id) {
+        const exercicio = estado.exercicios.find((ex) => ex.id === id);
+        if (!exercicio) return;
+
+        document.getElementById("editExercicioId").value = exercicio.id;
+        document.getElementById("editExercicioNome").value = exercicio.nome;
+        document.getElementById("editExercicioEquipamento").value =
+          exercicio.equipamento;
+        document.getElementById("editExercicioCategoria").value =
+          exercicio.categoria;
+        document.getElementById("editExercicioNivel").value = exercicio.nivel;
+        document.getElementById("editExercicioInstrucoes").value =
+          exercicio.instrucoes || "";
+
+        document.getElementById("modalEditarExercicio").classList.add("show");
+      }
+
+      function salvarEdicaoExercicio() {
+        const id = parseInt(document.getElementById("editExercicioId").value);
+        const nome = document.getElementById("editExercicioNome").value;
+        const equipamento = document.getElementById(
+          "editExercicioEquipamento"
+        ).value;
+        const categoria = document.getElementById(
+          "editExercicioCategoria"
+        ).value;
+        const nivel = document.getElementById("editExercicioNivel").value;
+        const instrucoes = document.getElementById(
+          "editExercicioInstrucoes"
+        ).value;
+
+        if (!nome || !equipamento || !categoria) {
+          mostrarToast("Preencha os campos obrigatórios", "error");
+          return;
+        }
+
+        const exercicio = estado.exercicios.find((ex) => ex.id === id);
+        if (exercicio) {
+          exercicio.nome = nome;
+          exercicio.equipamento = equipamento;
+          exercicio.categoria = categoria;
+          exercicio.nivel = parseInt(nivel);
+          exercicio.instrucoes = instrucoes;
+
+          renderizarTabelaExercicios();
+          renderizarBibliotecaExercicios();
+          atualizarSugestoes();
+
+          mostrarToast("Exercício atualizado com sucesso!", "success");
+          fecharModal("modalEditarExercicio");
+        }
+      }
+
+      function toggleExercicioStatus(id) {
+        const exercicio = estado.exercicios.find((ex) => ex.id === id);
+        if (exercicio) {
+          exercicio.ativo = !exercicio.ativo;
+          renderizarTabelaExercicios();
+          renderizarBibliotecaExercicios();
+          mostrarToast(
+            `Exercício ${exercicio.ativo ? "ativado" : "desativado"}!`,
+            "success"
+          );
+        }
+      }
+
+      function abrirModalExercicio() {
+        document.getElementById("modalExercicio").classList.add("show");
+      }
+
+      function salvarExercicio() {
+        const nome = document.getElementById("exercicioNome").value;
+        const equipamento = document.getElementById(
+          "exercicioEquipamento"
+        ).value;
+        const categoria = document.getElementById("exercicioCategoria").value;
+        const nivel = document.getElementById("exercicioNivel").value;
+        const instrucoes = document.getElementById("exercicioInstrucoes").value;
+
+        if (!nome || !equipamento || !categoria) {
+          mostrarToast("Preencha os campos obrigatórios", "error");
+          return;
+        }
+
+        const novoExercicio = {
+          id: estado.exercicios.length + 1,
+          nome,
+          equipamento,
+          categoria,
+          nivel: parseInt(nivel),
+          instrucoes,
+          ativo: true,
+        };
+
+        estado.exercicios.push(novoExercicio);
+        renderizarTabelaExercicios();
+        renderizarBibliotecaExercicios();
+        atualizarSugestoes();
+
+        mostrarToast("Exercício cadastrado com sucesso!", "success");
+        fecharModal("modalExercicio");
+
+        document.getElementById("formExercicio").reset();
+      }
+
+      // ============================================================
+      // FUNÇÕES DE TABS
+      // ============================================================
+      function mudarTab(tab) {
+        document
+          .querySelectorAll(".tab")
+          .forEach((t) => t.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-pane")
+          .forEach((p) => p.classList.remove("active"));
+
+        if (tab === "elaborar") {
+          document.querySelectorAll(".tab")[0].classList.add("active");
+          document.getElementById("tabElaborar").classList.add("active");
+        } else if (tab === "biblioteca") {
+          document.querySelectorAll(".tab")[1].classList.add("active");
+          document.getElementById("tabBiblioteca").classList.add("active");
+          renderizarTabelaExercicios();
+        } else {
+          document.querySelectorAll(".tab")[2].classList.add("active");
+          document.getElementById("tabHistorico").classList.add("active");
+          renderizarHistorico();
+        }
+      }
+
+      // ============================================================
+      // INICIALIZAÇÃO
+      // ============================================================
+      document.addEventListener("DOMContentLoaded", function () {
+        verificarLogin();
+        carregarAlunosSelect();
+
+        const hoje = new Date().toISOString().split("T")[0];
+        document.getElementById("dataInicio").value = hoje;
+
+        renderizarBibliotecaExercicios();
+        renderizarTreinosContainer();
+        renderizarTabelaExercicios();
+        renderizarHistorico();
+        atualizarSugestoes();
+
+        // Mostrar tour se for primeira vez
+        if (!localStorage.getItem("tour_visto")) {
+          setTimeout(() => {
+            document.getElementById("tourOverlay").classList.add("show");
+          }, 500);
+        }
+
+        document.addEventListener("click", function (event) {
+          const buscaResultados = document.getElementById("buscaResultados");
+          const buscaInput = document.getElementById("buscaAluno");
+
+          if (
+            !buscaInput.contains(event.target) &&
+            !buscaResultados.contains(event.target)
+          ) {
+            buscaResultados.classList.remove("show");
+          }
+        });
+
+        mostrarToast("Página carregada com sucesso", "success");
+      });
+    </script>
+  </body>
+</html>

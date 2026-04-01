@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Financeiro | Estúdio Rafaela Lisboa</title>
+
+    <!-- Fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Ícones -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Bibliotecas para exportação -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <!-- CSS externo -->
+    <link rel="stylesheet" href="../css/financeiro.css" />
+  </head>
+  <body>
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Carregando dados financeiros...</p>
+    </div>
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-content">
+        <div class="logo-area">
+          <a href="../index.html" class="logo-icon"
+            ><i class="fas fa-spa"></i
+          ></a>
+          <div class="logo-text">
+            <h1>ESTÚDIO RAFAELA LISBOA</h1>
+            <span>Dashboard Financeiro</span>
+          </div>
+        </div>
+        <div class="user-area">
+          <div class="user-info">
+            <div class="user-name" id="userName">Carregando...</div>
+            <div class="user-role" id="userRole">Financeiro</div>
+          </div>
+          <div class="user-avatar" id="userAvatar">?</div>
+          <button
+            class="btn-icon"
+            onclick="recarregarDados()"
+            title="Atualizar dados"
+          >
+            <i class="fas fa-sync-alt"></i>
+          </button>
+          <button class="btn-icon" onclick="fazerLogout()" title="Sair">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>Saúde Financeira</h1>
+          <div class="subtitle" id="periodoDisplay">Carregando...</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn-outline" onclick="abrirSelecionarMes()">
+            <i class="fas fa-calendar-alt"></i> Período
+          </button>
+          <button class="btn-outline" onclick="exportarPDF()">
+            <i class="fas fa-file-pdf"></i> PDF
+          </button>
+          <button class="btn-outline" onclick="exportarExcel()">
+            <i class="fas fa-file-excel"></i> Excel
+          </button>
+        </div>
+      </div>
+
+      <!-- CARDS PRINCIPAIS (4) -->
+      <div class="stats-grid" id="statsContainer">
+        <!-- Preenchido via JS -->
+      </div>
+
+      <!-- CARDS COMPACTOS (Caixa, Meta, Receitas por tipo, Saúde Financeira) -->
+      <div class="stats-grid-4" id="cardsCompactos">
+        <!-- Preenchido via JS -->
+      </div>
+
+      <!-- KPI ALUNOS (compacto) -->
+      <div class="compact-card" style="margin-bottom: 1.5rem" id="kpiAlunos">
+        <!-- Preenchido via JS -->
+      </div>
+
+      <!-- LISTAS DE PRÓXIMOS RECEBIMENTOS E CONTAS -->
+      <div class="stats-grid-2" id="listasContainer">
+        <!-- Preenchido via JS -->
+      </div>
+
+      <!-- ALERTAS -->
+      <div class="alertas-container" id="alertasContainer"></div>
+
+      <!-- GRÁFICOS -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">
+              <i
+                class="fas fa-chart-line"
+                style="color: var(--verde-principal)"
+              ></i>
+              Evolução da Receita (12 meses)
+            </h3>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="graficoEvolucao"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">
+              <i
+                class="fas fa-chart-pie"
+                style="color: var(--roxo-celebracao)"
+              ></i>
+              Receita por Tipo
+            </h3>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="graficoReceitaTipo"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEGUNDA LINHA: MARGEM MENSAL + RANKING/AGENDA -->
+      <div class="charts-grid-2">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">
+              <i class="fas fa-chart-bar" style="color: var(--azul-info)"></i>
+              Margem Mensal (últimos 6 meses)
+            </h3>
+            <span
+              class="tooltip-hint"
+              data-tooltip="Valores realizados (pagamentos efetivados)"
+              >ℹ️</span
+            >
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="graficoMargem"></canvas>
+          </div>
+        </div>
+        <div class="compact-card">
+          <div class="compact-title">
+            <i class="fas fa-trophy"></i> Ranking de Despesas
+          </div>
+          <div
+            id="rankingDespesas"
+            style="max-height: 200px; overflow-y: auto"
+          ></div>
+          <div class="compact-title" style="margin-top: 1rem">
+            <i class="fas fa-calendar-week"></i> Agenda da Semana
+          </div>
+          <div id="agendaSemana"></div>
+        </div>
+      </div>
+
+      <!-- ACESSO RÁPIDO AOS SUBMÓDULOS -->
+      <h2 style="font-family: var(--font-titulos); margin: 2rem 0 1rem">
+        Módulos Detalhados
+      </h2>
+      <div class="modulos-grid">
+        <a
+          href="mensalidades.html"
+          class="modulo-card"
+          data-tooltip="Gerenciar mensalidades dos alunos"
+        >
+          <div class="modulo-icon"><i class="fas fa-users"></i></div>
+          <div class="modulo-nome">Mensalidades</div>
+          <div class="modulo-desc">Controle de parcelas</div>
+        </a>
+        <a
+          href="receber.html"
+          class="modulo-card"
+          data-tooltip="Outras receitas (vendas, workshops)"
+        >
+          <div class="modulo-icon"><i class="fas fa-hand-holding-usd"></i></div>
+          <div class="modulo-nome">Receitas</div>
+          <div class="modulo-desc">Outras entradas</div>
+        </a>
+        <a
+          href="pagar.html"
+          class="modulo-card"
+          data-tooltip="Contas a pagar e despesas"
+        >
+          <div class="modulo-icon">
+            <i class="fas fa-file-invoice-dollar"></i>
+          </div>
+          <div class="modulo-nome">Despesas</div>
+          <div class="modulo-desc">Contas a pagar</div>
+        </a>
+        <a
+          href="dre.html"
+          class="modulo-card"
+          data-tooltip="Demonstrativo de Resultados"
+        >
+          <div class="modulo-icon"><i class="fas fa-list-alt"></i></div>
+          <div class="modulo-nome">DRE</div>
+          <div class="modulo-desc">Resultado do período</div>
+        </a>
+        <a
+          href="fluxocaixa.html"
+          class="modulo-card"
+          data-tooltip="Fluxo de caixa detalhado e projeções"
+        >
+          <div class="modulo-icon"><i class="fas fa-chart-line"></i></div>
+          <div class="modulo-nome">Fluxo de Caixa</div>
+          <div class="modulo-desc">Análise e projeção</div>
+        </a>
+      </div>
+    </main>
+
+    <!-- MODAL SELECIONAR MÊS -->
+    <div
+      class="modal"
+      id="modalSelecionarMes"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      "
+    >
+      <div
+        class="modal-content"
+        style="
+          background: white;
+          border-radius: 16px;
+          max-width: 400px;
+          width: 90%;
+        "
+      >
+        <div
+          class="modal-header"
+          style="
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--verde-pastel);
+            display: flex;
+            justify-content: space-between;
+          "
+        >
+          <h3 style="font-family: var(--font-titulos)">Selecionar Período</h3>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalSelecionarMes')"
+            style="
+              background: none;
+              border: none;
+              font-size: 1.5rem;
+              cursor: pointer;
+            "
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body" style="padding: 1.5rem">
+          <div class="form-group" style="margin-bottom: 1rem">
+            <label style="display: block; margin-bottom: 0.4rem">Mês</label>
+            <select
+              id="mesSelecionado"
+              class="form-control"
+              style="
+                width: 100%;
+                padding: 0.6rem;
+                border-radius: 8px;
+                border: 1px solid var(--verde-claro);
+              "
+            >
+              <option value="1">Janeiro</option>
+              <option value="2">Fevereiro</option>
+              <option value="3">Março</option>
+              <option value="4">Abril</option>
+              <option value="5">Maio</option>
+              <option value="6">Junho</option>
+              <option value="7">Julho</option>
+              <option value="8">Agosto</option>
+              <option value="9">Setembro</option>
+              <option value="10">Outubro</option>
+              <option value="11">Novembro</option>
+              <option value="12">Dezembro</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem">
+            <label style="display: block; margin-bottom: 0.4rem">Ano</label>
+            <select
+              id="anoSelecionado"
+              class="form-control"
+              style="
+                width: 100%;
+                padding: 0.6rem;
+                border-radius: 8px;
+                border: 1px solid var(--verde-claro);
+              "
+            ></select>
+          </div>
+        </div>
+        <div
+          class="modal-footer"
+          style="
+            padding: 1.5rem;
+            border-top: 1px solid var(--verde-pastel);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+          "
+        >
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalSelecionarMes')"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="aplicarMesSelecionado()">
+            Aplicar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- JavaScript externo -->
+    <script src="../js/financeiro.js"></script>
+  </body>
+</html>

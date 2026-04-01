@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Relatórios Completos - Estúdio Rafaela Lisboa</title>
+
+    <!-- Fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Ícones -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Bibliotecas para exportação -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <!-- CSS externo -->
+    <link rel="stylesheet" href="../css/relatorios.css" />
+  </head>
+  <body>
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Carregando relatórios...</p>
+    </div>
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-content">
+        <div class="logo-area">
+          <a href="../index.html" class="logo-icon">
+            <i class="fas fa-spa"></i>
+          </a>
+          <div class="logo-text">
+            <h1>ESTÚDIO RAFAELA LISBOA</h1>
+            <span>Relatórios</span>
+          </div>
+        </div>
+
+        <div class="user-area">
+          <a href="../index.html" class="btn-icon" title="Voltar ao Dashboard">
+            <i class="fas fa-home"></i>
+          </a>
+
+          <!-- DROPDOWN FAVORITOS -->
+          <div class="favorites-dropdown">
+            <button class="btn-icon" title="Relatórios favoritos">
+              <i class="fas fa-star"></i>
+            </button>
+            <div class="favorites-dropdown-content" id="favoritesDropdown">
+              <div class="empty-favorites">Nenhum favorito ainda</div>
+            </div>
+          </div>
+
+          <div class="user-info">
+            <div class="user-name" id="userName">Carregando...</div>
+            <div class="user-role" id="userRole"></div>
+          </div>
+          <div class="user-avatar" id="userAvatar">?</div>
+          <button class="btn-icon" onclick="fazerLogout()" title="Sair">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>
+            Relatórios Completos
+            <i
+              class="far fa-star favorite-star"
+              id="favoriteCurrent"
+              onclick="toggleFavorito()"
+              title="Adicionar aos favoritos"
+            ></i>
+          </h1>
+          <div class="subtitle" id="periodoDisplay">Carregando período...</div>
+        </div>
+        <div class="report-actions">
+          <!-- Botões existentes -->
+          <button class="btn-outline" onclick="exportarRelatorioAtual('pdf')">
+            <i class="fas fa-file-pdf"></i> PDF
+          </button>
+          <button class="btn-outline" onclick="exportarRelatorioAtual('csv')">
+            <i class="fas fa-file-csv"></i> CSV
+          </button>
+          <button class="btn-outline" onclick="exportarRelatorioAtual('excel')">
+            <i class="fas fa-file-excel"></i> Excel
+          </button>
+          <!-- NOVO: Salvar gráfico como imagem -->
+          <button
+            class="btn-outline"
+            onclick="exportarGraficoAtualComoImagem()"
+            title="Salvar o gráfico principal como imagem"
+          >
+            <i class="fas fa-camera"></i> Imagem
+          </button>
+          <!-- NOVO: Agendar relatório -->
+          <button
+            class="btn-outline"
+            onclick="abrirModalAgendamento()"
+            title="Agendar envio deste relatório por e-mail"
+          >
+            <i class="fas fa-clock"></i> Agendar
+          </button>
+          <!-- NOVO: Personalizar cards do dashboard -->
+          <button
+            class="btn-outline"
+            onclick="personalizarCardsDashboard()"
+            title="Personalizar quais cards aparecem no dashboard"
+          >
+            <i class="fas fa-sliders-h"></i> Customizar
+          </button>
+        </div>
+      </div>
+
+      <!-- FILTRO DE PERÍODO GLOBAL -->
+      <div class="filters-bar">
+        <div class="periodo-group">
+          <button class="periodo-btn" onclick="setPeriodo('hoje', this)">
+            Hoje
+          </button>
+          <button class="periodo-btn" onclick="setPeriodo('ontem', this)">
+            Ontem
+          </button>
+          <button
+            class="periodo-btn"
+            onclick="setPeriodo('ultimos7dias', this)"
+          >
+            7 dias
+          </button>
+          <button
+            class="periodo-btn"
+            onclick="setPeriodo('ultimos30dias', this)"
+          >
+            30 dias
+          </button>
+          <button
+            class="periodo-btn active"
+            onclick="setPeriodo('esteMes', this)"
+          >
+            Este mês
+          </button>
+          <button class="periodo-btn" onclick="setPeriodo('mesAnterior', this)">
+            Mês anterior
+          </button>
+          <button class="periodo-btn" onclick="setPeriodo('esteAno', this)">
+            Este ano
+          </button>
+          <button
+            class="periodo-btn"
+            onclick="setPeriodo('personalizado', this)"
+          >
+            Personalizado
+          </button>
+        </div>
+
+        <div class="date-range" id="dateRange" style="display: none">
+          <input type="date" id="dataInicio" value="" />
+          <span>até</span>
+          <input type="date" id="dataFim" value="" />
+          <button
+            class="btn-primary"
+            style="padding: 0.3rem 1rem"
+            onclick="aplicarPeriodoPersonalizado()"
+          >
+            Aplicar
+          </button>
+        </div>
+
+        <div class="filter-group">
+          <!-- NOVO: Botão para ativar comparação com benchmark (média do setor) -->
+          <label
+            class="benchmark-toggle"
+            style="
+              display: flex;
+              align-items: center;
+              gap: 0.4rem;
+              margin-right: 1rem;
+            "
+          >
+            <input
+              type="checkbox"
+              id="benchmarkToggle"
+              onchange="toggleBenchmark()"
+            />
+            <span style="font-size: 0.8rem">Comparar com média do setor</span>
+          </label>
+
+          <button
+            class="btn-primary"
+            style="padding: 0.3rem 1rem"
+            onclick="recarregarRelatorio()"
+          >
+            <i class="fas fa-sync-alt"></i> Atualizar
+          </button>
+        </div>
+      </div>
+
+      <!-- ALERTAS INTELIGENTES -->
+      <div id="alertBanner" class="alert-banner" style="display: none">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div class="alert-content">
+          <div class="alert-title" id="alertTitle">Atenção</div>
+          <div class="alert-message" id="alertMessage">...</div>
+        </div>
+        <button class="alert-close" onclick="fecharAlerta()">&times;</button>
+      </div>
+
+      <!-- TABS PRINCIPAIS -->
+      <div class="tabs-principais">
+        <button
+          class="tab-principal active"
+          onclick="mudarCategoria('dashboard')"
+        >
+          <i class="fas fa-chart-pie"></i> Dashboard Executivo
+        </button>
+        <button class="tab-principal" onclick="mudarCategoria('alunos')">
+          <i class="fas fa-users"></i> Alunos
+        </button>
+        <button class="tab-principal" onclick="mudarCategoria('agenda')">
+          <i class="fas fa-calendar-alt"></i> Agenda
+        </button>
+        <button class="tab-principal" onclick="mudarCategoria('financeiro')">
+          <i class="fas fa-dollar-sign"></i> Financeiro
+        </button>
+        <button class="tab-principal" onclick="mudarCategoria('performance')">
+          <i class="fas fa-chart-line"></i> Performance
+        </button>
+        <!-- Aba Analítico removida (auditoria) -->
+      </div>
+
+      <!-- CONTEÚDO DAS CATEGORIAS -->
+      <div id="conteudoRelatorios">
+        <!-- Carregado dinamicamente -->
+      </div>
+    </main>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- MODAL PARA DRILL-DOWN -->
+    <div id="modalDetalhes" class="modal">
+      <div class="modal-content">
+        <button class="modal-close" onclick="fecharModal()">&times;</button>
+        <div id="modalBody"></div>
+      </div>
+    </div>
+
+    <!-- MODAL PARA AGENDAMENTO DE RELATÓRIO -->
+    <div id="modalAgendamento" class="modal">
+      <div class="modal-content" style="max-width: 500px">
+        <button class="modal-close" onclick="fecharModalAgendamento()">
+          &times;
+        </button>
+        <h3 style="margin-bottom: 1rem">Agendar envio de relatório</h3>
+        <form id="formAgendamento">
+          <div class="form-group" style="margin-bottom: 1rem">
+            <label>Relatório:</label>
+            <select
+              id="relatorioAgendado"
+              class="filter-select"
+              style="width: 100%; margin-top: 0.3rem"
+            >
+              <option value="dashboard">Dashboard Executivo</option>
+              <option value="alunos">Relatório de Alunos</option>
+              <option value="agenda">Relatório de Agenda</option>
+              <option value="financeiro">Relatório Financeiro</option>
+              <option value="performance">Relatório de Performance</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem">
+            <label>Periodicidade:</label>
+            <select
+              id="periodicidade"
+              class="filter-select"
+              style="width: 100%; margin-top: 0.3rem"
+            >
+              <option value="diario">Diário</option>
+              <option value="semanal">Semanal</option>
+              <option value="mensal">Mensal</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem">
+            <label>E-mail para envio:</label>
+            <input
+              type="email"
+              id="emailAgendamento"
+              class="form-control"
+              style="
+                width: 100%;
+                padding: 0.5rem;
+                border-radius: 8px;
+                border: 1px solid var(--verde-claro);
+              "
+              placeholder="seu@email.com"
+            />
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 0.5rem">
+            <button
+              type="button"
+              class="btn-secondary"
+              onclick="fecharModalAgendamento()"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn-primary"
+              onclick="salvarAgendamento()"
+            >
+              Agendar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL PARA PERSONALIZAÇÃO DE CARDS DO DASHBOARD -->
+    <div id="modalCustomizarCards" class="modal">
+      <div class="modal-content" style="max-width: 500px">
+        <button class="modal-close" onclick="fecharModalCustomizarCards()">
+          &times;
+        </button>
+        <h3 style="margin-bottom: 1rem">Personalizar cards do Dashboard</h3>
+        <p style="margin-bottom: 1rem">
+          Selecione quais cards deseja exibir no Dashboard Executivo:
+        </p>
+        <div id="cardsChecklist">
+          <!-- Checkboxes gerados dinamicamente pelo JS -->
+          <div class="loading-spinner">Carregando opções...</div>
+        </div>
+        <div
+          style="
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 1rem;
+          "
+        >
+          <button
+            type="button"
+            class="btn-secondary"
+            onclick="fecharModalCustomizarCards()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="btn-primary"
+            onclick="salvarPersonalizacaoCards()"
+          >
+            Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- JavaScript externo -->
+    <script src="../js/relatorios.js"></script>
+  </body>
+</html>

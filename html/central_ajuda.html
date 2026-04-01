@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Central de Ajuda Turbinada - Estúdio Rafaela Lisboa</title>
+
+    <!-- Fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Ícones -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Supabase (opcional) -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <!-- CSS externo -->
+    <link rel="stylesheet" href="../css/central_ajuda.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="header-content">
+        <div class="logo-area">
+          <a href="../index.html" class="logo-icon"
+            ><i class="fas fa-spa"></i
+          ></a>
+          <div class="logo-text">
+            <h1>ESTÚDIO RAFAELA LISBOA</h1>
+            <span>Central de Ajuda</span>
+          </div>
+        </div>
+        <div class="user-area">
+          <div class="user-info">
+            <div class="user-name" id="userName">Carregando...</div>
+            <div class="user-role" id="userRole">Ajuda</div>
+          </div>
+          <div class="user-avatar" id="userAvatar">?</div>
+          <a href="../index.html" class="btn-icon" title="Voltar ao Dashboard"
+            ><i class="fas fa-home"></i
+          ></a>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- BANNER DE BOAS-VINDAS -->
+      <div class="welcome-banner">
+        <div class="welcome-text">
+          <h2>Olá, como podemos ajudar?</h2>
+          <p>
+            Pergunte ao nosso assistente virtual. Ele digita como se fosse
+            humano!
+          </p>
+        </div>
+        <div class="welcome-icon">
+          <i class="fas fa-robot"></i>
+        </div>
+      </div>
+
+      <!-- SEÇÃO DE PESQUISA -->
+      <div class="search-section">
+        <div class="search-title"><i class="fas fa-search"></i> Pesquisar</div>
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Ex: Como cadastrar um aluno, emitir relatório..."
+            autofocus
+          />
+          <button onclick="performSearch()">Buscar</button>
+        </div>
+        <div class="quick-suggestions" id="suggestions">
+          <span class="suggestion-chip" onclick="quickSearch('Cadastrar Aluno')"
+            >📘 Cadastrar Aluno</span
+          >
+          <span
+            class="suggestion-chip"
+            onclick="quickSearch('Gerar Mensalidade')"
+            >💰 Gerar Mensalidade</span
+          >
+          <span class="suggestion-chip" onclick="quickSearch('Agendar Aula')"
+            >📅 Agendar Aula</span
+          >
+          <span
+            class="suggestion-chip"
+            onclick="quickSearch('Relatório Financeiro')"
+            >📊 Relatório Financeiro</span
+          >
+          <span
+            class="suggestion-chip"
+            onclick="quickSearch('Configurar Plano')"
+            >⚙️ Configurar Plano</span
+          >
+          <span class="suggestion-chip" onclick="quickSearch('Importar OFX')"
+            >🏦 Importar OFX</span
+          >
+          <span
+            class="suggestion-chip"
+            onclick="quickSearch('Avaliação Detalhada')"
+            >🩺 Avaliação Detalhada</span
+          >
+          <span class="suggestion-chip" onclick="quickSearch('Portal do Aluno')"
+            >🎓 Portal do Aluno</span
+          >
+        </div>
+      </div>
+
+      <!-- RESULTADOS DA PESQUISA -->
+      <div class="results-section" id="resultsSection">
+        <div class="results-header">
+          <div class="results-title" id="resultsTitle">
+            Resultados para "<span id="searchTerm"></span>"
+          </div>
+          <button class="btn-icon" onclick="clearSearch()" title="Limpar">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="results-list" id="resultsList"></div>
+      </div>
+
+      <!-- ÍNDICE POR CATEGORIA -->
+      <div class="categorias-grid" id="categoriasGrid"></div>
+
+      <!-- TUTORIAL EM DESTAQUE (inicialmente oculto) -->
+      <div class="tutorial-section" id="tutorialSection">
+        <div class="tutorial-title" id="tutorialTitle"></div>
+        <div class="tutorial-meta" id="tutorialMeta"></div>
+        <div id="tutorialContent"></div>
+        <div class="action-buttons" id="tutorialActions"></div>
+        <div class="feedback-section" style="margin-top: 1rem">
+          <span>Este artigo foi útil?</span>
+          <button class="btn-outline-action" onclick="feedbackUtil(true)">
+            <i class="fas fa-thumbs-up"></i> Sim
+          </button>
+          <button class="btn-outline-action" onclick="feedbackUtil(false)">
+            <i class="fas fa-thumbs-down"></i> Não
+          </button>
+        </div>
+      </div>
+
+      <!-- GLOSSÁRIO -->
+      <div class="glossario-section">
+        <div class="glossario-title">
+          <i class="fas fa-book"></i> Glossário de Termos
+        </div>
+        <div class="glossario-grid" id="glossarioGrid"></div>
+      </div>
+    </main>
+
+    <!-- ASSISTENTE VIRTUAL -->
+    <div class="chatbot-button" id="chatbotButton" onclick="toggleChatbot()">
+      <i class="fas fa-comment-dots"></i>
+    </div>
+    <div class="chatbot-window" id="chatbotWindow">
+      <div class="chatbot-header">
+        <h3><i class="fas fa-robot"></i> Assistente Virtual</h3>
+        <button class="chatbot-close" onclick="toggleChatbot()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="chatbot-messages" id="chatbotMessages">
+        <div class="message bot">
+          Olá! Sou o assistente virtual. Pergunte-me algo sobre o sistema (ex:
+          "como cadastrar aluno", "o que é DRE"). Vou digitar as respostas para
+          você! 😊
+        </div>
+      </div>
+      <div class="chatbot-input">
+        <input
+          type="text"
+          id="chatbotInput"
+          placeholder="Digite sua pergunta..."
+          onkeypress="if (event.key === 'Enter') sendMessage();"
+        />
+        <button onclick="sendMessage()">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- JavaScript externo -->
+    <script src="../js/central_ajuda.js"></script>
+  </body>
+</html>

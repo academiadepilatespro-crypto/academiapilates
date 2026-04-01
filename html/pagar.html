@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Despesas | Estúdio Rafaela Lisboa</title>
+
+    <!-- Fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Ícones -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Bibliotecas para exportação -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <!-- CSS externo -->
+    <link rel="stylesheet" href="../css/pagar.css" />
+  </head>
+  <body>
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Carregando...</p>
+    </div>
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-content">
+        <div class="logo-area">
+          <a href="../index.html" class="logo-icon"
+            ><i class="fas fa-spa"></i
+          ></a>
+          <div class="logo-text">
+            <h1>ESTÚDIO RAFAELA LISBOA</h1>
+            <span>Contas a Pagar</span>
+          </div>
+        </div>
+        <div class="user-area">
+          <div class="user-info">
+            <div class="user-name" id="userName">Carregando...</div>
+            <div class="user-role" id="userRole">Financeiro</div>
+          </div>
+          <div class="user-avatar" id="userAvatar">?</div>
+          <button
+            class="btn-icon"
+            id="notificationBell"
+            onclick="abrirListaNotificacoes()"
+            title="Notificações"
+          >
+            <i class="fas fa-bell"></i>
+            <span
+              id="notificationBadge"
+              class="badge"
+              style="display: none"
+            ></span>
+          </button>
+          <button class="btn-icon" onclick="fazerLogout()" title="Sair">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>Despesas</h1>
+          <div class="subtitle" id="totalContas">Carregando...</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn-outline" onclick="exportarPDF()">
+            <i class="fas fa-file-pdf"></i> PDF
+          </button>
+          <button class="btn-outline" onclick="exportarExcel()">
+            <i class="fas fa-file-excel"></i> Excel
+          </button>
+          <button class="btn-outline" onclick="abrirModalImportarCSV()">
+            <i class="fas fa-file-csv"></i> Importar CSV
+          </button>
+          <button class="btn-primary" onclick="abrirModalConta()">
+            <i class="fas fa-plus"></i> Nova Despesa
+          </button>
+        </div>
+      </div>
+
+      <!-- CARDS DE RESUMO (4) -->
+      <div class="stats-grid" id="resumoContainer"></div>
+
+      <!-- AGENDA FINANCEIRA DA SEMANA (clicável) -->
+      <div
+        class="compact-card"
+        style="margin-bottom: 1.5rem"
+        id="agendaSemana"
+      ></div>
+
+      <!-- FILTROS -->
+      <div class="filters-advanced">
+        <div class="filters-title"><i class="fas fa-filter"></i> Filtros</div>
+        <div class="filters-grid">
+          <div class="filter-group">
+            <label class="filter-label">Período de Vencimento</label>
+            <div class="date-range">
+              <input
+                type="date"
+                class="filter-input"
+                id="filtroInicio"
+                onchange="filtrarContas()"
+              />
+              <span>até</span>
+              <input
+                type="date"
+                class="filter-input"
+                id="filtroFim"
+                onchange="filtrarContas()"
+              />
+            </div>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Status</label>
+            <select
+              class="filter-select"
+              id="filtroStatus"
+              onchange="filtrarContas()"
+            >
+              <option value="">Todos</option>
+              <option value="pendente">Pendente</option>
+              <option value="pago">Pago</option>
+              <option value="vencido">Vencido</option>
+              <option value="parcial">Parcial</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Categoria</label>
+            <select
+              class="filter-select"
+              id="filtroCategoria"
+              onchange="filtrarContas()"
+            >
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Buscar</label>
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input
+                type="text"
+                id="searchInput"
+                placeholder="Descrição ou fornecedor..."
+                oninput="filtrarContas()"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="filter-actions">
+          <button class="btn-outline" onclick="limparFiltros()">
+            Limpar Filtros
+          </button>
+        </div>
+      </div>
+
+      <!-- GRÁFICOS (Despesas por categoria e Evolução) -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">
+              <i
+                class="fas fa-chart-pie"
+                style="color: var(--roxo-celebracao)"
+              ></i>
+              Despesas por Categoria
+            </h3>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="graficoPizza"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">
+              <i class="fas fa-chart-line" style="color: var(--azul-info)"></i>
+              Evolução de Despesas (6 meses)
+            </h3>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="graficoLinha"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- DASHBOARD EXECUTIVO (sempre visível) -->
+      <div class="dashboard-section" id="dashboardSection">
+        <div class="section-header">
+          <h2 class="section-title">
+            <i class="fas fa-chart-line"></i> Dashboard Executivo
+          </h2>
+          <button class="btn-outline" onclick="toggleDashboard()">
+            Ocultar
+          </button>
+        </div>
+        <div class="dashboard-grid">
+          <div class="dashboard-card">
+            <h4>Despesas por Dia da Semana</h4>
+            <div class="chart-wrapper">
+              <canvas id="graficoDiaSemana" height="200"></canvas>
+            </div>
+          </div>
+          <div class="dashboard-card">
+            <h4>Comparativo Mês Atual x Anterior</h4>
+            <div class="chart-wrapper">
+              <canvas id="graficoComparativo" height="200"></canvas>
+            </div>
+          </div>
+          <div class="dashboard-card">
+            <h4>Previsão de Saídas (30 dias)</h4>
+            <div class="chart-wrapper">
+              <canvas id="graficoPrevisao" height="200"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABELA DE CONTAS -->
+      <div class="table-container">
+        <div class="table-header">
+          <h3 class="table-title">Todas as Despesas</h3>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th onclick="ordenarPor('descricao')">
+                  Descrição <i class="fas fa-sort" id="sortDescricao"></i>
+                </th>
+                <th onclick="ordenarPor('fornecedor')">
+                  Fornecedor <i class="fas fa-sort" id="sortFornecedor"></i>
+                </th>
+                <th onclick="ordenarPor('valor')">
+                  Valor <i class="fas fa-sort" id="sortValor"></i>
+                </th>
+                <th onclick="ordenarPor('vencimento')">
+                  Vencimento <i class="fas fa-sort" id="sortVencimento"></i>
+                </th>
+                <th>Status</th>
+                <th onclick="ordenarPor('categoria')">
+                  Categoria <i class="fas fa-sort" id="sortCategoria"></i>
+                </th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaContas"></tbody>
+          </table>
+        </div>
+        <!-- Paginação -->
+        <div class="pagination" id="paginacao"></div>
+      </div>
+
+      <!-- RANKING DE DESPESAS (Top 5) com barras de progresso -->
+      <div class="compact-card" style="margin-bottom: 1.5rem">
+        <div class="compact-title">
+          <i class="fas fa-trophy"></i> Top 5 Despesas do Mês
+        </div>
+        <div id="rankingDespesas"></div>
+      </div>
+    </main>
+
+    <!-- ========== MODAIS ========== -->
+
+    <!-- MODAL CADASTRO/EDIÇÃO DE CONTA (com grupo recorrente) -->
+    <div class="modal" id="modalConta">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalContaTitle">Nova Despesa</h2>
+          <button class="close-modal" onclick="fecharModal('modalConta')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form
+            id="formConta"
+            onsubmit="
+              event.preventDefault();
+              salvarConta();
+            "
+          >
+            <input type="hidden" id="contaId" />
+            <input type="hidden" id="contaGrupoId" />
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label required">Descrição</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="contaDescricao"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Fornecedor</label>
+                <input type="text" class="form-control" id="contaFornecedor" />
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">CPF/CNPJ</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="contaCpfCnpj"
+                  placeholder="Apenas números"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label required">Valor (R$)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="contaValor"
+                  step="0.01"
+                  min="0.01"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label required">Data de Vencimento</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="contaVencimento"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label required">Categoria</label>
+                <select
+                  class="form-control"
+                  id="contaCategoria"
+                  required
+                ></select>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Tipo</label>
+                <select class="form-control" id="contaTipo">
+                  <option value="variavel">Variável</option>
+                  <option value="fixa">Fixa</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Observações</label>
+              <textarea class="form-textarea" id="contaObs" rows="2"></textarea>
+            </div>
+            <div class="form-group checkbox-group">
+              <input
+                type="checkbox"
+                id="contaRecorrente"
+                onchange="toggleRecorrente()"
+              />
+              <label for="contaRecorrente"
+                >Conta recorrente (criar grupo)</label
+              >
+            </div>
+            <div id="recorrenteFields" style="display: none">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Frequência</label>
+                  <select class="form-control" id="contaFrequencia">
+                    <option value="mensal">Mensal</option>
+                    <option value="trimestral">Trimestral</option>
+                    <option value="anual">Anual</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Nº de ocorrências</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="contaOcorrencias"
+                    min="1"
+                    max="60"
+                    value="12"
+                  />
+                </div>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--grafite-claro)">
+                Serão geradas contas com o mesmo valor e vencimentos sucessivos.
+              </p>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalConta')">
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="salvarConta()">
+            <i class="fas fa-save"></i> Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL BAIXA DE CONTA (com suporte a pagamento parcial e saldo restante) -->
+    <div class="modal" id="modalBaixa">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h2 class="modal-title">Registrar Pagamento</h2>
+          <button class="close-modal" onclick="fecharModal('modalBaixa')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form
+            id="formBaixa"
+            onsubmit="
+              event.preventDefault();
+              registrarBaixa();
+            "
+          >
+            <input type="hidden" id="baixaContaId" />
+            <div class="form-group">
+              <label class="form-label required">Data do Pagamento</label>
+              <input type="date" class="form-control" id="baixaData" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Valor Pago (R$)</label>
+              <input
+                type="number"
+                class="form-control"
+                id="baixaValor"
+                step="0.01"
+                min="0.01"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Forma de Pagamento</label>
+              <select class="form-control" id="baixaForma" required>
+                <option value="PIX">PIX</option>
+                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Transferência">Transferência</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Observações</label>
+              <textarea class="form-textarea" id="baixaObs" rows="2"></textarea>
+            </div>
+            <div class="form-group checkbox-group">
+              <input
+                type="checkbox"
+                id="baixaPagamentoParcial"
+                onchange="toggleParcial()"
+              />
+              <label for="baixaPagamentoParcial"
+                >Pagamento parcial (manter saldo)</label
+              >
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalBaixa')">
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="registrarBaixa()">
+            <i class="fas fa-check"></i> Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL ANEXO REAL (com upload para Supabase) -->
+    <div class="modal" id="modalAnexo">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h2 class="modal-title">Anexar Comprovante</h2>
+          <button class="close-modal" onclick="fecharModal('modalAnexo')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="formAnexo" onsubmit="event.preventDefault()">
+            <input type="hidden" id="anexoContaId" />
+            <div
+              class="upload-area"
+              onclick="document.getElementById('fileAnexo').click()"
+            >
+              <input
+                type="file"
+                id="fileAnexo"
+                accept=".pdf,.jpg,.jpeg,.png"
+                onchange="uploadAnexo()"
+              />
+              <i class="fas fa-cloud-upload-alt"></i>
+              <p>Clique para selecionar o arquivo</p>
+              <small>PDF, JPG ou PNG (máx 10MB)</small>
+            </div>
+            <div id="anexoInfo" class="arquivo-info" style="display: none">
+              <span id="anexoNome"></span>
+              <i
+                class="fas fa-check-circle"
+                style="color: var(--verde-sucesso)"
+              ></i>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalAnexo')">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DETALHES DA CONTA (com visualização de anexos) -->
+    <div class="modal" id="modalDetalhes">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Detalhes da Despesa</h2>
+          <button class="close-modal" onclick="fecharModal('modalDetalhes')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body" id="detalhesBody"></div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalDetalhes')">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL CONFIRMAR EXCLUSÃO -->
+    <div class="modal" id="modalConfirmar">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h2 class="modal-title">Confirmar Exclusão</h2>
+          <button class="close-modal" onclick="fecharModal('modalConfirmar')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p
+            id="confirmarMensagem"
+            style="font-size: 0.95rem; line-height: 1.6"
+          ></p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalConfirmar')">
+            Cancelar
+          </button>
+          <button class="btn-danger" id="confirmarBotao">
+            <i class="fas fa-trash"></i> Excluir
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL IMPORTAR CSV -->
+    <div class="modal" id="modalImportarCSV">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Importar Despesas (CSV)</h2>
+          <button class="close-modal" onclick="fecharModal('modalImportarCSV')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Arquivo CSV</label>
+            <input
+              type="file"
+              id="csvFile"
+              accept=".csv"
+              class="form-control"
+            />
+            <small style="color: var(--grafite-claro)"
+              >Formato esperado:
+              descricao,fornecedor,cpf_cnpj,valor,data_vencimento,categoria_id,tipo,observacoes
+              (cabeçalho opcional)</small
+            >
+          </div>
+          <div class="form-group">
+            <label class="form-label">Preview</label>
+            <div
+              id="csvPreview"
+              style="
+                max-height: 300px;
+                overflow: auto;
+                border: 1px solid var(--verde-claro);
+                padding: 0.5rem;
+              "
+            ></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalImportarCSV')"
+          >
+            Cancelar
+          </button>
+          <button
+            class="btn-primary"
+            id="btnImportarCSV"
+            onclick="importarCSV()"
+          >
+            <i class="fas fa-upload"></i> Importar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL GERENCIAMENTO DE GRUPO RECORRENTE -->
+    <div class="modal" id="modalGrupo">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Gerenciar Grupo Recorrente</h2>
+          <button class="close-modal" onclick="fecharModal('modalGrupo')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body" id="grupoBody"></div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalGrupo')">
+            Fechar
+          </button>
+          <button
+            class="btn-danger"
+            id="btnExcluirGrupo"
+            style="display: none"
+            onclick="excluirTodasFuturasGrupo()"
+          >
+            Excluir Todas do Grupo
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL EDIÇÃO EM LOTE DE GRUPO -->
+    <div class="modal" id="modalEditarGrupo">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Editar Grupo Recorrente</h2>
+          <button class="close-modal" onclick="fecharModal('modalEditarGrupo')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form
+            id="formEditarGrupo"
+            onsubmit="
+              event.preventDefault();
+              salvarEdicaoGrupo();
+            "
+          >
+            <input type="hidden" id="editarGrupoId" />
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Descrição</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editarGrupoDescricao"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Fornecedor</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editarGrupoFornecedor"
+                />
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Valor (R$)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="editarGrupoValor"
+                  step="0.01"
+                  min="0.01"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Categoria</label>
+                <select class="form-control" id="editarGrupoCategoria">
+                  <option value="">Manter atual</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group checkbox-group">
+              <input type="checkbox" id="editarGrupoApenasFuturas" checked />
+              <label for="editarGrupoApenasFuturas"
+                >Aplicar apenas nas contas futuras (vencimento > hoje)</label
+              >
+            </div>
+            <p
+              class="form-hint"
+              style="
+                font-size: 0.8rem;
+                color: var(--grafite-claro);
+                margin-top: 1rem;
+              "
+            >
+              <i class="fas fa-info-circle"></i> Os campos preenchidos serão
+              atualizados em todas as contas do grupo selecionadas. Deixe em
+              branco para não alterar.
+            </p>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalEditarGrupo')"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="salvarEdicaoGrupo()">
+            <i class="fas fa-save"></i> Salvar Alterações
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL RELATÓRIO POR FORNECEDOR -->
+    <div class="modal" id="modalRelatorioFornecedor">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title" id="relatorioFornecedorTitulo">
+            Relatório do Fornecedor
+          </h2>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalRelatorioFornecedor')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body" id="relatorioFornecedorBody"></div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalRelatorioFornecedor')"
+          >
+            Fechar
+          </button>
+          <button class="btn-primary" onclick="exportarRelatorioFornecedor()">
+            <i class="fas fa-file-pdf"></i> Exportar PDF
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL NOTIFICAÇÕES -->
+    <div id="modalNotificacoes" class="modal">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h2 class="modal-title">Notificações</h2>
+          <button class="close-modal" onclick="fecharModalNotificacoes()">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body" id="listaNotificacoesBody"></div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModalNotificacoes()">
+            Fechar
+          </button>
+          <button class="btn-primary" onclick="marcarTodasComoLidas()">
+            Marcar todas como lidas
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- JavaScript externo -->
+    <script src="../js/pagar.js"></script>
+  </body>
+</html>

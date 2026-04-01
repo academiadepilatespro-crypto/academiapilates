@@ -1,0 +1,2376 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1"
+    />
+    <title>Super Portal Premium - Estúdio Rafaela Lisboa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+      /* ==================== CSS COMPLETO (idêntico ao original, omitido por brevidade) ==================== */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+      :root {
+        --verde-principal: #2d5a4d;
+        --verde-claro: #3a7a68;
+        --verde-esmeralda: #1abc9c;
+        --verde-pastel: #d4ede4;
+        --grafite: #1a1a1a;
+        --grafite-claro: #3a3a3a;
+        --grafite-muito-claro: #6a6a6a;
+        --off-white: #f8f9fa;
+        --branco: #ffffff;
+        --vermelho-coral: #ff6b6b;
+        --vermelho-suave: #ffe5e5;
+        --laranja-ouro: #ffa500;
+        --laranja-suave: #fff3cd;
+        --verde-sucesso: #00d084;
+        --azul-info: #0099ff;
+        --azul-suave: #e3f2fd;
+        --roxo-celebracao: #9b59b6;
+        --roxo-suave: #f3e5f5;
+        --dourado: #d4af37;
+        --font-titulos: "Cormorant Garamond", serif;
+        --font-corpo: "Montserrat", sans-serif;
+        --shadow-sm: 0 2px 8px rgba(45, 90, 77, 0.1);
+        --shadow-md: 0 8px 24px rgba(45, 90, 77, 0.15);
+        --shadow-lg: 0 16px 48px rgba(45, 90, 77, 0.2);
+        --pago: #00d084;
+        --pendente: #ffa500;
+        --atrasado: #ff6b6b;
+        --hoje: #d4af37;
+      }
+      html {
+        font-size: 14px;
+        scroll-behavior: smooth;
+        -webkit-font-smoothing: antialiased;
+      }
+      body {
+        font-family: var(--font-corpo);
+        background: linear-gradient(135deg, #f8f9fa 0%, #e8f1ed 100%);
+        color: var(--grafite);
+        min-height: 100vh;
+        overflow-x: hidden;
+        position: relative;
+      }
+
+      /* ========== TELA DE LOGIN ========== */
+      .login-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: linear-gradient(
+          135deg,
+          var(--verde-principal) 0%,
+          var(--verde-claro) 100%
+        );
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+      }
+      .login-container::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 500px;
+        height: 500px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        filter: blur(40px);
+      }
+      .login-container::after {
+        content: "";
+        position: absolute;
+        bottom: -30%;
+        left: -5%;
+        width: 400px;
+        height: 400px;
+        background: rgba(26, 188, 156, 0.1);
+        border-radius: 50%;
+        filter: blur(40px);
+      }
+      .login-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 32px;
+        padding: 2.5rem 1.5rem;
+        box-shadow: var(--shadow-lg);
+        width: 100%;
+        max-width: 400px;
+        animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+        z-index: 10;
+      }
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(40px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+      .login-logo {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(
+          135deg,
+          var(--verde-principal),
+          var(--verde-esmeralda)
+        );
+        border-radius: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 2.5rem;
+        color: var(--branco);
+        box-shadow: var(--shadow-md);
+        animation: float 3s ease-in-out infinite;
+      }
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+      .login-header h1 {
+        font-family: var(--font-titulos);
+        font-size: 2.2rem;
+        font-weight: 700;
+        background: linear-gradient(
+          135deg,
+          var(--verde-principal),
+          var(--verde-claro)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+      }
+      .login-header p {
+        color: var(--grafite-claro);
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+      .form-label {
+        display: block;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--grafite);
+        margin-bottom: 0.6rem;
+      }
+      .form-input {
+        width: 100%;
+        padding: 1rem 1.2rem;
+        border: 2px solid rgba(45, 90, 77, 0.2);
+        border-radius: 16px;
+        font-size: 1rem;
+        font-family: var(--font-corpo);
+        background: rgba(212, 237, 228, 0.3);
+        backdrop-filter: blur(10px);
+        color: var(--grafite);
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      .form-input:focus {
+        outline: none;
+        border-color: var(--verde-esmeralda);
+        box-shadow: 0 0 0 4px rgba(26, 188, 156, 0.1);
+        background: rgba(212, 237, 228, 0.5);
+      }
+      .btn-login {
+        width: 100%;
+        padding: 1.2rem;
+        background: linear-gradient(
+          135deg,
+          var(--verde-principal),
+          var(--verde-esmeralda)
+        );
+        color: var(--branco);
+        border: none;
+        border-radius: 16px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-family: var(--font-corpo);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+        box-shadow: var(--shadow-md);
+        min-height: 48px;
+        position: relative;
+        overflow: hidden;
+      }
+      .btn-login::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: left 0.3s;
+      }
+      .btn-login:hover::before {
+        left: 100%;
+      }
+      .btn-login:active {
+        transform: scale(0.98);
+      }
+      .btn-login:disabled {
+        background: var(--grafite-claro);
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+      .login-error {
+        background: linear-gradient(135deg, #ffe5e5, #fff0f0);
+        color: var(--vermelho-coral);
+        padding: 1rem;
+        border-radius: 16px;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        display: none;
+        border-left: 4px solid var(--vermelho-coral);
+        backdrop-filter: blur(10px);
+      }
+      .login-error.show {
+        display: block;
+        animation: shake 0.3s ease;
+      }
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        75% {
+          transform: translateX(5px);
+        }
+      }
+      .loading-spinner {
+        width: 18px;
+        height: 18px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top-color: var(--branco);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        display: inline-block;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ========== HEADER, BOTTOM NAV, ETC ========== (MANTIDO) */
+      .portal-header {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.95),
+          rgba(212, 237, 228, 0.5)
+        );
+        backdrop-filter: blur(20px);
+        box-shadow: var(--shadow-sm);
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        border-bottom: 1px solid rgba(45, 90, 77, 0.1);
+      }
+      .portal-header-left {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+      .portal-logo-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(
+          135deg,
+          var(--verde-principal),
+          var(--verde-esmeralda)
+        );
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--branco);
+        box-shadow: var(--shadow-md);
+      }
+      .portal-header-title {
+        font-family: var(--font-titulos);
+        font-size: 1.4rem;
+        font-weight: 700;
+        background: linear-gradient(
+          135deg,
+          var(--verde-principal),
+          var(--verde-claro)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .btn-logout {
+        background: none;
+        border: none;
+        color: var(--grafite);
+        font-size: 1.3rem;
+        cursor: pointer;
+        padding: 0.8rem;
+        transition: all 0.3s;
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+      }
+      .btn-logout:active {
+        background: rgba(45, 90, 77, 0.1);
+        color: var(--verde-esmeralda);
+      }
+      .portal-content {
+        display: none;
+        padding-bottom: 120px;
+      }
+      .portal-content.show {
+        display: block;
+      }
+      .content-section {
+        display: none;
+        animation: fadeIn 0.4s ease;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      .content-section.active {
+        display: block;
+      }
+      .perfil-header-super {
+        background: linear-gradient(
+          135deg,
+          var(--verde-principal),
+          var(--verde-claro)
+        );
+        padding: 2.5rem 1.5rem;
+        border-radius: 0 0 32px 32px;
+        color: var(--branco);
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+      }
+      .perfil-header-super::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        filter: blur(40px);
+      }
+      .perfil-header-super::after {
+        content: "";
+        position: absolute;
+        bottom: -20%;
+        left: -5%;
+        width: 250px;
+        height: 250px;
+        background: rgba(26, 188, 156, 0.15);
+        border-radius: 50%;
+        filter: blur(40px);
+      }
+      .perfil-header-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+      }
+      .perfil-foto-container {
+        position: relative;
+      }
+      .perfil-foto {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 5px solid var(--branco);
+        box-shadow: var(--shadow-lg);
+        background: var(--verde-pastel);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.8rem;
+        color: var(--verde-principal);
+        animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      @keyframes popIn {
+        from {
+          transform: scale(0.8);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .perfil-foto img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+      .perfil-foto.placeholder {
+        background: var(--verde-pastel);
+        color: var(--verde-principal);
+        font-size: 2.8rem;
+      }
+      .perfil-status-badge {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, var(--verde-sucesso), #00b86f);
+        border: 4px solid var(--branco);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        animation: pulse 2s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(0, 208, 132, 0.7);
+        }
+        50% {
+          box-shadow: 0 0 0 8px rgba(0, 208, 132, 0);
+        }
+      }
+      .perfil-info-header {
+        flex: 1;
+      }
+      .perfil-nome-super {
+        font-family: var(--font-titulos);
+        font-size: 1.7rem;
+        font-weight: 700;
+        margin-bottom: 0.3rem;
+        letter-spacing: 0.5px;
+      }
+      .perfil-status-text {
+        font-size: 0.9rem;
+        opacity: 0.95;
+        font-weight: 500;
+      }
+
+      /* DASHBOARD, ALERTAS, CARDS, ETC (MANTIDO) */
+      .dashboard-container {
+        padding: 1.5rem 1rem;
+      }
+      .alertas-section {
+        margin-bottom: 2rem;
+      }
+      .alertas-title {
+        font-family: var(--font-titulos);
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--grafite);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+      .alertas-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      @media (min-width: 481px) {
+        .alertas-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      .alert-card {
+        border-radius: 20px;
+        padding: 1.3rem;
+        box-shadow: var(--shadow-md);
+        border-left: 5px solid;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        cursor: pointer;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+      .alert-card:active {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+      }
+      .alert-card.urgente {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 107, 107, 0.1),
+          rgba(255, 150, 150, 0.1)
+        );
+        border-left-color: var(--vermelho-coral);
+      }
+      .alert-card.atencao {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 165, 0, 0.1),
+          rgba(255, 200, 100, 0.1)
+        );
+        border-left-color: var(--laranja-ouro);
+      }
+      .alert-card.info {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 153, 255, 0.1),
+          rgba(100, 200, 255, 0.1)
+        );
+        border-left-color: var(--azul-info);
+      }
+      .alert-card.sucesso {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 208, 132, 0.1),
+          rgba(100, 230, 180, 0.1)
+        );
+        border-left-color: var(--verde-sucesso);
+      }
+      .alert-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 0.8rem;
+      }
+      .alert-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        flex-shrink: 0;
+        animation: bounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-5px);
+        }
+      }
+      .alert-card.urgente .alert-icon {
+        background: rgba(255, 107, 107, 0.2);
+        color: var(--vermelho-coral);
+      }
+      .alert-card.atencao .alert-icon {
+        background: rgba(255, 165, 0, 0.2);
+        color: var(--laranja-ouro);
+      }
+      .alert-card.info .alert-icon {
+        background: rgba(0, 153, 255, 0.2);
+        color: var(--azul-info);
+      }
+      .alert-card.sucesso .alert-icon {
+        background: rgba(0, 208, 132, 0.2);
+        color: var(--verde-sucesso);
+      }
+      .alert-content {
+        flex: 1;
+      }
+      .alert-titulo {
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--grafite);
+        margin-bottom: 0.3rem;
+      }
+      .alert-descricao {
+        font-size: 0.85rem;
+        color: var(--grafite-claro);
+        line-height: 1.5;
+      }
+      .alert-meta {
+        font-size: 0.8rem;
+        color: var(--grafite-muito-claro);
+        margin-top: 0.6rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-weight: 600;
+      }
+      .stats-section {
+        margin-bottom: 2rem;
+      }
+      .stats-title {
+        font-family: var(--font-titulos);
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--grafite);
+        margin-bottom: 1rem;
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+      @media (min-width: 481px) {
+        .stats-grid {
+          grid-template-columns: 1fr 1fr 1fr;
+        }
+      }
+      .stat-card {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.9),
+          rgba(212, 237, 228, 0.4)
+        );
+        backdrop-filter: blur(10px);
+        padding: 1.3rem;
+        border-radius: 20px;
+        box-shadow: var(--shadow-md);
+        text-align: center;
+        border-top: 4px solid;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        transition: all 0.3s;
+        cursor: pointer;
+      }
+      .stat-card:active {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+      }
+      .stat-card.pago {
+        border-top-color: var(--pago);
+      }
+      .stat-card.pendente {
+        border-top-color: var(--pendente);
+      }
+      .stat-card.atrasado {
+        border-top-color: var(--atrasado);
+      }
+      .stat-label {
+        font-size: 0.75rem;
+        color: var(--grafite-muito-claro);
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        letter-spacing: 1px;
+      }
+      .stat-value {
+        font-family: var(--font-titulos);
+        font-size: 1.5rem;
+        font-weight: 700;
+        background: linear-gradient(
+          135deg,
+          var(--verde-principal),
+          var(--verde-claro)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      /* AGENDA E FINANCEIRO (MANTIDO) */
+      .agenda-container {
+        padding: 1.5rem 1rem;
+      }
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+      }
+      .section-header h2 {
+        font-family: var(--font-titulos);
+        font-size: 1.4rem;
+        color: var(--grafite);
+        font-weight: 700;
+      }
+      .agenda-filtros {
+        display: flex;
+        gap: 0.6rem;
+        margin-bottom: 1.5rem;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+      }
+      .agenda-filtros::-webkit-scrollbar {
+        height: 4px;
+      }
+      .agenda-filtros::-webkit-scrollbar-track {
+        background: var(--verde-pastel);
+        border-radius: 10px;
+      }
+      .agenda-filtros::-webkit-scrollbar-thumb {
+        background: var(--verde-esmeralda);
+        border-radius: 10px;
+      }
+      .filtro-btn {
+        padding: 0.8rem 1.4rem;
+        border: 2px solid var(--verde-esmeralda);
+        background: var(--branco);
+        color: var(--verde-esmeralda);
+        border-radius: 20px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        white-space: nowrap;
+        font-size: 0.9rem;
+        font-family: var(--font-corpo);
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        box-shadow: var(--shadow-sm);
+      }
+      .filtro-btn:active {
+        transform: scale(0.95);
+      }
+      .filtro-btn.active {
+        background: linear-gradient(
+          135deg,
+          var(--verde-principal),
+          var(--verde-esmeralda)
+        );
+        color: var(--branco);
+        box-shadow: var(--shadow-md);
+      }
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 500;
+        align-items: flex-end;
+        animation: fadeIn 0.3s ease;
+      }
+      .modal-overlay.show {
+        display: flex;
+      }
+      .modal-content {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.98),
+          rgba(212, 237, 228, 0.5)
+        );
+        backdrop-filter: blur(20px);
+        border-radius: 32px 32px 0 0;
+        padding: 1.5rem;
+        width: 100%;
+        max-height: 80vh;
+        overflow-y: auto;
+        animation: slideUpModal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+      @keyframes slideUpModal {
+        from {
+          transform: translateY(100%);
+        }
+        to {
+          transform: translateY(0);
+        }
+      }
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+      }
+      .modal-header h3 {
+        font-family: var(--font-titulos);
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--grafite);
+      }
+      .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--grafite);
+        cursor: pointer;
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        transition: all 0.3s;
+      }
+      .form-group-modal {
+        margin-bottom: 1.2rem;
+      }
+      .form-label-modal {
+        display: block;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--grafite);
+        margin-bottom: 0.5rem;
+      }
+      .form-input-modal {
+        width: 100%;
+        padding: 0.9rem 1rem;
+        border: 2px solid rgba(45, 90, 77, 0.2);
+        border-radius: 14px;
+        font-size: 1rem;
+        font-family: var(--font-corpo);
+        background: rgba(212, 237, 228, 0.3);
+        backdrop-filter: blur(10px);
+        color: var(--grafite);
+        transition: all 0.3s;
+      }
+      .btn-aplicar-filtro {
+        width: 100%;
+        padding: 1.1rem;
+        background: linear-gradient(
+          135deg,
+          var(--verde-principal),
+          var(--verde-esmeralda)
+        );
+        color: var(--branco);
+        border: none;
+        border-radius: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: var(--font-corpo);
+        font-size: 1rem;
+        min-height: 48px;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s;
+      }
+      .agenda-list,
+      .parcelas-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .agenda-item,
+      .parcela-item {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.9),
+          rgba(212, 237, 228, 0.3)
+        );
+        backdrop-filter: blur(10px);
+        padding: 1.3rem;
+        border-radius: 20px;
+        box-shadow: var(--shadow-md);
+        border-left: 5px solid var(--verde-esmeralda);
+        transition: all 0.3s;
+        position: relative;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+      }
+      .agenda-item:active {
+        transform: translateY(-4px);
+      }
+      .agenda-item.hoje {
+        border-left-color: var(--hoje);
+        background: linear-gradient(
+          135deg,
+          rgba(212, 175, 55, 0.1),
+          rgba(212, 175, 55, 0.05)
+        );
+      }
+      .agenda-item.semana {
+        border-left-color: var(--azul-info);
+      }
+      .agenda-badge {
+        position: absolute;
+        top: 0.8rem;
+        right: 0.8rem;
+        padding: 0.4rem 0.9rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        box-shadow: var(--shadow-sm);
+        animation: popIn 0.4s;
+      }
+      .agenda-badge.hoje {
+        background: linear-gradient(135deg, var(--hoje), #e6c200);
+        color: var(--grafite);
+      }
+      .agenda-badge.semana {
+        background: linear-gradient(135deg, var(--azul-info), #0077cc);
+        color: var(--branco);
+      }
+      .agenda-item-header,
+      .parcela-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 0.8rem;
+      }
+      .agenda-item-date-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(
+          135deg,
+          var(--verde-pastel),
+          rgba(212, 237, 228, 0.5)
+        );
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--verde-esmeralda);
+        font-size: 1.3rem;
+        flex-shrink: 0;
+      }
+      .agenda-item-info,
+      .parcela-info {
+        flex: 1;
+      }
+      .agenda-item-date {
+        font-size: 0.75rem;
+        color: var(--verde-esmeralda);
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 0.2rem;
+        letter-spacing: 0.5px;
+      }
+      .agenda-item-title {
+        font-weight: 700;
+        color: var(--grafite);
+        margin-bottom: 0.3rem;
+        font-size: 1rem;
+      }
+      .agenda-item-footer {
+        margin-top: 0.8rem;
+        padding-top: 0.8rem;
+        border-top: 1px solid rgba(45, 90, 77, 0.1);
+      }
+      .agenda-item-time {
+        font-size: 0.9rem;
+        color: var(--grafite-claro);
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-weight: 600;
+      }
+      .empty-state {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: var(--grafite-claro);
+      }
+      .empty-state-icon {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        opacity: 0.4;
+      }
+      .financeiro-container {
+        padding: 1.5rem 1rem;
+      }
+      .financeiro-summary {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      @media (min-width: 481px) {
+        .financeiro-summary {
+          grid-template-columns: 1fr 1fr 1fr;
+        }
+      }
+      .summary-card {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.9),
+          rgba(212, 237, 228, 0.4)
+        );
+        backdrop-filter: blur(10px);
+        padding: 1.3rem;
+        border-radius: 20px;
+        box-shadow: var(--shadow-md);
+        text-align: center;
+        border-top: 4px solid;
+        transition: all 0.3s;
+      }
+      .summary-card.pago {
+        border-top-color: var(--pago);
+      }
+      .summary-card.pendente {
+        border-top-color: var(--pendente);
+      }
+      .summary-card.atrasado {
+        border-top-color: var(--atrasado);
+      }
+      .summary-label {
+        font-size: 0.75rem;
+        color: var(--grafite-muito-claro);
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        letter-spacing: 1px;
+      }
+      .summary-value {
+        font-family: var(--font-titulos);
+        font-size: 1.4rem;
+        font-weight: 700;
+        background: linear-gradient(
+          135deg,
+          var(--verde-principal),
+          var(--verde-claro)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .parcela-item {
+        border-left: 5px solid;
+      }
+      .parcela-item.pago {
+        border-left-color: var(--pago);
+      }
+      .parcela-item.pendente {
+        border-left-color: var(--pendente);
+      }
+      .parcela-item.atrasado {
+        border-left-color: var(--atrasado);
+      }
+      .parcela-numero {
+        font-size: 0.75rem;
+        color: var(--grafite-muito-claro);
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+      .parcela-valor {
+        font-family: var(--font-titulos);
+        font-size: 1.3rem;
+        font-weight: 700;
+        background: linear-gradient(
+          135deg,
+          var(--verde-principal),
+          var(--verde-claro)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .parcela-status {
+        display: inline-block;
+        padding: 0.4rem 0.9rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--branco);
+        text-transform: uppercase;
+        box-shadow: var(--shadow-sm);
+      }
+      .parcela-status.pago {
+        background: linear-gradient(135deg, var(--pago), #00b86f);
+      }
+      .parcela-status.pendente {
+        background: linear-gradient(135deg, var(--pendente), #ff8c00);
+      }
+      .parcela-status.atrasado {
+        background: linear-gradient(135deg, var(--atrasado), #ff4444);
+      }
+      .parcela-footer {
+        margin-top: 0.8rem;
+        padding-top: 0.8rem;
+        border-top: 1px solid rgba(45, 90, 77, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--grafite-claro);
+      }
+
+      /* PERFIL */
+      .perfil-container {
+        padding: 1.5rem 1rem;
+      }
+      .perfil-card {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.9),
+          rgba(212, 237, 228, 0.4)
+        );
+        backdrop-filter: blur(10px);
+        padding: 1.5rem;
+        border-radius: 20px;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+      }
+      .perfil-info-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(45, 90, 77, 0.1);
+        transition: all 0.3s;
+      }
+      .perfil-info-row:last-child {
+        border-bottom: none;
+      }
+      .perfil-info-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(
+          135deg,
+          var(--verde-pastel),
+          rgba(212, 237, 228, 0.5)
+        );
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--verde-esmeralda);
+        font-size: 1.3rem;
+        flex-shrink: 0;
+      }
+      .perfil-info-content {
+        flex: 1;
+      }
+      .perfil-info-label {
+        font-size: 0.75rem;
+        color: var(--grafite-muito-claro);
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+      .perfil-info-value {
+        font-size: 1rem;
+        color: var(--grafite);
+        font-weight: 600;
+        word-break: break-word;
+      }
+
+      /* BOTTOM NAV */
+      .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.95),
+          rgba(212, 237, 228, 0.5)
+        );
+        backdrop-filter: blur(20px);
+        border-top: 1px solid rgba(45, 90, 77, 0.1);
+        display: flex;
+        justify-content: space-around;
+        padding: 0.8rem 0 1rem 0;
+        z-index: 200;
+        box-shadow: var(--shadow-md);
+      }
+      .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.5rem 1rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--grafite-claro);
+        transition: all 0.3s;
+        font-size: 0.7rem;
+        font-family: var(--font-corpo);
+        font-weight: 600;
+        min-width: 60px;
+        min-height: 60px;
+        justify-content: center;
+        border-radius: 14px;
+      }
+      .nav-item i {
+        font-size: 1.5rem;
+      }
+      .nav-item.active {
+        color: var(--verde-esmeralda);
+        background: rgba(26, 188, 156, 0.1);
+      }
+      .nav-item.active i {
+        font-size: 1.8rem;
+      }
+
+      /* TOAST E LOADING */
+      .toast {
+        position: fixed;
+        bottom: 110px;
+        left: 1rem;
+        right: 1rem;
+        padding: 1.1rem 1.3rem;
+        border-radius: 16px;
+        color: var(--branco);
+        font-size: 0.95rem;
+        animation: slideUp 0.4s;
+        z-index: 300;
+        max-width: 400px;
+        margin: 0 auto;
+        box-shadow: var(--shadow-lg);
+        font-weight: 600;
+      }
+      .toast.success {
+        background: linear-gradient(135deg, var(--pago), #00b86f);
+      }
+      .toast.error {
+        background: linear-gradient(135deg, var(--atrasado), #ff4444);
+      }
+      .toast.info {
+        background: linear-gradient(135deg, var(--azul-info), #0077cc);
+      }
+      .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+      .loading-overlay.show {
+        display: flex;
+      }
+      .loading-spinner-large {
+        width: 60px;
+        height: 60px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top-color: var(--branco);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      /* PAGINAÇÃO E EXPORTAÇÃO */
+      .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+      }
+      .pagination-btn {
+        background: var(--branco);
+        border: 1px solid var(--verde-claro);
+        color: var(--grafite);
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 0.85rem;
+      }
+      .pagination-btn:active {
+        background: var(--verde-pastel);
+      }
+      .pagination-info {
+        font-size: 0.85rem;
+        color: var(--grafite-claro);
+      }
+      .btn-export {
+        background: none;
+        border: none;
+        color: var(--verde-esmeralda);
+        cursor: pointer;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.3rem 0.6rem;
+        border-radius: 20px;
+        background: rgba(26, 188, 156, 0.1);
+        transition: all 0.3s;
+      }
+      .btn-export:active {
+        background: rgba(26, 188, 156, 0.2);
+      }
+      .btn-refresh {
+        background: none;
+        border: none;
+        color: var(--verde-esmeralda);
+        cursor: pointer;
+        font-size: 1.1rem;
+        padding: 0.5rem;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+      }
+      .btn-refresh:active {
+        background: rgba(26, 188, 156, 0.2);
+        transform: rotate(180deg);
+      }
+      .section-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-left: auto;
+      }
+      .card-tooltip[data-tooltip]:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--grafite);
+        color: var(--branco);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        white-space: nowrap;
+        z-index: 10;
+        margin-bottom: 0.25rem;
+      }
+
+      @media (max-width: 360px) {
+        html {
+          font-size: 12px;
+        }
+        .perfil-foto {
+          width: 80px;
+          height: 80px;
+          font-size: 2.2rem;
+        }
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+        .financeiro-summary {
+          grid-template-columns: 1fr;
+        }
+        .alert-card {
+          padding: 1rem;
+        }
+      }
+      @media (max-width: 480px) {
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+        .financeiro-summary {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- TELA DE LOGIN -->
+    <div id="loginScreen" class="login-container">
+      <div class="login-card">
+        <div class="login-header">
+          <div class="login-logo"><i class="fas fa-spa"></i></div>
+          <h1>Super Portal</h1>
+          <p>Estúdio Rafaela Lisboa</p>
+        </div>
+        <div id="loginError" class="login-error"></div>
+        <form id="loginForm" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label class="form-label">CPF</label>
+            <input
+              type="text"
+              id="cpfInput"
+              class="form-input"
+              placeholder="000.000.000-00"
+              maxlength="14"
+              required
+              inputmode="numeric"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Data de Nascimento</label>
+            <input
+              type="date"
+              id="dataNascimentoInput"
+              class="form-input"
+              required
+            />
+          </div>
+          <button type="submit" class="btn-login" id="loginBtn">
+            <span
+              class="loading-spinner"
+              id="loginSpinner"
+              style="display: none"
+            ></span>
+            <span id="loginBtnText">Entrar</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- PORTAL DO ALUNO -->
+    <div id="portalScreen" class="portal-content">
+      <header class="portal-header">
+        <div class="portal-header-left">
+          <div class="portal-logo-icon"><i class="fas fa-spa"></i></div>
+          <div class="portal-header-title">Super Portal</div>
+        </div>
+        <div class="portal-header-right">
+          <button class="btn-logout" onclick="handleLogout()" title="Sair">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- DASHBOARD -->
+      <section id="dashboardSection" class="content-section active">
+        <div class="perfil-header-super">
+          <div class="perfil-header-content">
+            <div class="perfil-foto-container">
+              <div id="perfilFoto" class="perfil-foto placeholder">A</div>
+              <div class="perfil-status-badge">
+                <i class="fas fa-check"></i>
+              </div>
+            </div>
+            <div class="perfil-info-header">
+              <div class="perfil-nome-super" id="perfilNomeSuper">
+                Carregando...
+              </div>
+              <div class="perfil-status-text" id="perfilStatusText">
+                Ativo no sistema
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="dashboard-container">
+          <div class="alertas-section">
+            <div class="alertas-title">
+              <i class="fas fa-bell"></i> Alertas e Avisos
+            </div>
+            <div class="alertas-grid" id="alertasContainer"></div>
+          </div>
+          <div class="stats-section">
+            <div class="stats-title">
+              <i class="fas fa-chart-pie"></i> Seu Financeiro
+            </div>
+            <div class="stats-grid" id="statsCardsContainer"></div>
+          </div>
+          <div class="section-header" style="margin-top: 2rem">
+            <i
+              class="fas fa-calendar-alt"
+              style="color: var(--verde-esmeralda); font-size: 1.3rem"
+            ></i>
+            <h2>Próximas Aulas</h2>
+            <div class="section-actions">
+              <button
+                class="btn-refresh"
+                onclick="recarregarDados()"
+                title="Atualizar"
+              >
+                <i class="fas fa-sync-alt"></i>
+              </button>
+              <button
+                class="btn-export"
+                onclick="exportarAgendaPDF()"
+                title="Exportar agenda"
+              >
+                <i class="fas fa-file-pdf"></i> PDF
+              </button>
+            </div>
+          </div>
+          <div id="proximasAulasContainer" class="agenda-list"></div>
+          <div class="section-header" style="margin-top: 2rem">
+            <i
+              class="fas fa-file-invoice-dollar"
+              style="color: var(--verde-esmeralda); font-size: 1.3rem"
+            ></i>
+            <h2>Parcelas Vencendo</h2>
+            <button
+              class="btn-export"
+              onclick="exportarExtratoCSV()"
+              title="Exportar extrato"
+            >
+              <i class="fas fa-file-csv"></i> CSV
+            </button>
+          </div>
+          <div id="parcelasVencendoContainer" class="parcelas-list"></div>
+        </div>
+      </section>
+
+      <!-- AGENDA COMPLETA -->
+      <section id="agendaSection" class="content-section">
+        <div class="agenda-container">
+          <div class="section-header">
+            <i
+              class="fas fa-calendar-alt"
+              style="color: var(--verde-esmeralda); font-size: 1.3rem"
+            ></i>
+            <h2>Minha Agenda Completa</h2>
+            <div class="section-actions">
+              <button class="btn-refresh" onclick="recarregarDados()">
+                <i class="fas fa-sync-alt"></i>
+              </button>
+              <button class="btn-export" onclick="exportarAgendaPDF()">
+                <i class="fas fa-file-pdf"></i> PDF
+              </button>
+            </div>
+          </div>
+          <div class="agenda-filtros">
+            <button
+              class="filtro-btn active"
+              onclick="filtrarAgenda('hoje', this)"
+            >
+              <i class="fas fa-calendar-day"></i> Hoje
+            </button>
+            <button class="filtro-btn" onclick="filtrarAgenda('semana', this)">
+              <i class="fas fa-calendar-week"></i> Semana
+            </button>
+            <button class="filtro-btn" onclick="filtrarAgenda('mes', this)">
+              <i class="fas fa-calendar-alt"></i> Mês
+            </button>
+            <button class="filtro-btn" onclick="abrirFiltroPersonalizado()">
+              <i class="fas fa-sliders-h"></i> Personalizado
+            </button>
+          </div>
+          <div id="agendaFullContainer" class="agenda-list"></div>
+          <div
+            id="agendaPagination"
+            class="pagination-container"
+            style="display: none"
+          ></div>
+        </div>
+      </section>
+
+      <!-- FINANCEIRO COMPLETO -->
+      <section id="financeiroSection" class="content-section">
+        <div class="financeiro-container">
+          <div class="section-header">
+            <i
+              class="fas fa-wallet"
+              style="color: var(--verde-esmeralda); font-size: 1.3rem"
+            ></i>
+            <h2>Meu Financeiro Completo</h2>
+            <div class="section-actions">
+              <button class="btn-refresh" onclick="recarregarDados()">
+                <i class="fas fa-sync-alt"></i>
+              </button>
+              <button class="btn-export" onclick="exportarExtratoCSV()">
+                <i class="fas fa-file-csv"></i> CSV
+              </button>
+            </div>
+          </div>
+          <div class="financeiro-summary" id="financeiroSummary"></div>
+          <div id="parcelasFullContainer" class="parcelas-list"></div>
+          <div
+            id="parcelasPagination"
+            class="pagination-container"
+            style="display: none"
+          ></div>
+        </div>
+      </section>
+
+      <!-- PERFIL -->
+      <section id="perfilSection" class="content-section">
+        <div class="perfil-container">
+          <div class="perfil-card">
+            <div class="perfil-info-row">
+              <div class="perfil-info-icon"><i class="fas fa-id-card"></i></div>
+              <div class="perfil-info-content">
+                <div class="perfil-info-label">CPF</div>
+                <div class="perfil-info-value" id="perfilCPF">---</div>
+              </div>
+            </div>
+            <div class="perfil-info-row">
+              <div class="perfil-info-icon">
+                <i class="fas fa-birthday-cake"></i>
+              </div>
+              <div class="perfil-info-content">
+                <div class="perfil-info-label">Data de Nascimento</div>
+                <div class="perfil-info-value" id="perfilDataNascimento">
+                  ---
+                </div>
+              </div>
+            </div>
+            <div class="perfil-info-row">
+              <div class="perfil-info-icon">
+                <i class="fas fa-envelope"></i>
+              </div>
+              <div class="perfil-info-content">
+                <div class="perfil-info-label">E-mail</div>
+                <div class="perfil-info-value" id="perfilEmail">---</div>
+              </div>
+            </div>
+            <div class="perfil-info-row">
+              <div class="perfil-info-icon"><i class="fas fa-phone"></i></div>
+              <div class="perfil-info-content">
+                <div class="perfil-info-label">Telefone</div>
+                <div class="perfil-info-value" id="perfilTelefone">---</div>
+              </div>
+            </div>
+            <div class="perfil-info-row">
+              <div class="perfil-info-icon">
+                <i class="fas fa-briefcase"></i>
+              </div>
+              <div class="perfil-info-content">
+                <div class="perfil-info-label">Profissão</div>
+                <div class="perfil-info-value" id="perfilProfissao">---</div>
+              </div>
+            </div>
+          </div>
+          <button
+            class="btn-logout"
+            onclick="handleLogout()"
+            style="
+              width: calc(100% - 2rem);
+              margin: 0 1rem;
+              padding: 1.2rem;
+              background: linear-gradient(
+                135deg,
+                var(--vermelho-coral),
+                #ff4444
+              );
+              color: white;
+              border: none;
+              border-radius: 16px;
+              font-weight: 700;
+              font-family: var(--font-corpo);
+              cursor: pointer;
+              box-shadow: var(--shadow-md);
+              font-size: 1rem;
+              min-height: 48px;
+            "
+          >
+            <i class="fas fa-sign-out-alt"></i> Sair da Conta
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- MODAL DE FILTRO PERSONALIZADO -->
+    <div id="modalFiltroPersonalizado" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Filtrar por Período</h3>
+          <button class="modal-close" onclick="fecharFiltroPersonalizado()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="form-group-modal">
+          <label class="form-label-modal">Data Inicial</label
+          ><input type="date" id="dataInicial" class="form-input-modal" />
+        </div>
+        <div class="form-group-modal">
+          <label class="form-label-modal">Data Final</label
+          ><input type="date" id="dataFinal" class="form-input-modal" />
+        </div>
+        <button
+          class="btn-aplicar-filtro"
+          onclick="aplicarFiltroPersonalizado()"
+        >
+          Aplicar Filtro
+        </button>
+      </div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav id="bottomNav" class="bottom-nav" style="display: none">
+      <button class="nav-item active" onclick="mudarSecao('dashboard', this)">
+        <i class="fas fa-home"></i><span>Home</span>
+      </button>
+      <button class="nav-item" onclick="mudarSecao('agenda', this)">
+        <i class="fas fa-calendar-alt"></i><span>Agenda</span>
+      </button>
+      <button class="nav-item" onclick="mudarSecao('financeiro', this)">
+        <i class="fas fa-wallet"></i><span>Financeiro</span>
+      </button>
+      <button class="nav-item" onclick="mudarSecao('perfil', this)">
+        <i class="fas fa-user"></i><span>Perfil</span>
+      </button>
+    </nav>
+
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="loading-spinner-large"></div>
+    </div>
+
+    <script>
+      // ==================== CONFIGURAÇÃO SUPABASE ====================
+      const SUPABASE_URL = "https://mputdowrhzrvqslslubk.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wdXRkb3dyaHpydnFzbHNsdWJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxNjY1NDEsImV4cCI6MjA4NDc0MjU0MX0.1TlAIzCd7896EBOeYIYy3B5Czt41l-XcWYboaspEizc";
+      let supabaseClient = null;
+      let aluno = null;
+      let todasAulas = [];
+      let todasParcelas = [];
+      let filtroAtualAgenda = "hoje";
+      let agendaPaginaAtual = 1,
+        agendaItensPorPagina = 5;
+      let parcelasPaginaAtual = 1,
+        parcelasItensPorPagina = 5;
+      let realtimeSubscription = null;
+
+      // Inicialização
+      async function init() {
+        supabaseClient = window.supabase.createClient(
+          SUPABASE_URL,
+          SUPABASE_ANON_KEY,
+        );
+        const salvo = localStorage.getItem("alunoLogado");
+        if (salvo) {
+          aluno = JSON.parse(salvo);
+          document.getElementById("loginScreen").style.display = "none";
+          document.getElementById("portalScreen").classList.add("show");
+          document.getElementById("bottomNav").style.display = "flex";
+          await carregarDados();
+          iniciarRealtime();
+        }
+        document
+          .getElementById("cpfInput")
+          .addEventListener("input", function (e) {
+            let v = e.target.value.replace(/\D/g, "");
+            if (v.length > 11) v = v.substring(0, 11);
+            e.target.value = v.replace(
+              /(\d{3})(\d{3})(\d{3})(\d{2})/,
+              "$1.$2.$3-$4",
+            );
+          });
+        document
+          .getElementById("modalFiltroPersonalizado")
+          .addEventListener("click", (e) => {
+            if (e.target.id === "modalFiltroPersonalizado")
+              fecharFiltroPersonalizado();
+          });
+      }
+
+      async function carregarDados() {
+        if (!aluno) return;
+        mostrarLoading(true);
+        try {
+          const [aulasRes, mensalidadesRes] = await Promise.all([
+            supabaseClient
+              .from("aulas")
+              .select("*")
+              .eq("aluno_id", aluno.id)
+              .order("data", { ascending: true }),
+            supabaseClient
+              .from("mensalidades")
+              .select("id")
+              .eq("aluno_id", aluno.id),
+          ]);
+          todasAulas = aulasRes.data || [];
+          let parcelas = [];
+          if (mensalidadesRes.data && mensalidadesRes.data.length) {
+            const mensIds = mensalidadesRes.data.map((m) => m.id);
+            const { data: parc } = await supabaseClient
+              .from("parcelas")
+              .select("*")
+              .in("mensalidade_id", mensIds)
+              .order("vencimento", { ascending: true });
+            parcelas = parc || [];
+          }
+          todasParcelas = parcelas;
+          atualizarUI();
+        } catch (e) {
+          console.error(e);
+          mostrarToast("Erro ao carregar dados", "error");
+        } finally {
+          mostrarLoading(false);
+        }
+      }
+
+      function atualizarUI() {
+        // Perfil
+        document.getElementById("perfilNomeSuper").textContent = aluno.nome;
+        document.getElementById("perfilCPF").textContent = formatarCPF(
+          aluno.cpf,
+        );
+        document.getElementById("perfilDataNascimento").textContent =
+          formatarData(aluno.nascimento);
+        document.getElementById("perfilEmail").textContent =
+          aluno.email || "---";
+        document.getElementById("perfilTelefone").textContent =
+          aluno.telefone || "---";
+        document.getElementById("perfilProfissao").textContent =
+          aluno.profissao || "---";
+        const iniciais = aluno.nome
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .substring(0, 2)
+          .toUpperCase();
+        const fotoEl = document.getElementById("perfilFoto");
+        if (aluno.foto_url) {
+          fotoEl.innerHTML = `<img src="${aluno.foto_url}" alt="${aluno.nome}">`;
+          fotoEl.classList.remove("placeholder");
+        } else {
+          fotoEl.textContent = iniciais;
+          fotoEl.classList.add("placeholder");
+        }
+
+        // Financeiro
+        const pago = todasParcelas
+          .filter((p) => p.status === "pago")
+          .reduce((s, p) => s + p.valor, 0);
+        const pendente = todasParcelas
+          .filter((p) => p.status === "pendente")
+          .reduce((s, p) => s + p.valor, 0);
+        const atrasado = todasParcelas
+          .filter((p) => p.status === "atrasado")
+          .reduce((s, p) => s + p.valor, 0);
+        document.getElementById("statsCardsContainer").innerHTML = `
+        <div class="stat-card pago" data-tooltip="Total já quitado"><div class="stat-label">Pago</div><div class="stat-value">${formatarValor(pago)}</div></div>
+        <div class="stat-card pendente" data-tooltip="Valor a vencer"><div class="stat-label">Pendente</div><div class="stat-value">${formatarValor(pendente)}</div></div>
+        <div class="stat-card atrasado" data-tooltip="Valores em atraso"><div class="stat-label">Atrasado</div><div class="stat-value">${formatarValor(atrasado)}</div></div>
+      `;
+        document.getElementById("financeiroSummary").innerHTML = `
+        <div class="summary-card pago"><div class="summary-label">Pago</div><div class="summary-value">${formatarValor(pago)}</div></div>
+        <div class="summary-card pendente"><div class="summary-label">Pendente</div><div class="summary-value">${formatarValor(pendente)}</div></div>
+        <div class="summary-card atrasado"><div class="summary-label">Atrasado</div><div class="summary-value">${formatarValor(atrasado)}</div></div>
+      `;
+
+        // Alertas
+        const alertas = [];
+        if (atrasado > 0)
+          alertas.push({
+            tipo: "urgente",
+            icon: "⚠️",
+            titulo: "Parcelas Atrasadas!",
+            descricao: `Você tem ${todasParcelas.filter((p) => p.status === "atrasado").length} parcela(s) vencida(s).`,
+            meta: `Total: ${formatarValor(atrasado)}`,
+          });
+        const vencendo = todasParcelas.filter(
+          (p) =>
+            p.status !== "pago" &&
+            new Date(p.vencimento) <= new Date(Date.now() + 7 * 86400000) &&
+            p.status !== "atrasado",
+        );
+        if (vencendo.length && atrasado === 0)
+          alertas.push({
+            tipo: "atencao",
+            icon: "🔔",
+            titulo: "Parcelas Vencendo em Breve",
+            descricao: `${vencendo.length} parcela(s) vence(m) nos próximos 7 dias.`,
+            meta: `Próximo vencimento: ${formatarData(vencendo[0].vencimento)}`,
+          });
+        const aulasHoje = todasAulas.filter(
+          (a) =>
+            new Date(a.data + "T00:00:00").toDateString() ===
+            new Date().toDateString(),
+        );
+        if (aulasHoje.length)
+          alertas.push({
+            tipo: "info",
+            icon: "📅",
+            titulo: `Você tem ${aulasHoje.length} aula(s) hoje!`,
+            descricao: "Não esqueça de comparecer.",
+            meta: "Próxima aula",
+          });
+        if (!atrasado && !vencendo.length && !aulasHoje.length)
+          alertas.push({
+            tipo: "sucesso",
+            icon: "✅",
+            titulo: "Parabéns!",
+            descricao: "Tudo em dia! Continue assim.",
+            meta: "",
+          });
+        document.getElementById("alertasContainer").innerHTML =
+          alertas
+            .map(
+              (a) =>
+                `<div class="alert-card ${a.tipo}"><div class="alert-header"><div class="alert-icon">${a.icon}</div><div class="alert-content"><div class="alert-titulo">${a.titulo}</div><div class="alert-descricao">${a.descricao}</div><div class="alert-meta">${a.meta}</div></div></div></div>`,
+            )
+            .join("") ||
+          '<div class="empty-state">Nenhum alerta no momento</div>';
+
+        // Parcelas vencendo (destaque)
+        const vencendoFiltradas = vencendo.slice(0, 5);
+        document.getElementById("parcelasVencendoContainer").innerHTML =
+          vencendoFiltradas
+            .map(
+              (p) =>
+                `<div class="parcela-item ${p.status}"><div class="parcela-header"><div><div class="parcela-numero">Parcela ${p.numero}</div><div class="parcela-valor">${formatarValor(p.valor)}</div></div><span class="parcela-status ${p.status}">${p.status.toUpperCase()}</span></div><div class="parcela-footer"><span>Venc: ${formatarData(p.vencimento)}</span></div></div>`,
+            )
+            .join("") || '<div class="empty-state">Nada vencendo</div>';
+
+        // Próximas aulas
+        const futuras = todasAulas
+          .filter((a) => new Date(a.data + "T00:00:00") >= new Date())
+          .slice(0, 3);
+        document.getElementById("proximasAulasContainer").innerHTML =
+          futuras
+            .map(
+              (a) => `
+        <div class="agenda-item"><div class="agenda-item-header"><div class="agenda-item-date-icon"><i class="fas fa-calendar"></i></div><div class="agenda-item-info"><div class="agenda-item-date">${obterDiaSemana(a.data).toUpperCase()} - ${formatarData(a.data)}</div><div class="agenda-item-title">${a.status || "Aula"}</div></div></div><div class="agenda-item-footer"><div class="agenda-item-time"><i class="fas fa-clock"></i> ${formatarHora(a.horario)}</div></div></div>
+      `,
+            )
+            .join("") || '<div class="empty-state">Nenhuma aula futura</div>';
+
+        // Agenda completa com paginação
+        renderizarAgendaCompleta();
+        // Parcelas completas com paginação
+        renderizarParcelasCompletas();
+      }
+
+      function renderizarAgendaCompleta() {
+        let aulasFiltradas = filtrarAulasPorPeriodo(
+          todasAulas,
+          filtroAtualAgenda,
+        );
+        const total = aulasFiltradas.length;
+        const start = (agendaPaginaAtual - 1) * agendaItensPorPagina;
+        const pagina = aulasFiltradas.slice(
+          start,
+          start + agendaItensPorPagina,
+        );
+        document.getElementById("agendaFullContainer").innerHTML =
+          pagina
+            .map((a) => {
+              const ehHoje =
+                new Date(a.data + "T00:00:00").toDateString() ===
+                new Date().toDateString();
+              const ehSemana =
+                !ehHoje &&
+                new Date(a.data + "T00:00:00") <=
+                  new Date(Date.now() + 7 * 86400000);
+              let badge = "";
+              if (ehHoje) badge = '<span class="agenda-badge hoje">HOJE</span>';
+              else if (ehSemana)
+                badge = '<span class="agenda-badge semana">SEMANA</span>';
+              return `<div class="agenda-item ${ehHoje ? "hoje" : ehSemana ? "semana" : ""}">${badge}<div class="agenda-item-header"><div class="agenda-item-date-icon"><i class="fas fa-calendar"></i></div><div class="agenda-item-info"><div class="agenda-item-date">${obterDiaSemana(a.data).toUpperCase()} - ${formatarData(a.data)}</div><div class="agenda-item-title">${a.status || "Aula"}</div></div></div><div class="agenda-item-footer"><div class="agenda-item-time"><i class="fas fa-clock"></i> ${formatarHora(a.horario)}</div>${a.observacoes ? `<div class="agenda-item-observacoes">${a.observacoes}</div>` : ""}</div></div>`;
+            })
+            .join("") ||
+          '<div class="empty-state">Nenhuma aula neste período</div>';
+        const pagDiv = document.getElementById("agendaPagination");
+        if (total > agendaItensPorPagina) {
+          const totalPages = Math.ceil(total / agendaItensPorPagina);
+          pagDiv.style.display = "flex";
+          pagDiv.innerHTML = `
+          <button class="pagination-btn" onclick="mudarPaginaAgenda(-1)" ${agendaPaginaAtual === 1 ? "disabled" : ""}>Anterior</button>
+          <span class="pagination-info">Página ${agendaPaginaAtual} de ${totalPages}</span>
+          <button class="pagination-btn" onclick="mudarPaginaAgenda(1)" ${agendaPaginaAtual === totalPages ? "disabled" : ""}>Próximo</button>
+        `;
+        } else pagDiv.style.display = "none";
+      }
+
+      function renderizarParcelasCompletas() {
+        const total = todasParcelas.length;
+        const start = (parcelasPaginaAtual - 1) * parcelasItensPorPagina;
+        const pagina = todasParcelas.slice(
+          start,
+          start + parcelasItensPorPagina,
+        );
+        document.getElementById("parcelasFullContainer").innerHTML =
+          pagina
+            .map(
+              (p) => `
+        <div class="parcela-item ${p.status}"><div class="parcela-header"><div><div class="parcela-numero">Parcela ${p.numero}</div><div class="parcela-valor">${formatarValor(p.valor)}</div></div><span class="parcela-status ${p.status}">${p.status.toUpperCase()}</span></div><div class="parcela-footer"><span>Venc: ${formatarData(p.vencimento)}</span>${p.data_pagamento ? `<span>Pago: ${formatarData(p.data_pagamento)}</span>` : ""}</div></div>
+      `,
+            )
+            .join("") || '<div class="empty-state">Nenhuma parcela</div>';
+        const pagDiv = document.getElementById("parcelasPagination");
+        if (total > parcelasItensPorPagina) {
+          const totalPages = Math.ceil(total / parcelasItensPorPagina);
+          pagDiv.style.display = "flex";
+          pagDiv.innerHTML = `
+          <button class="pagination-btn" onclick="mudarPaginaParcelas(-1)" ${parcelasPaginaAtual === 1 ? "disabled" : ""}>Anterior</button>
+          <span class="pagination-info">Página ${parcelasPaginaAtual} de ${totalPages}</span>
+          <button class="pagination-btn" onclick="mudarPaginaParcelas(1)" ${parcelasPaginaAtual === totalPages ? "disabled" : ""}>Próximo</button>
+        `;
+        } else pagDiv.style.display = "none";
+      }
+
+      function filtrarAulasPorPeriodo(aulas, tipo) {
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+        if (tipo === "hoje")
+          return aulas.filter(
+            (a) =>
+              new Date(a.data + "T00:00:00").toDateString() ===
+              hoje.toDateString(),
+          );
+        if (tipo === "semana")
+          return aulas.filter((a) => {
+            const d = new Date(a.data + "T00:00:00");
+            return d >= hoje && d <= new Date(hoje.getTime() + 7 * 86400000);
+          });
+        if (tipo === "mes")
+          return aulas.filter((a) => {
+            const d = new Date(a.data + "T00:00:00");
+            return (
+              d.getMonth() === hoje.getMonth() &&
+              d.getFullYear() === hoje.getFullYear()
+            );
+          });
+        if (tipo === "personalizado") {
+          const inicio = document.getElementById("dataInicial").value;
+          const fim = document.getElementById("dataFinal").value;
+          if (inicio && fim)
+            return aulas.filter((a) => {
+              const d = new Date(a.data + "T00:00:00");
+              return (
+                d >= new Date(inicio + "T00:00:00") &&
+                d <= new Date(fim + "T23:59:59")
+              );
+            });
+        }
+        return aulas;
+      }
+
+      function filtrarAgenda(tipo, btn) {
+        filtroAtualAgenda = tipo;
+        agendaPaginaAtual = 1;
+        document
+          .querySelectorAll(".filtro-btn")
+          .forEach((b) => b.classList.remove("active"));
+        if (btn) btn.classList.add("active");
+        renderizarAgendaCompleta();
+      }
+
+      function abrirFiltroPersonalizado() {
+        document
+          .getElementById("modalFiltroPersonalizado")
+          .classList.add("show");
+      }
+      function fecharFiltroPersonalizado() {
+        document
+          .getElementById("modalFiltroPersonalizado")
+          .classList.remove("show");
+      }
+      function aplicarFiltroPersonalizado() {
+        const inicio = document.getElementById("dataInicial").value;
+        const fim = document.getElementById("dataFinal").value;
+        if (!inicio || !fim) {
+          mostrarToast("Selecione ambas as datas", "error");
+          return;
+        }
+        if (new Date(inicio) > new Date(fim)) {
+          mostrarToast("Data inicial maior que final", "error");
+          return;
+        }
+        filtroAtualAgenda = "personalizado";
+        agendaPaginaAtual = 1;
+        document
+          .querySelectorAll(".filtro-btn")
+          .forEach((b) => b.classList.remove("active"));
+        document.querySelectorAll(".filtro-btn")[3].classList.add("active");
+        renderizarAgendaCompleta();
+        fecharFiltroPersonalizado();
+        mostrarToast("Filtro aplicado", "success");
+      }
+
+      function mudarPaginaAgenda(delta) {
+        agendaPaginaAtual += delta;
+        renderizarAgendaCompleta();
+      }
+      function mudarPaginaParcelas(delta) {
+        parcelasPaginaAtual += delta;
+        renderizarParcelasCompletas();
+      }
+
+      function mudarSecao(secao, btn) {
+        document
+          .querySelectorAll(".content-section")
+          .forEach((s) => s.classList.remove("active"));
+        document.getElementById(secao + "Section").classList.add("active");
+        document
+          .querySelectorAll(".nav-item")
+          .forEach((n) => n.classList.remove("active"));
+        btn.classList.add("active");
+      }
+
+      function recarregarDados() {
+        carregarDados();
+        mostrarToast("Dados atualizados!", "success");
+      }
+
+      function iniciarRealtime() {
+        if (realtimeSubscription) realtimeSubscription.unsubscribe();
+        realtimeSubscription = supabaseClient
+          .channel(`aluno:${aluno.id}`)
+          .on(
+            "postgres_changes",
+            {
+              event: "*",
+              schema: "public",
+              table: "aulas",
+              filter: `aluno_id=eq.${aluno.id}`,
+            },
+            () => recarregarDados(),
+          )
+          .on(
+            "postgres_changes",
+            {
+              event: "*",
+              schema: "public",
+              table: "parcelas",
+              filter: `aluno_id=eq.${aluno.id}`,
+            },
+            () => recarregarDados(),
+          )
+          .subscribe();
+      }
+
+      function exportarAgendaPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(16);
+        doc.text(`Agenda - ${aluno.nome}`, 14, 20);
+        doc.setFontSize(10);
+        doc.text(`Gerado em: ${new Date().toLocaleString()}`, 14, 28);
+        const aulasExport = filtrarAulasPorPeriodo(
+          todasAulas,
+          filtroAtualAgenda,
+        );
+        const body = aulasExport.map((a) => [
+          formatarData(a.data),
+          obterDiaSemana(a.data),
+          formatarHora(a.horario),
+          a.status || "Aula",
+          a.observacoes || "",
+        ]);
+        doc.autoTable({
+          head: [["Data", "Dia", "Horário", "Status", "Observações"]],
+          body: body,
+          startY: 35,
+          theme: "striped",
+        });
+        doc.save(
+          `agenda_${aluno.nome}_${new Date().toISOString().split("T")[0]}.pdf`,
+        );
+        mostrarToast("PDF gerado", "success");
+      }
+
+      function exportarExtratoCSV() {
+        const dados = todasParcelas.map((p) => [
+          p.numero,
+          formatarValor(p.valor),
+          formatarData(p.vencimento),
+          p.status.toUpperCase(),
+          p.data_pagamento ? formatarData(p.data_pagamento) : "-",
+        ]);
+        const csv = [
+          ["Parcela", "Valor", "Vencimento", "Status", "Data Pagamento"],
+          ...dados,
+        ]
+          .map((row) => row.join(";"))
+          .join("\n");
+        const blob = new Blob(["\uFEFF" + csv], {
+          type: "text/csv;charset=utf-8;",
+        });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `extrato_${aluno.nome}_${new Date().toISOString().split("T")[0]}.csv`;
+        link.click();
+        mostrarToast("CSV exportado", "success");
+      }
+
+      // UTILITÁRIOS
+      function formatarCPF(cpf) {
+        return cpf
+          .replace(/\D/g, "")
+          .replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+      }
+      function formatarData(data) {
+        return data
+          ? new Date(data + "T00:00:00").toLocaleDateString("pt-BR")
+          : "---";
+      }
+      function formatarHora(horario) {
+        if (!horario) return "--:--";
+        return horario.split(":").slice(0, 2).join(":");
+      }
+      function formatarValor(valor) {
+        return new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }).format(valor || 0);
+      }
+      function obterDiaSemana(data) {
+        const dias = [
+          "Domingo",
+          "Segunda",
+          "Terça",
+          "Quarta",
+          "Quinta",
+          "Sexta",
+          "Sábado",
+        ];
+        return dias[new Date(data + "T00:00:00").getDay()];
+      }
+      function mostrarToast(msg, tipo = "info") {
+        const t = document.createElement("div");
+        t.className = `toast ${tipo}`;
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+      }
+      function mostrarLoading(show) {
+        document
+          .getElementById("loadingOverlay")
+          .classList[show ? "add" : "remove"]("show");
+      }
+
+      // FUNÇÃO DE LOGIN CORRIGIDA
+      async function handleLogin(e) {
+        e.preventDefault();
+        const cpfInput = document.getElementById("cpfInput").value;
+        const cpfNumeros = cpfInput.replace(/\D/g, "");
+        const dataNasc = document.getElementById("dataNascimentoInput").value;
+        const btn = document.getElementById("loginBtn");
+        const err = document.getElementById("loginError");
+
+        if (cpfNumeros.length !== 11 || !dataNasc) {
+          mostrarToast(
+            "Preencha CPF (11 dígitos) e data de nascimento",
+            "error",
+          );
+          return;
+        }
+
+        err.classList.remove("show");
+        btn.disabled = true;
+        document.getElementById("loginSpinner").style.display = "block";
+        document.getElementById("loginBtnText").textContent = "Entrando...";
+        mostrarLoading(true);
+
+        try {
+          if (!supabaseClient) {
+            supabaseClient = window.supabase.createClient(
+              SUPABASE_URL,
+              SUPABASE_ANON_KEY,
+            );
+          }
+
+          const cpfMascara = formatarCPF(cpfNumeros);
+          console.log("🔍 Tentativa 1 - CPF com máscara:", cpfMascara);
+          let { data, error } = await supabaseClient
+            .from("alunos")
+            .select("*")
+            .eq("cpf", cpfMascara)
+            .eq("nascimento", dataNasc);
+          console.log("✅ Resultado 1:", data, error);
+
+          if (!data || data.length === 0) {
+            console.log("🔍 Tentativa 2 - CPF sem máscara:", cpfNumeros);
+            ({ data, error } = await supabaseClient
+              .from("alunos")
+              .select("*")
+              .eq("cpf", cpfNumeros)
+              .eq("nascimento", dataNasc));
+            console.log("✅ Resultado 2:", data, error);
+          }
+
+          if (!data || data.length === 0) {
+            const dataBR = new Date(dataNasc).toLocaleDateString("pt-BR");
+            console.log("🔍 Tentativa 3 - Data BR:", dataBR);
+            ({ data, error } = await supabaseClient
+              .from("alunos")
+              .select("*")
+              .eq("cpf", cpfMascara)
+              .eq("nascimento", dataBR));
+            if (!data || data.length === 0) {
+              ({ data, error } = await supabaseClient
+                .from("alunos")
+                .select("*")
+                .eq("cpf", cpfNumeros)
+                .eq("nascimento", dataBR));
+            }
+            console.log("✅ Resultado 3:", data, error);
+          }
+
+          if (error) throw error;
+
+          if (!data || data.length === 0) {
+            throw new Error("CPF ou data de nascimento inválidos");
+          }
+
+          aluno = data[0];
+          localStorage.setItem("alunoLogado", JSON.stringify(aluno));
+          document.getElementById("loginScreen").style.display = "none";
+          document.getElementById("portalScreen").classList.add("show");
+          document.getElementById("bottomNav").style.display = "flex";
+          await carregarDados();
+          iniciarRealtime();
+          mostrarToast("Bem-vindo(a)!", "success");
+        } catch (e) {
+          console.error("❌ Erro no login:", e);
+          err.textContent = e.message;
+          err.classList.add("show");
+        } finally {
+          btn.disabled = false;
+          document.getElementById("loginSpinner").style.display = "none";
+          document.getElementById("loginBtnText").textContent = "Entrar";
+          mostrarLoading(false);
+        }
+      }
+
+      function handleLogout() {
+        if (confirm("Sair do portal?")) {
+          localStorage.removeItem("alunoLogado");
+          location.reload();
+        }
+      }
+
+      window.init = init;
+      window.handleLogin = handleLogin;
+      window.handleLogout = handleLogout;
+      window.filtrarAgenda = filtrarAgenda;
+      window.abrirFiltroPersonalizado = abrirFiltroPersonalizado;
+      window.fecharFiltroPersonalizado = fecharFiltroPersonalizado;
+      window.aplicarFiltroPersonalizado = aplicarFiltroPersonalizado;
+      window.mudarSecao = mudarSecao;
+      window.recarregarDados = recarregarDados;
+      window.exportarAgendaPDF = exportarAgendaPDF;
+      window.exportarExtratoCSV = exportarExtratoCSV;
+      window.mudarPaginaAgenda = mudarPaginaAgenda;
+      window.mudarPaginaParcelas = mudarPaginaParcelas;
+
+      init();
+    </script>
+  </body>
+</html>

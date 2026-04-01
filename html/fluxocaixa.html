@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fluxo de Caixa | Estúdio Rafaela Lisboa</title>
+
+    <!-- Fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Ícones -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Bibliotecas para exportação -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <!-- CSS externo -->
+    <link rel="stylesheet" href="../css/fluxocaixa.css" />
+  </head>
+  <body>
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Calculando fluxo de caixa...</p>
+    </div>
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-content">
+        <div class="logo-area">
+          <a href="../index.html" class="logo-icon"
+            ><i class="fas fa-spa"></i
+          ></a>
+          <div class="logo-text">
+            <h1>ESTÚDIO RAFAELA LISBOA</h1>
+            <span>Fluxo de Caixa</span>
+          </div>
+        </div>
+        <div class="user-area">
+          <div class="user-info">
+            <div class="user-name" id="userName">Carregando...</div>
+            <div class="user-role" id="userRole">Financeiro</div>
+          </div>
+          <div class="user-avatar" id="userAvatar">?</div>
+          <button
+            class="btn-icon"
+            onclick="abrirConfiguracoes()"
+            title="Configurações"
+          >
+            <i class="fas fa-sliders-h"></i>
+          </button>
+          <button class="btn-icon" onclick="fazerLogout()" title="Sair">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>Fluxo de Caixa</h1>
+          <div class="subtitle">Acompanhamento e projeção financeira</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn-outline" onclick="abrirCompararPeriodos()">
+            <i class="fas fa-chart-line"></i> Comparar
+          </button>
+          <button class="btn-outline" onclick="abrirSalvarPeriodo()">
+            <i class="fas fa-save"></i> Salvar período
+          </button>
+          <button class="btn-outline" onclick="exportarPDF()">
+            <i class="fas fa-file-pdf"></i> PDF
+          </button>
+          <button class="btn-outline" onclick="exportarExcel()">
+            <i class="fas fa-file-excel"></i> Excel
+          </button>
+        </div>
+      </div>
+
+      <!-- SELETOR DE PERÍODO -->
+      <div class="periodo-selector">
+        <div class="periodo-info">
+          <i class="fas fa-calendar-alt"></i>
+          <span class="periodo-atual" id="periodoAtual">Carregando...</span>
+          <div class="periodo-tipo">
+            <button id="btnDiario" class="active" onclick="setTipo('diario')">
+              Diário
+            </button>
+            <button id="btnSemanal" onclick="setTipo('semanal')">
+              Semanal
+            </button>
+            <button id="btnMensal" onclick="setTipo('mensal')">Mensal</button>
+          </div>
+        </div>
+        <div class="periodo-actions">
+          <button class="btn-outline" onclick="abrirSelecionarPeriodo()">
+            <i class="fas fa-calendar-alt"></i> Personalizado
+          </button>
+          <select
+            id="periodosSalvosSelect"
+            onchange="carregarPeriodoSalvo(this.value)"
+            class="periodo-salvo-select"
+          >
+            <option value="">Períodos salvos</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- PAINEL DE DIAGNÓSTICO AUTOMÁTICO -->
+      <div class="diagnostico-container" id="diagnosticoContainer"></div>
+
+      <!-- CARDS DE RESUMO (primeira linha) -->
+      <div class="stats-grid" id="resumoContainer"></div>
+
+      <!-- CARDS DE INDICADORES (segunda linha) -->
+      <div class="indicadores-grid" id="indicadoresContainer"></div>
+
+      <!-- ALERTAS AUTOMÁTICOS -->
+      <div class="alertas-container" id="alertasContainer"></div>
+
+      <!-- TOP MOVIMENTOS (maiores entradas e saídas) -->
+      <div class="top-container" id="topContainer"></div>
+
+      <!-- GRÁFICOS -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">
+              <i
+                class="fas fa-chart-line"
+                style="color: var(--verde-principal)"
+              ></i>
+              Saldo Acumulado
+            </h3>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="graficoSaldo"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">
+              <i
+                class="fas fa-chart-pie"
+                style="color: var(--roxo-celebracao)"
+              ></i>
+              Composição
+            </h3>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="graficoComposicao"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- HEATMAP (fluxo por dia da semana) -->
+      <div class="heatmap-container" id="heatmapContainer"></div>
+
+      <!-- PROJEÇÃO DE SALDO (30, 90, 360 dias) -->
+      <div class="projecao-container">
+        <div class="projecao-header">
+          <h3 class="projecao-titulo">
+            <i class="fas fa-chart-line" style="color: var(--azul-info)"></i>
+            Projeção de Saldo
+          </h3>
+          <div style="display: flex; gap: 0.5rem">
+            <button class="btn-outline" onclick="setHorizonte(30)">
+              30 dias
+            </button>
+            <button class="btn-outline" onclick="setHorizonte(90)">
+              90 dias
+            </button>
+            <button class="btn-outline" onclick="setHorizonte(360)">
+              360 dias
+            </button>
+            <button class="btn-outline" onclick="exportarProjecaoPDF()">
+              <i class="fas fa-file-pdf"></i> Exportar
+            </button>
+          </div>
+        </div>
+        <div class="chart-wrapper" style="height: 250px">
+          <canvas id="graficoProjecao"></canvas>
+        </div>
+        <div
+          style="margin-top: 1rem; font-size: 0.85rem; display: flex; gap: 1rem"
+        >
+          <span
+            ><span
+              style="
+                display: inline-block;
+                width: 12px;
+                height: 12px;
+                background: var(--vermelho-urgente);
+              "
+            ></span>
+            Menor saldo previsto: <span id="menorSaldo"></span
+          ></span>
+          <span
+            ><span
+              style="
+                display: inline-block;
+                width: 12px;
+                height: 12px;
+                background: var(--laranja-atencao);
+              "
+            ></span>
+            Maior saída: <span id="maiorSaida"></span
+          ></span>
+        </div>
+      </div>
+
+      <!-- FLUXO POR CATEGORIA (simplificado) -->
+      <div class="compact-card" style="margin-bottom: 1.5rem">
+        <div class="compact-title">Fluxo por Categoria</div>
+        <div id="fluxoCategoria"></div>
+      </div>
+
+      <!-- FILTROS POR TIPO E BUSCA -->
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 1rem;
+          margin-bottom: 1rem;
+        "
+      >
+        <div class="filtros-tipo">
+          <span class="filter-label">Mostrar:</span>
+          <label class="filtro-check"
+            ><input
+              type="checkbox"
+              id="filtroMensalidades"
+              checked
+              onchange="filtrarTabela()"
+            />
+            Mensalidades</label
+          >
+          <label class="filtro-check"
+            ><input
+              type="checkbox"
+              id="filtroOutras"
+              checked
+              onchange="filtrarTabela()"
+            />
+            Outras Receitas</label
+          >
+          <label class="filtro-check"
+            ><input
+              type="checkbox"
+              id="filtroDespesas"
+              checked
+              onchange="filtrarTabela()"
+            />
+            Despesas</label
+          >
+        </div>
+        <div class="busca-container">
+          <input
+            type="text"
+            id="buscaTabela"
+            placeholder="Buscar por descrição ou categoria..."
+            oninput="filtrarTabela()"
+            class="form-control"
+            style="min-width: 200px"
+          />
+        </div>
+      </div>
+
+      <!-- TABELA DE MOVIMENTAÇÕES -->
+      <div class="table-container">
+        <div class="table-header">
+          <h3 class="table-title">Movimentações do Período</h3>
+        </div>
+        <div class="table-responsive">
+          <table id="tabelaMovimentacoes">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Descrição</th>
+                <th>Categoria</th>
+                <th>Valor</th>
+                <th>Tipo</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyMovimentacoes"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <!-- MODAL SELECIONAR PERÍODO -->
+    <div class="modal" id="modalSelecionarPeriodo">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h3 class="modal-title">Selecionar Período</h3>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalSelecionarPeriodo')"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Data Início</label
+            ><input type="date" class="form-control" id="periodoInicio" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Data Fim</label
+            ><input type="date" class="form-control" id="periodoFim" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalSelecionarPeriodo')"
+          >
+            Cancelar</button
+          ><button class="btn-primary" onclick="aplicarPeriodoPersonalizado()">
+            Aplicar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL CONFIGURAÇÕES (limites saúde caixa) -->
+    <div class="modal" id="modalConfiguracoes">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h3 class="modal-title">Configurações de Indicadores</h3>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalConfiguracoes')"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label"
+              >Limite baixo (meses) - Runway vermelho</label
+            ><input
+              type="number"
+              step="0.1"
+              id="limiteBaixo"
+              class="form-control"
+              value="2"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label"
+              >Limite médio (meses) - Runway amarelo</label
+            ><input
+              type="number"
+              step="0.1"
+              id="limiteMedio"
+              class="form-control"
+              value="3"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalConfiguracoes')"
+          >
+            Cancelar</button
+          ><button class="btn-primary" onclick="salvarConfiguracoes()">
+            Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL SALVAR PERÍODO -->
+    <div class="modal" id="modalSalvarPeriodo">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h3 class="modal-title">Salvar Período Atual</h3>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalSalvarPeriodo')"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Nome do período</label
+            ><input
+              type="text"
+              id="nomePeriodoSalvo"
+              class="form-control"
+              placeholder="Ex: Janeiro 2025"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalSalvarPeriodo')"
+          >
+            Cancelar</button
+          ><button class="btn-primary" onclick="salvarPeriodoAtual()">
+            Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL COMPARAR PERÍODOS -->
+    <div class="modal" id="modalComparar">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Comparar com Período Anterior</h3>
+          <button class="close-modal" onclick="fecharModal('modalComparar')">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body" id="compararConteudo"></div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalComparar')">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DETALHES TRANSAÇÃO -->
+    <div class="modal" id="modalDetalhes">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h3 class="modal-title">Detalhes da Transação</h3>
+          <button class="close-modal" onclick="fecharModal('modalDetalhes')">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body" id="detalhesConteudo"></div>
+      </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- JavaScript externo -->
+    <script src="../js/fluxocaixa.js"></script>
+  </body>
+</html>
