@@ -1,0 +1,1520 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agenda Inteligente</title>
+
+    <!-- Fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Ícones -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <!-- Bibliotecas para PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- CSS externo -->
+    <link rel="stylesheet" href="../css/agenda.css" />
+  </head>
+  <body>
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Carregando agenda inteligente...</p>
+    </div>
+
+    <header class="header">
+      <div class="header-content">
+        <div class="logo-area">
+          <a href="../index.html" class="logo-icon"
+            ><i class="fas fa-spa"></i
+          ></a>
+          <div class="logo-text">
+            <h1>ESTÚDIO DE PILATES - RAFAELA LISBOA</h1>
+            <span>Agenda Inteligente</span>
+          </div>
+        </div>
+
+        <div class="user-area">
+          <div class="welcome-message">
+            <i class="fas fa-smile"></i> Tenha um ótimo dia!
+          </div>
+          <div class="notificacoes-area">
+            <button
+              class="notificacoes-btn"
+              onclick="toggleNotificacoes()"
+              title="Ver notificações"
+            >
+              <i class="fas fa-bell"></i>
+              <span class="notificacoes-badge" id="notificacoesBadge">0</span>
+            </button>
+            <div class="notificacoes-dropdown" id="notificacoesDropdown">
+              <div id="notificacoesLista"></div>
+            </div>
+          </div>
+
+          <div class="user-info">
+            <div class="user-name" id="userName">Carregando...</div>
+            <div class="user-role" id="userRole">Instrutor</div>
+          </div>
+          <div class="user-avatar" id="userAvatar">?</div>
+          <button class="btn-icon" onclick="fazerLogout()" title="Sair">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1>Agenda Inteligente</h1>
+          <div class="subtitle">
+            Gestão profissional de horários e capacidade
+          </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem">
+          <button
+            class="btn-outline"
+            onclick="exportarAgendaDiaPDF()"
+            title="Exportar agenda do dia em PDF"
+          >
+            <i class="fas fa-file-pdf"></i> Agenda do Dia
+          </button>
+          <button
+            class="btn-outline"
+            onclick="exportarAgendaSemanaPDF()"
+            title="Exportar agenda da semana em PDF"
+          >
+            <i class="fas fa-calendar-week"></i> Agenda da Semana
+          </button>
+          <button
+            class="btn-outline"
+            onclick="forcarRefresh()"
+            title="Atualizar dados com o banco"
+          >
+            <i class="fas fa-sync-alt"></i> Atualizar Agora
+          </button>
+          <button
+            class="btn-primary"
+            onclick="abrirModalNovoAgendamento()"
+            title="Criar novo agendamento (plano)"
+          >
+            <i class="fas fa-calendar-plus"></i> Novo Agendamento
+          </button>
+        </div>
+      </div>
+
+      <div class="filters-section">
+        <div class="filters-title">
+          <i class="fas fa-filter"></i> Filtros de Busca
+        </div>
+        <div class="filters-grid">
+          <div class="filter-group">
+            <label class="filter-label">Aluno</label>
+            <select
+              class="filter-input"
+              id="filtroAluno"
+              onchange="aplicarFiltros()"
+            >
+              <option value="">Todos os alunos</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Status</label>
+            <select
+              class="filter-input"
+              id="filtroStatus"
+              onchange="aplicarFiltros()"
+            >
+              <option value="">Todos os status</option>
+              <option value="confirmada">Confirmadas</option>
+              <option value="presente">Presente</option>
+              <option value="ausente">Ausente</option>
+              <option value="justificada">Justificada</option>
+              <option value="reagendada">Reagendada</option>
+              <option value="cancelada">Cancelada</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Horário</label>
+            <select
+              class="filter-input"
+              id="filtroHorario"
+              onchange="aplicarFiltros()"
+            >
+              <option value="">Todos os horários</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Período</label>
+            <select
+              class="filter-input"
+              id="filtroPeriodo"
+              onchange="aplicarFiltros()"
+            >
+              <option value="">Todos</option>
+              <option value="manha">Manhã (08h-12h)</option>
+              <option value="tarde">Tarde (13h30-20h30)</option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-actions">
+          <button class="btn-outline" onclick="limparFiltros()">
+            <i class="fas fa-times"></i> Limpar Filtros
+          </button>
+          <button class="btn-primary" onclick="aplicarFiltros()">
+            <i class="fas fa-search"></i> Buscar
+          </button>
+        </div>
+      </div>
+
+      <div class="view-toggle">
+        <button class="view-btn active" onclick="mudarView('dia')">Dia</button>
+        <button class="view-btn" onclick="mudarView('semana')">Semana</button>
+        <button class="view-btn" onclick="mudarView('mes')">Mês</button>
+      </div>
+
+      <div class="timeline-legend">
+        <div class="legend-item">
+          <div class="legend-color normal"></div>
+          <span>Normal (≤3 alunos)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color alerta"></div>
+          <span>Alerta (4 alunos - 80%)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color critico"></div>
+          <span>Crítico (5 alunos - Lotado)</span>
+        </div>
+        <div class="legend-item">
+          <div
+            class="legend-color"
+            style="background: var(--roxo-celebracao)"
+          ></div>
+          <span>Feriado/Evento</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: var(--azul-info)"></div>
+          <span>Reagendada</span>
+        </div>
+      </div>
+
+      <div id="timelineSection" class="timeline-section">
+        <div class="timeline-header">
+          <div>
+            <div class="timeline-title">Linha do Tempo do Dia</div>
+            <div class="timeline-date" id="timelineDate"></div>
+          </div>
+          <div class="timeline-nav">
+            <button class="btn-outline" onclick="navegarDia('anterior')">
+              <i class="fas fa-chevron-left"></i> Anterior
+            </button>
+            <button class="btn-hoje" onclick="irParaHoje()">
+              <i class="fas fa-calendar-day"></i> Hoje
+            </button>
+            <button class="btn-outline" onclick="navegarDia('proximo')">
+              Próximo <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+        <div class="timeline-horizontal" id="timelineHorizontal">
+          <div style="text-align: center; padding: 2rem; width: 100%">
+            Carregando aulas...
+          </div>
+        </div>
+      </div>
+
+      <div id="weekSection" class="week-section">
+        <div class="week-header">
+          <div class="week-title">Agenda Semanal</div>
+          <div class="week-nav">
+            <button class="btn-outline" onclick="navegarSemana('anterior')">
+              <i class="fas fa-chevron-left"></i> Semana Anterior
+            </button>
+            <button class="btn-hoje" onclick="irParaHoje()">
+              <i class="fas fa-calendar-day"></i> Hoje
+            </button>
+            <button class="btn-outline" onclick="navegarSemana('proximo')">
+              Próxima Semana <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+        <div id="weekTableContainer"></div>
+      </div>
+
+      <div id="monthSection" class="month-section">
+        <div class="month-header">
+          <div class="month-title" id="monthTitle"></div>
+          <div class="week-nav">
+            <button class="btn-outline" onclick="navegarMes('anterior')">
+              <i class="fas fa-chevron-left"></i> Mês Anterior
+            </button>
+            <button class="btn-hoje" onclick="irParaHoje()">
+              <i class="fas fa-calendar-day"></i> Hoje
+            </button>
+            <button class="btn-outline" onclick="navegarMes('proximo')">
+              Próximo Mês <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+        <div id="monthGrid" class="month-grid"></div>
+      </div>
+
+      <div class="espera-section">
+        <div class="espera-header">
+          <div class="espera-title">
+            <i class="fas fa-clock"></i> Lista de Espera
+          </div>
+          <div class="espera-header-actions">
+            <span class="espera-count" id="esperaCount">0</span>
+            <button
+              class="btn-outline"
+              onclick="abrirModalNovaEspera()"
+              title="Adicionar aluno à lista de espera"
+            >
+              <i class="fas fa-plus"></i> Novo
+            </button>
+          </div>
+        </div>
+        <div class="espera-grid" id="esperaGrid">
+          <div style="text-align: center; padding: 2rem">
+            Carregando lista de espera...
+          </div>
+        </div>
+      </div>
+
+      <div class="relatorios-section">
+        <div class="relatorios-header">
+          <div class="relatorios-title">
+            <i class="fas fa-chart-pie"></i> Relatórios Inteligentes
+          </div>
+          <button class="btn-outline" onclick="atualizarRelatorios()">
+            <i class="fas fa-sync-alt"></i> Atualizar
+          </button>
+        </div>
+        <div class="relatorios-grid" id="relatoriosGrid"></div>
+      </div>
+
+      <div class="disponibilidade-section">
+        <div class="disponibilidade-header">
+          <div class="disponibilidade-title">
+            <i class="fas fa-clock"></i> Consultar Disponibilidade
+          </div>
+          <div class="disponibilidade-filtros">
+            <input
+              type="date"
+              class="form-control"
+              id="disponibilidadeData"
+              value=""
+              style="width: 160px"
+              onchange="carregarDisponibilidade()"
+            />
+            <select
+              class="form-select"
+              id="disponibilidadeHorario"
+              style="width: 120px"
+              onchange="carregarDisponibilidade()"
+            >
+              <option value="">Todos</option>
+              <option value="08:00">08:00</option>
+              <option value="09:00">09:00</option>
+              <option value="10:00">10:00</option>
+              <option value="11:00">11:00</option>
+              <option value="13:30">13:30</option>
+              <option value="14:30">14:30</option>
+              <option value="15:30">15:30</option>
+              <option value="16:30">16:30</option>
+              <option value="17:30">17:30</option>
+              <option value="18:30">18:30</option>
+              <option value="19:30">19:30</option>
+              <option value="20:30">20:30</option>
+            </select>
+            <button class="btn-outline" onclick="carregarDisponibilidade()">
+              <i class="fas fa-search"></i> Buscar
+            </button>
+          </div>
+        </div>
+        <div id="disponibilidadeGrid" class="disponibilidade-grid"></div>
+      </div>
+    </main>
+
+    <div class="modal" id="modalNovoAgendamento">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">
+            <i class="fas fa-calendar-plus"></i>
+            <span id="modalAgendamentoTitulo">Novo Agendamento</span>
+          </h2>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalNovoAgendamento')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="dossie-section">
+            <h3 class="section-title"><i class="fas fa-user"></i> Aluno</h3>
+            <div class="form-group">
+              <div class="aluno-search-container">
+                <input
+                  type="text"
+                  class="aluno-search-input"
+                  id="alunoSearchInput"
+                  placeholder="Digite nome ou CPF do aluno..."
+                  autocomplete="off"
+                  oninput="filtrarAlunos()"
+                />
+                <div id="alunoSearchResults" class="aluno-search-results"></div>
+              </div>
+              <input type="hidden" id="agendamentoAlunoId" />
+            </div>
+            <div
+              id="alunoInfoContainer"
+              class="aluno-foto-container"
+              style="display: none"
+            >
+              <div class="aluno-foto" id="alunoFoto">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="aluno-info-texto">
+                <div class="nome" id="alunoNomeAgendamento"></div>
+                <div class="contato">
+                  <span
+                    ><i class="fas fa-phone"></i>
+                    <span id="alunoTelefoneAgendamento"></span
+                  ></span>
+                  <span
+                    ><i class="fas fa-envelope"></i>
+                    <span id="alunoEmailAgendamento"></span
+                  ></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dossie-section">
+            <h3 class="section-title">
+              <i class="fas fa-clock"></i> Tipo de Agendamento
+            </h3>
+            <div class="plano-tipo-selector">
+              <div
+                class="plano-tipo-option"
+                id="tipoContinuo"
+                onclick="selecionarTipoAgendamento('continuo')"
+              >
+                <i class="fas fa-infinity"></i>
+                <h4>Contínuo</h4>
+                <p>Renovação automática</p>
+              </div>
+              <div
+                class="plano-tipo-option"
+                id="tipoSessoes"
+                onclick="selecionarTipoAgendamento('sessoes')"
+              >
+                <i class="fas fa-hashtag"></i>
+                <h4>Por Sessões</h4>
+                <p>Número limitado de aulas</p>
+              </div>
+              <div
+                class="plano-tipo-option"
+                id="tipoPeriodo"
+                onclick="selecionarTipoAgendamento('periodo')"
+              >
+                <i class="fas fa-calendar-alt"></i>
+                <h4>Por Período</h4>
+                <p>Datas específicas</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="dossie-section">
+            <h3 class="section-title">
+              <i class="fas fa-calendar-alt"></i> Configuração do Agendamento
+            </h3>
+
+            <div class="form-group">
+              <label class="form-label">Plano *</label>
+              <select class="form-select" id="agendamentoPlanoId" required>
+                <option value="">Selecione um plano...</option>
+              </select>
+              <div class="form-hint">
+                Escolha o plano que será utilizado para calcular valores e
+                duração.
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Duração</label>
+              <select class="form-select" id="agendamentoDuracao">
+                <option value="30">30 minutos</option>
+                <option value="45">45 minutos</option>
+                <option value="60" selected>60 minutos</option>
+                <option value="90">90 minutos</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Dias da Semana e Horários *</label>
+              <div
+                class="dias-semana-horarios"
+                id="diasSemanaHorariosContainer"
+              >
+                <div class="dia-horario-item">
+                  <input
+                    type="checkbox"
+                    id="dia2"
+                    value="2"
+                    onchange="toggleHorarioDia(this)"
+                  />
+                  <label class="dia-label" for="dia2">Segunda</label>
+                  <input
+                    type="time"
+                    class="horario-input"
+                    id="horario2"
+                    step="300"
+                    value="09:00"
+                    disabled
+                  />
+                </div>
+                <div class="dia-horario-item">
+                  <input
+                    type="checkbox"
+                    id="dia3"
+                    value="3"
+                    onchange="toggleHorarioDia(this)"
+                  />
+                  <label class="dia-label" for="dia3">Terça</label>
+                  <input
+                    type="time"
+                    class="horario-input"
+                    id="horario3"
+                    step="300"
+                    value="09:00"
+                    disabled
+                  />
+                </div>
+                <div class="dia-horario-item">
+                  <input
+                    type="checkbox"
+                    id="dia4"
+                    value="4"
+                    onchange="toggleHorarioDia(this)"
+                  />
+                  <label class="dia-label" for="dia4">Quarta</label>
+                  <input
+                    type="time"
+                    class="horario-input"
+                    id="horario4"
+                    step="300"
+                    value="09:00"
+                    disabled
+                  />
+                </div>
+                <div class="dia-horario-item">
+                  <input
+                    type="checkbox"
+                    id="dia5"
+                    value="5"
+                    onchange="toggleHorarioDia(this)"
+                  />
+                  <label class="dia-label" for="dia5">Quinta</label>
+                  <input
+                    type="time"
+                    class="horario-input"
+                    id="horario5"
+                    step="300"
+                    value="09:00"
+                    disabled
+                  />
+                </div>
+                <div class="dia-horario-item">
+                  <input
+                    type="checkbox"
+                    id="dia6"
+                    value="6"
+                    onchange="toggleHorarioDia(this)"
+                  />
+                  <label class="dia-label" for="dia6">Sexta</label>
+                  <input
+                    type="time"
+                    class="horario-input"
+                    id="horario6"
+                    step="300"
+                    value="09:00"
+                    disabled
+                  />
+                </div>
+                <div class="dia-horario-item">
+                  <input
+                    type="checkbox"
+                    id="dia7"
+                    value="7"
+                    onchange="toggleHorarioDia(this)"
+                  />
+                  <label class="dia-label" for="dia7">Sábado</label>
+                  <input
+                    type="time"
+                    class="horario-input"
+                    id="horario7"
+                    step="300"
+                    value="09:00"
+                    disabled
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div id="camposContinuo" style="display: none">
+              <div class="form-group">
+                <label class="form-label">Data de Início *</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="agendamentoDataInicioContinuo"
+                  required
+                  onchange="calcularPrevisaoAgendamento()"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Período de Agendamento</label>
+                <select
+                  class="form-select"
+                  id="agendamentoPeriodoMeses"
+                  onchange="calcularPrevisaoAgendamento()"
+                >
+                  <option value="3">3 meses</option>
+                  <option value="6">6 meses</option>
+                  <option value="12" selected>12 meses</option>
+                  <option value="24">24 meses</option>
+                  <option value="0">Até o fim do ano</option>
+                </select>
+                <div class="form-hint">
+                  As aulas serão geradas automaticamente para este período
+                </div>
+              </div>
+            </div>
+
+            <div id="camposSessoes" style="display: none">
+              <div class="form-group">
+                <label class="form-label">Total de Sessões *</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="agendamentoTotalSessoes"
+                  min="1"
+                  max="100"
+                  value="20"
+                  onchange="calcularPrevisaoAgendamento()"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Data de Início *</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="agendamentoDataInicioSessoes"
+                  onchange="calcularPrevisaoAgendamento()"
+                />
+              </div>
+              <div class="info-box">
+                <i class="fas fa-info-circle"></i> O sistema gerará as aulas até
+                atingir o total de sessões.
+              </div>
+            </div>
+
+            <div id="camposPeriodo" style="display: none">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Data de Início *</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="agendamentoDataInicioPeriodo"
+                    onchange="calcularPrevisaoAgendamento()"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Data de Término *</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="agendamentoDataFimPeriodo"
+                    onchange="calcularPrevisaoAgendamento()"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Pausa no Plano (opcional)</label>
+              <div class="form-row">
+                <input
+                  type="date"
+                  class="form-control"
+                  id="agendamentoPausaInicio"
+                  placeholder="Início da pausa"
+                  onchange="calcularPrevisaoAgendamento()"
+                />
+                <input
+                  type="date"
+                  class="form-control"
+                  id="agendamentoPausaFim"
+                  placeholder="Fim da pausa"
+                  onchange="calcularPrevisaoAgendamento()"
+                />
+              </div>
+              <div class="form-hint">
+                Durante a pausa, as aulas não serão geradas (ex: férias,
+                atestado).
+              </div>
+            </div>
+
+            <div
+              class="info-box"
+              style="margin-top: 1rem"
+              id="previsaoAgendamentoContainer"
+            >
+              <strong>Pré-visualização do Agendamento</strong>
+              <div id="previsaoAgendamento" class="previa-aulas-plano">
+                Selecione os dados para ver a prévia.
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 1rem">
+              <label class="form-label">Observações</label>
+              <textarea
+                class="form-textarea"
+                id="agendamentoObservacoes"
+                rows="2"
+                placeholder="Observações sobre o agendamento..."
+              ></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalNovoAgendamento')"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="salvarAgendamento()">
+            <i class="fas fa-save"></i> Gerar Agendamento
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="modalNovaAula">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalNovaAulaTitle">
+            <i class="fas fa-calendar-plus"></i> Nova Aula
+          </h2>
+          <button class="close-modal" onclick="fecharModal('modalNovaAula')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="tabs">
+            <button class="tab active" onclick="mudarTab('dados', event)">
+              Dados da Aula
+            </button>
+            <button class="tab" onclick="mudarTab('lote', event)">
+              Agendamento em Lote
+            </button>
+            <button class="tab" onclick="mudarTab('aluno', event)">
+              Dados do Aluno
+            </button>
+            <button class="tab" onclick="mudarTab('documentos', event)">
+              Documentos
+            </button>
+            <button class="tab" onclick="mudarTab('evolucao', event)">
+              Evolução
+            </button>
+          </div>
+
+          <form id="formNovaAula" onsubmit="return false;">
+            <input type="hidden" id="aulaId" />
+            <input type="hidden" id="loteId" />
+            <input type="hidden" id="aulaOriginalId" />
+
+            <div class="tab-pane active" id="tabDados">
+              <div class="dossie-section">
+                <h3 class="section-title">
+                  <i class="fas fa-calendar-alt"></i> Informações da Aula
+                </h3>
+                <div class="form-grid">
+                  <div class="form-group full-width">
+                    <label class="form-label">Aluno</label>
+                    <select
+                      class="form-control"
+                      id="aulaAluno"
+                      onchange="carregarDadosAluno()"
+                    >
+                      <option value="">Selecione um aluno...</option>
+                    </select>
+                    <input type="hidden" id="aulaAlunoNome" />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Data *</label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      id="aulaData"
+                      required
+                      onchange="verificarDisponibilidade()"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Horário *</label>
+                    <input
+                      type="time"
+                      class="form-control"
+                      id="aulaHorario"
+                      required
+                      step="300"
+                      value="09:00"
+                      onchange="verificarDisponibilidade()"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Duração</label>
+                    <select class="form-select" id="aulaDuracao">
+                      <option value="30">30 minutos</option>
+                      <option value="45">45 minutos</option>
+                      <option value="60" selected>60 minutos</option>
+                      <option value="90">90 minutos</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="aulaStatus">
+                      <option value="confirmada">Confirmada</option>
+                      <option value="reagendada">Reagendada</option>
+                      <option value="cancelada">Cancelada</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Presença</label>
+                    <select class="form-select" id="aulaPresenca">
+                      <option value="">Pendente</option>
+                      <option value="presente">Presente</option>
+                      <option value="ausente">Ausente</option>
+                      <option value="justificada">Justificada</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group full-width">
+                    <label class="form-label">Foco da Aula</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="aulaFoco"
+                      placeholder="Ex: Mobilidade de quadril, Fortalecimento de core..."
+                    />
+                  </div>
+
+                  <div class="form-group full-width">
+                    <label class="form-label">Observações</label>
+                    <textarea
+                      class="form-textarea"
+                      id="aulaObservacoes"
+                      rows="2"
+                      placeholder="Observações gerais sobre a aula..."
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div
+                  id="disponibilidadeHorario"
+                  class="disponibilidade-container"
+                  style="display: none"
+                >
+                  <div class="disponibilidade-header">
+                    <i class="fas fa-clock"></i>
+                    <span>Disponibilidade do Horário</span>
+                    <span
+                      id="disponibilidadeBadge"
+                      class="disponibilidade-badge"
+                    ></span>
+                  </div>
+                  <div class="ocupacao-bar">
+                    <div
+                      id="barraOcupacao"
+                      class="ocupacao-fill"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                  <div
+                    id="disponibilidadeInfo"
+                    style="font-size: 0.85rem; margin-top: 0.5rem"
+                  ></div>
+                </div>
+
+                <div
+                  id="reagendamentoInfo"
+                  class="reagendar-actions"
+                  style="display: none"
+                >
+                  <div style="flex: 1">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Esta é uma aula reagendada</strong>
+                    <div id="aulaOriginalInfo" style="font-size: 0.8rem"></div>
+                  </div>
+                  <button
+                    type="button"
+                    class="reagendar-btn cancel"
+                    onclick="cancelarReagendamento()"
+                  >
+                    <i class="fas fa-undo"></i> Cancelar Reagendamento
+                  </button>
+                </div>
+
+                <div
+                  id="ocupacaoHorario"
+                  class="ocupacao-container"
+                  style="display: none"
+                >
+                  <div class="ocupacao-header">
+                    <span
+                      ><i class="fas fa-users"></i> Ocupação do Horário</span
+                    >
+                    <span id="contadorOcupacao"></span>
+                  </div>
+                  <div class="ocupacao-bar">
+                    <div
+                      id="barraOcupacaoAntiga"
+                      class="ocupacao-fill"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                  <div
+                    id="alertaLotacao"
+                    class="alerta-lotacao"
+                    style="display: none"
+                  >
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="alertaLotacaoTexto"></span>
+                    <button
+                      class="btn-secondary"
+                      onclick="entrarListaEspera()"
+                      style="margin-left: auto"
+                    >
+                      Lista de Espera
+                    </button>
+                  </div>
+                  <div
+                    id="alertaFeriado"
+                    class="alerta-feriado"
+                    style="display: none"
+                  >
+                    <i class="fas fa-umbrella-beach"></i>
+                    <span id="alertaFeriadoTexto"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-pane" id="tabLote">
+              <div class="dossie-section">
+                <h3 class="section-title">
+                  <i class="fas fa-layer-group"></i> Agendamento em Lote
+                </h3>
+
+                <div class="info-box">
+                  <i class="fas fa-info-circle"></i> Agende múltiplas aulas de
+                  uma vez. As aulas serão geradas automaticamente e registradas
+                  na tabela de lotes.
+                </div>
+
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label class="form-label">Total de Aulas</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="loteTotal"
+                      min="1"
+                      max="100"
+                      value="20"
+                      onchange="calcularPrevisaoLote()"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Vezes por Semana</label>
+                    <select
+                      class="form-select"
+                      id="loteVezesSemana"
+                      onchange="atualizarDiasSemanaLote()"
+                    >
+                      <option value="1">1 vez por semana</option>
+                      <option value="2" selected>2 vezes por semana</option>
+                      <option value="3">3 vezes por semana</option>
+                      <option value="4">4 vezes por semana</option>
+                      <option value="5">5 vezes por semana</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Horário Fixo *</label>
+                    <input
+                      type="time"
+                      class="form-control"
+                      id="loteHorario"
+                      required
+                      value="09:00"
+                      step="300"
+                    />
+                  </div>
+
+                  <div class="form-group full-width">
+                    <label class="form-label">Data de Início *</label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      id="loteDataInicio"
+                      required
+                      onchange="calcularPrevisaoLote()"
+                    />
+                  </div>
+
+                  <div class="form-group full-width">
+                    <label class="form-label">Dias da Semana</label>
+                    <div class="dias-semana" id="diasSemanaContainerLote"></div>
+                    <div class="form-hint">
+                      Marque os dias em que as aulas devem ocorrer
+                    </div>
+                  </div>
+
+                  <div class="form-group full-width">
+                    <label class="form-label">Pausa no Lote (Férias)</label>
+                    <div class="form-row">
+                      <input
+                        type="date"
+                        class="form-control"
+                        id="lotePausaInicio"
+                        placeholder="Início da pausa"
+                      />
+                      <input
+                        type="date"
+                        class="form-control"
+                        id="lotePausaFim"
+                        placeholder="Fim da pausa"
+                      />
+                    </div>
+                    <div class="form-hint">
+                      Deixe em branco se não houver pausa
+                    </div>
+                  </div>
+                </div>
+
+                <div class="info-box" style="margin-top: 1rem">
+                  <strong>Pré-visualização do Lote</strong>
+                  <div id="previsaoLote" class="previa-aulas">
+                    Selecione os dados para ver a prévia.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-pane" id="tabAluno">
+              <div class="dossie-section">
+                <h3 class="section-title">
+                  <i class="fas fa-user"></i> Informações do Aluno
+                </h3>
+
+                <div class="aluno-card">
+                  <div class="aluno-header">
+                    <span class="aluno-nome" id="alunoNome"
+                      >Selecione um aluno</span
+                    >
+                    <span class="status-badge" id="alunoStatusBadge">-</span>
+                  </div>
+                  <div class="aluno-info" id="alunoInfo">
+                    <span
+                      ><i class="fas fa-phone"></i>
+                      <span id="alunoTelefone">-</span></span
+                    >
+                    <span
+                      ><i class="fas fa-envelope"></i>
+                      <span id="alunoEmail">-</span></span
+                    >
+                    <span
+                      ><i class="fas fa-calendar-alt"></i>
+                      <span id="alunoPlano">-</span></span
+                    >
+                  </div>
+                </div>
+
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label class="form-label">Data de Nascimento</label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      id="alunoNascimento"
+                      readonly
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">CPF</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="alunoCPF"
+                      readonly
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Profissão</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="alunoProfissao"
+                      readonly
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Contato Emergência</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="alunoContatoEmergencia"
+                      readonly
+                    />
+                  </div>
+                </div>
+
+                <div class="form-group full-width">
+                  <label class="form-label">Observações de Saúde</label>
+                  <textarea
+                    class="form-textarea"
+                    id="alunoObservacoesSaude"
+                    rows="2"
+                    readonly
+                  ></textarea>
+                </div>
+
+                <button
+                  class="btn-outline"
+                  onclick="abrirDossieAluno()"
+                  style="width: 100%"
+                >
+                  <i class="fas fa-external-link-alt"></i> Ver Dossiê Completo
+                  do Aluno
+                </button>
+              </div>
+            </div>
+
+            <div class="tab-pane" id="tabDocumentos">
+              <div class="dossie-section">
+                <h3 class="section-title">
+                  <i class="fas fa-file-alt"></i> Documentos do Aluno
+                </h3>
+
+                <div class="info-box">
+                  <i class="fas fa-info-circle"></i> Documentos do aluno
+                  relacionados à aula
+                </div>
+
+                <div id="documentosLista" class="documentos-grid">
+                  <p style="text-align: center; color: var(--grafite-claro)">
+                    Selecione um aluno para ver os documentos
+                  </p>
+                </div>
+
+                <div class="upload-area">
+                  <input
+                    type="file"
+                    id="novoDocumento"
+                    multiple
+                    onchange="uploadDocumento(event)"
+                  />
+                  <label for="novoDocumento" class="upload-label">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>Clique para selecionar arquivos</span>
+                    <small>ou arraste e solte aqui</small>
+                  </label>
+                </div>
+
+                <div
+                  id="uploadProgress"
+                  style="display: none; margin-top: 1rem"
+                >
+                  <div
+                    style="
+                      height: 4px;
+                      background: var(--verde-pastel);
+                      border-radius: 2px;
+                      overflow: hidden;
+                    "
+                  >
+                    <div
+                      id="progressBar"
+                      style="
+                        width: 0%;
+                        height: 100%;
+                        background: var(--verde-principal);
+                        border-radius: 2px;
+                        transition: width 0.3s;
+                      "
+                    ></div>
+                  </div>
+                  <p
+                    id="progressText"
+                    style="font-size: 0.75rem; margin-top: 0.3rem"
+                  >
+                    Enviando...
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-pane" id="tabEvolucao">
+              <div class="dossie-section">
+                <h3 class="section-title">
+                  <i class="fas fa-chart-line"></i> Evolução do Aluno
+                </h3>
+
+                <div class="form-group">
+                  <label class="form-label">Registrar Nova Evolução</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="evolucaoResumo"
+                    placeholder="Resumo da evolução *"
+                    style="margin-bottom: 0.5rem"
+                  />
+                  <textarea
+                    class="form-textarea"
+                    id="evolucaoDetalhes"
+                    rows="2"
+                    placeholder="Detalhes técnicos da evolução..."
+                  ></textarea>
+                  <button
+                    class="btn-primary"
+                    onclick="salvarEvolucao()"
+                    style="margin-top: 0.5rem; width: 100%"
+                  >
+                    <i class="fas fa-save"></i> Registrar Evolução
+                  </button>
+                </div>
+
+                <div style="margin-top: 1.5rem">
+                  <h4 style="margin-bottom: 0.8rem">Histórico de Evoluções</h4>
+                  <div class="evolucao-timeline" id="evolucaoTimeline">
+                    <p style="text-align: center; color: var(--grafite-claro)">
+                      Selecione um aluno para ver o histórico
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalNovaAula')">
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="salvarAula()" id="btnSalvarAula">
+            Salvar Aula
+          </button>
+          <button
+            class="btn-primary"
+            onclick="salvarLote()"
+            id="btnSalvarLote"
+            style="display: none"
+          >
+            <i class="fas fa-layer-group"></i> Gerar Lote
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="modalDetalhesAula">
+      <div class="modal-content" style="max-width: 700px; height: auto">
+        <div class="modal-header">
+          <h2 class="modal-title">
+            <i class="fas fa-info-circle"></i> Detalhes da Aula
+          </h2>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalDetalhesAula')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div id="conteudoDetalhesAula"></div>
+
+          <div class="checkin-section" id="checkinSection">
+            <div class="checkin-box checkin">
+              <div class="checkin-label">CHECK-IN</div>
+              <div class="checkin-time" id="checkinTime">--:--</div>
+              <button
+                class="btn-success checkin-btn"
+                id="btnCheckin"
+                onclick="registrarCheckin()"
+              >
+                <i class="fas fa-sign-in-alt"></i> Agora
+              </button>
+              <div class="checkin-manual">
+                <input type="time" id="checkinManual" step="60" value="08:00" />
+                <button
+                  id="btnCheckinManual"
+                  onclick="registrarCheckinManual()"
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+            <div class="checkin-box checkout">
+              <div class="checkin-label">CHECK-OUT</div>
+              <div class="checkin-time" id="checkoutTime">--:--</div>
+              <button
+                class="btn-success checkin-btn"
+                id="btnCheckout"
+                onclick="registrarCheckout()"
+              >
+                <i class="fas fa-sign-out-alt"></i> Agora
+              </button>
+              <div class="checkin-manual">
+                <input
+                  type="time"
+                  id="checkoutManual"
+                  step="60"
+                  value="09:00"
+                />
+                <button
+                  id="btnCheckoutManual"
+                  onclick="registrarCheckoutManual()"
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="reagendar-actions">
+            <div style="flex: 1">
+              <i class="fas fa-calendar-alt"></i>
+              <strong>Reagendar esta aula</strong>
+              <div style="font-size: 0.8rem">Escolha a nova data e horário</div>
+            </div>
+            <button class="reagendar-btn" onclick="abrirReagendamento()">
+              <i class="fas fa-calendar-plus"></i> Reagendar
+            </button>
+          </div>
+
+          <div style="margin-top: 1rem; display: flex; justify-content: center">
+            <button
+              class="btn-outline"
+              onclick="abrirDossieCompleto()"
+              style="width: 100%"
+            >
+              <i class="fas fa-file-alt"></i> Ver Dossiê Completo do Aluno
+            </button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalDetalhesAula')"
+          >
+            <i class="fas fa-times"></i> Fechar
+          </button>
+          <button
+            class="btn-primary"
+            onclick="editarAulaAtual()"
+            id="btnEditarDetalhes"
+          >
+            <i class="fas fa-edit"></i> Editar
+          </button>
+          <button
+            class="btn-danger"
+            onclick="cancelarAula()"
+            id="btnCancelarAula"
+          >
+            <i class="fas fa-ban"></i> Cancelar Aula
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="modalDossieCompleto">
+      <div class="modal-content medium">
+        <div class="modal-header">
+          <h2 class="modal-title">
+            <i class="fas fa-folder-open"></i> Dossiê Completo do Aluno
+          </h2>
+          <button
+            class="close-modal"
+            onclick="fecharModal('modalDossieCompleto')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="tabs">
+            <button class="tab active" onclick="mudarTabDossie('info', event)">
+              Informações
+            </button>
+            <button class="tab" onclick="mudarTabDossie('agenda', event)">
+              Agenda do Aluno
+            </button>
+            <button class="tab" onclick="mudarTabDossie('evolucao', event)">
+              Evolução
+            </button>
+            <button class="tab" onclick="mudarTabDossie('documentos', event)">
+              Documentos
+            </button>
+          </div>
+
+          <div id="tabDossieInfo" class="tab-pane active">
+            <div id="conteudoDossieInfo"></div>
+          </div>
+          <div id="tabDossieAgenda" class="tab-pane">
+            <div id="conteudoDossieAgenda"></div>
+          </div>
+          <div id="tabDossieEvolucao" class="tab-pane">
+            <div id="conteudoDossieEvolucao"></div>
+          </div>
+          <div id="tabDossieDocumentos" class="tab-pane">
+            <div id="conteudoDossieDocumentos"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalDossieCompleto')"
+          >
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="modalConfirmar">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h2 class="modal-title">Confirmar Ação</h2>
+          <button class="close-modal" onclick="fecharModal('modalConfirmar')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p id="confirmarMensagem">
+            Tem certeza que deseja realizar esta ação?
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="fecharModal('modalConfirmar')">
+            Cancelar
+          </button>
+          <button class="btn-danger" id="confirmarBtn">Confirmar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="modalNovaEspera">
+      <div class="modal-content small">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalEsperaTitulo">
+            <i class="fas fa-clock"></i> Adicionar à Lista de Espera
+          </h2>
+          <button class="close-modal" onclick="fecharModal('modalNovaEspera')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="esperaId" value="" />
+          <div class="form-group">
+            <label class="form-label required">Aluno</label>
+            <select class="form-control" id="esperaAlunoId" required>
+              <option value="">Selecione um aluno...</option>
+            </select>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label required">Dia da Semana</label>
+              <select class="form-control" id="esperaDiaSemana" required>
+                <option value="">Selecione...</option>
+                <option value="2">Segunda-feira</option>
+                <option value="3">Terça-feira</option>
+                <option value="4">Quarta-feira</option>
+                <option value="5">Quinta-feira</option>
+                <option value="6">Sexta-feira</option>
+                <option value="7">Sábado</option>
+                <option value="1">Domingo</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Horário</label>
+              <select class="form-control" id="esperaHorario" required>
+                <option value="">Selecione...</option>
+                <option value="08:00">08:00</option>
+                <option value="09:00">09:00</option>
+                <option value="10:00">10:00</option>
+                <option value="11:00">11:00</option>
+                <option value="13:30">13:30</option>
+                <option value="14:30">14:30</option>
+                <option value="15:30">15:30</option>
+                <option value="16:30">16:30</option>
+                <option value="17:30">17:30</option>
+                <option value="18:30">18:30</option>
+                <option value="19:30">19:30</option>
+                <option value="20:30">20:30</option>
+              </select>
+            </div>
+          </div>
+          <div class="info-box" style="margin-top: 1rem">
+            <i class="fas fa-info-circle"></i> A posição será calculada
+            automaticamente com base nos registros existentes para o mesmo
+            dia/horário.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn-secondary"
+            onclick="fecharModal('modalNovaEspera')"
+          >
+            Cancelar
+          </button>
+          <button class="btn-primary" onclick="salvarNovaEspera()">
+            <i class="fas fa-save"></i> Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+    <div id="pdf-content" style="display: none"></div>
+
+    <!-- Script principal -->
+    <script src="../js/agenda.js"></script>
+  </body>
+</html>
