@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+
+    <!-- Fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Ícones -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <!-- CSS personalizado -->
+    <link rel="stylesheet" href="css/index.css" />
+  </head>
+  <body>
+    <!-- LOADING OVERLAY -->
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="spinner"></div>
+      <div class="loading-text">Carregando...</div>
+    </div>
+
+    <!-- TELA DE ERRO -->
+    <div class="error-page" id="errorPage">
+      <div class="error-container">
+        <div class="error-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h2 class="error-title">Erro de Conexão</h2>
+        <div class="error-message" id="errorMessage"></div>
+        <button class="error-btn" onclick="window.location.reload()">
+          <i class="fas fa-redo-alt"></i> Tentar Novamente
+        </button>
+      </div>
+    </div>
+
+    <!-- PÁGINA DE LOGIN -->
+    <div class="login-page" id="loginPage">
+      <div class="login-container">
+        <div class="login-logo">
+          <div class="login-logo-icon">
+            <i class="fas fa-spa"></i>
+          </div>
+          <div class="login-logo-text">ESTÚDIO RAFAELA LISBOA</div>
+          <div class="login-logo-subtitle">Sistema de Gestão</div>
+        </div>
+
+        <form class="login-form" id="loginForm" onsubmit="return false;">
+          <div class="form-group">
+            <label class="form-label">E-mail</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              value="admin@pilatesnobility.com"
+              placeholder="Digite seu e-mail"
+              required
+              autocomplete="username"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Senha</label>
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              value="admin123"
+              placeholder="Digite sua senha"
+              required
+              autocomplete="current-password"
+            />
+          </div>
+          <button
+            type="button"
+            class="login-btn"
+            id="loginButton"
+            onclick="fazerLogin()"
+          >
+            <i class="fas fa-sign-in-alt"></i> Entrar
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- SISTEMA PRINCIPAL -->
+    <div class="main-system" id="mainSystem">
+      <div class="app-wrapper">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+          <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">
+              <i class="fas fa-spa"></i>
+            </div>
+            <div class="sidebar-logo-text">ESTÚDIO RAFAELA LISBOA</div>
+            <div class="sidebar-logo-subtitle">Gestão Inteligente</div>
+          </div>
+
+          <div class="sidebar-user">
+            <div class="sidebar-user-avatar" id="sidebarUserAvatar"></div>
+            <div class="sidebar-user-info">
+              <div class="sidebar-user-name" id="sidebarUserName"></div>
+              <div class="sidebar-user-role" id="sidebarUserRole"></div>
+            </div>
+            <button class="sidebar-logout" onclick="fazerLogout()" title="Sair">
+              <i class="fas fa-sign-out-alt"></i>
+            </button>
+          </div>
+
+          <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" onclick="return false;">
+              <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a
+              href="#"
+              class="nav-item"
+              onclick="
+                abrirModulo('alunos');
+                return false;
+              "
+            >
+              <i class="fas fa-users"></i> Alunos
+            </a>
+            <a
+              href="#"
+              class="nav-item"
+              onclick="
+                abrirModulo('agenda');
+                return false;
+              "
+            >
+              <i class="fas fa-calendar-alt"></i> Agenda
+            </a>
+            <a
+              href="#"
+              class="nav-item"
+              onclick="
+                abrirModulo('financeiro');
+                return false;
+              "
+            >
+              <i class="fas fa-credit-card"></i> Financeiro
+            </a>
+            <a
+              href="#"
+              class="nav-item"
+              onclick="
+                abrirModulo('relatorios');
+                return false;
+              "
+            >
+              <i class="fas fa-chart-bar"></i> Relatórios
+            </a>
+            <a
+              href="#"
+              class="nav-item"
+              onclick="
+                abrirModulo('avaliacao');
+                return false;
+              "
+            >
+              <i class="fas fa-notes-medical"></i> Avaliação Detalhada
+            </a>
+            <a
+              href="#"
+              class="nav-item"
+              onclick="
+                abrirModulo('configuracoes');
+                return false;
+              "
+            >
+              <i class="fas fa-cog"></i> Configurações
+            </a>
+            <a
+              href="#"
+              class="nav-item"
+              onclick="
+                abrirModulo('ajuda');
+                return false;
+              "
+            >
+              <i class="fas fa-question-circle"></i> Central de Ajuda
+            </a>
+          </nav>
+        </aside>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <main class="main-content" id="mainContent">
+          <div class="page-header">
+            <div>
+              <h1>Olá, seja Bem-vindo(a)!</h1>
+              <div class="date" id="dataAtual"></div>
+            </div>
+            <div class="welcome-message">
+              <i class="fas fa-smile"></i> Tenha um ótimo dia!
+            </div>
+          </div>
+
+          <!-- CARDS DE ESTATÍSTICAS - LOADING -->
+          <div class="stats-grid" id="statsLoading">
+            <div class="stat-card stat-card-loading">
+              <i class="fas fa-spinner fa-spin loading-spinner"></i>
+            </div>
+            <div class="stat-card stat-card-loading">
+              <i class="fas fa-spinner fa-spin loading-spinner"></i>
+            </div>
+            <div class="stat-card stat-card-loading">
+              <i class="fas fa-spinner fa-spin loading-spinner"></i>
+            </div>
+            <div class="stat-card stat-card-loading">
+              <i class="fas fa-spinner fa-spin loading-spinner"></i>
+            </div>
+          </div>
+
+          <!-- CONTEÚDO DO DASHBOARD -->
+          <div id="dashboardContent"></div>
+        </main>
+      </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="globalToastContainer"></div>
+
+    <!-- BOTÃO MOBILE -->
+    <button
+      class="menu-toggle"
+      id="menuToggle"
+      onclick="document.getElementById('sidebar').classList.toggle('open')"
+      title="Abrir menu"
+      aria-label="Abrir menu"
+    >
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Script principal -->
+    <script src="js/index.js"></script>
+  </body>
+</html>
