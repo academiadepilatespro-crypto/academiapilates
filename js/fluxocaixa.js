@@ -84,15 +84,15 @@ function fecharModal(id) {
 // AUTENTICAÇÃO
 // ============================================================
 async function verificarLogin() {
-  const usuarioSalvo = localStorage.getItem("usuario");
-  if (usuarioSalvo) {
-    estado.usuario = JSON.parse(usuarioSalvo);
+  const usuario = await window.requireAuthenticatedUser(supabaseClient);
+  if (!usuario) return false;
+  estado.usuario = usuario;
+  if (typeof atualizarInterfaceUsuario === "function") {
     atualizarInterfaceUsuario();
-    return true;
-  } else {
-    window.location.href = "../index.html";
-    return false;
+  } else if (typeof atualizarHeaderUsuario === "function") {
+    atualizarHeaderUsuario();
   }
+  return true;
 }
 
 function atualizarInterfaceUsuario() {
@@ -110,9 +110,7 @@ function atualizarInterfaceUsuario() {
 }
 
 async function fazerLogout() {
-  await supabaseClient.auth.signOut();
-  localStorage.removeItem("usuario");
-  window.location.href = "../index.html";
+  await window.signOutPilates(supabaseClient);
 }
 
 // ============================================================

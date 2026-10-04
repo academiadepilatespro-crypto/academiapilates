@@ -139,15 +139,15 @@ function validarCpfCnpj(valor) {
 // AUTENTICAÇÃO
 // ============================================================
 async function verificarLogin() {
-  const usuarioSalvo = localStorage.getItem("usuario");
-  if (usuarioSalvo) {
-    estado.usuario = JSON.parse(usuarioSalvo);
+  const usuario = await window.requireAuthenticatedUser(supabaseClient);
+  if (!usuario) return false;
+  estado.usuario = usuario;
+  if (typeof atualizarInterfaceUsuario === "function") {
     atualizarInterfaceUsuario();
-    return true;
-  } else {
-    window.location.href = "../index.html";
-    return false;
+  } else if (typeof atualizarHeaderUsuario === "function") {
+    atualizarHeaderUsuario();
   }
+  return true;
 }
 function atualizarInterfaceUsuario() {
   if (!estado.usuario) return;
@@ -163,9 +163,7 @@ function atualizarInterfaceUsuario() {
   document.getElementById("userAvatar").textContent = iniciais;
 }
 async function fazerLogout() {
-  await supabaseClient.auth.signOut();
-  localStorage.removeItem("usuario");
-  window.location.href = "../index.html";
+  await window.signOutPilates(supabaseClient);
 }
 
 // ============================================================
@@ -1119,12 +1117,9 @@ async function uploadAnexo() {
       .from("contas_pagar_anexos")
       .upload(filePath, file);
     if (error) throw error;
-    const { data: publicUrl } = supabaseClient.storage
-      .from("contas_pagar_anexos")
-      .getPublicUrl(filePath);
     const { error: updateError } = await supabaseClient
       .from("contas_pagar")
-      .update({ anexo_url: publicUrl.publicUrl })
+      .update({ anexo_path: filePath })
       .eq("id", contaId);
     if (updateError) throw updateError;
     document.getElementById("anexoNome").textContent = file.name;
@@ -1135,6 +1130,20 @@ async function uploadAnexo() {
     mostrarToast("Erro ao anexar: " + error.message, "error");
   } finally {
     esconderLoading();
+  }
+}
+
+async function visualizarAnexo(path) {
+  if (!path) return;
+  try {
+    const { data, error } = await supabaseClient.storage
+      .from("contas_pagar_anexos")
+      .createSignedUrl(path, 60 * 10);
+    if (error) throw error;
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  } catch (error) {
+    console.error(error);
+    mostrarToast("Não foi possível abrir o comprovante", "error");
   }
 }
 
@@ -1189,10 +1198,10 @@ function verDetalhes(id) {
           : ""
       }
       ${
-        conta.anexo_url
+        conta.anexo_path || conta.anexo_url
           ? `
         <hr class="detalhes-divider">
-        <div class="detalhes-anexo"><strong>Comprovante:</strong> <a href="${conta.anexo_url}" target="_blank">Visualizar</a></div>
+        <div class="detalhes-anexo"><strong>Comprovante:</strong> <a href="#" onclick="visualizarAnexo('${escapeHtml(conta.anexo_path || "")}'); return false;">Visualizar</a></div>
       `
           : ""
       }

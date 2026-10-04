@@ -244,36 +244,15 @@ function filtrarLista(aba, termo) {
 
 // ======================== AUTENTICAÇÃO E LOGIN ========================
 async function verificarLogin() {
-  try {
-    const {
-      data: { user },
-      error,
-    } = await supabaseClient.auth.getUser();
-    if (error || !user) {
-      const usuarioSalvo = localStorage.getItem("usuario");
-      if (usuarioSalvo) {
-        estado.usuario = JSON.parse(usuarioSalvo);
-        return true;
-      }
-      window.location.href = "../index.html";
-      return false;
-    }
-    const { data: usuarioData, error: usuarioError } = await supabaseClient
-      .from("usuarios")
-      .select("id, nome, email, role")
-      .eq("id", user.id)
-      .single();
-    if (!usuarioError && usuarioData) {
-      estado.usuario = usuarioData;
-      localStorage.setItem("usuario", JSON.stringify(usuarioData));
-      return true;
-    }
-    return false;
-  } catch (error) {
-    console.error("Erro ao verificar login:", error);
-    window.location.href = "../index.html";
-    return false;
+  const usuario = await window.requireAuthenticatedUser(supabaseClient);
+  if (!usuario) return false;
+  estado.usuario = usuario;
+  if (typeof atualizarInterfaceUsuario === "function") {
+    atualizarInterfaceUsuario();
+  } else if (typeof atualizarHeaderUsuario === "function") {
+    atualizarHeaderUsuario();
   }
+  return true;
 }
 
 function carregarInfoUsuario() {
@@ -295,11 +274,7 @@ function carregarInfoUsuario() {
 async function fazerLogout() {
   confirmarAcao(
     "Deseja sair do sistema?",
-    async () => {
-      await supabaseClient.auth.signOut();
-      localStorage.removeItem("usuario");
-      window.location.href = "../index.html";
-    },
+    async () => await window.signOutPilates(supabaseClient),
     "Confirmar saída",
   );
 }

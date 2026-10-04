@@ -276,35 +276,15 @@ async function safeQuery(
 // VERIFICAÇÃO DE LOGIN E CARREGAMENTO DO USUÁRIO
 // ============================================================
 async function verificarLogin() {
-  try {
-    const {
-      data: { user },
-    } = await supabaseClient.auth.getUser();
-    if (!user) {
-      const usuarioSalvo = localStorage.getItem("usuario");
-      if (usuarioSalvo) {
-        estado.usuario = JSON.parse(usuarioSalvo);
-        atualizarHeaderUsuario();
-        return true;
-      }
-      return false;
-    }
-    const { data: usuarioData } = await supabaseClient
-      .from("usuarios")
-      .select("id, nome, email, role, foto_url")
-      .eq("id", user.id)
-      .single();
-    if (usuarioData) {
-      estado.usuario = usuarioData;
-      localStorage.setItem("usuario", JSON.stringify(usuarioData));
-      atualizarHeaderUsuario();
-      return true;
-    }
-    return false;
-  } catch (error) {
-    console.error("Erro ao verificar login:", error);
-    return false;
+  const usuario = await window.requireAuthenticatedUser(supabaseClient);
+  if (!usuario) return false;
+  estado.usuario = usuario;
+  if (typeof atualizarInterfaceUsuario === "function") {
+    atualizarInterfaceUsuario();
+  } else if (typeof atualizarHeaderUsuario === "function") {
+    atualizarHeaderUsuario();
   }
+  return true;
 }
 
 function atualizarHeaderUsuario() {
@@ -332,16 +312,7 @@ function atualizarHeaderUsuario() {
 }
 
 async function fazerLogout() {
-  try {
-    await supabaseClient.auth.signOut();
-  } catch (error) {
-    console.error("Erro no logout:", error);
-  } finally {
-    estado.usuario = null;
-    localStorage.removeItem("usuario");
-    limparCache();
-    window.location.href = "index.html";
-  }
+  await window.signOutPilates(supabaseClient);
 }
 
 // ============================================================

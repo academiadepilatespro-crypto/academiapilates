@@ -1,3 +1,8 @@
+const supabaseClient = window.supabase.createClient(
+  "https://mputdowrhzrvqslslubk.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wdXRkb3dyaHpydnFzbHNsdWJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxNjY1NDEsImV4cCI6MjA4NDc0MjU0MX0.1TlAIzCd7896EBOeYIYy3B5Czt41l-XcWYboaspEizc",
+);
+
 // ============================================================
 // BASE DE CONHECIMENTO ENRIQUECIDA COM O FAQ COMPLETO
 // INCLUINDO OS MÓDULOS: DASHBOARD, ALUNOS, AGENDA, FINANCEIRO,
@@ -2354,13 +2359,11 @@ function mostrarToast(msg, tipo = "info") {
 }
 
 // ============================================================
-// CARREGAR USUÁRIO (simulação)
+// CARREGAR USUÁRIO AUTENTICADO
 // ============================================================
 function carregarUsuario() {
-  const usuario = JSON.parse(localStorage.getItem("usuario")) || {
-    nome: "Usuário",
-    role: "admin",
-  };
+  const usuario = window.usuarioAutenticado;
+  if (!usuario) return;
   document.getElementById("userName").textContent = usuario.nome;
   document.getElementById("userRole").textContent =
     usuario.role === "admin" ? "Administrador" : "Instrutor";
@@ -2709,7 +2712,8 @@ function digitarMensagem(elemento, texto, acoes = [], tutorialId = null) {
 // ============================================================
 // INICIALIZAÇÃO
 // ============================================================
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  if (!(await window.requireAuthenticatedUser(supabaseClient))) return;
   carregarUsuario();
   renderizarCategorias();
   renderizarGlossario();

@@ -116,68 +116,19 @@ async function safeQuery(
 // FUNÇÕES DE AUTENTICAÇÃO
 // ============================================================
 async function verificarLogin() {
-  try {
-    // Tentar pegar usuário do localStorage (vindo do index)
-    const usuarioSalvo = localStorage.getItem("usuario");
-    if (usuarioSalvo) {
-      estado.usuario = JSON.parse(usuarioSalvo);
-      document.getElementById("userName").textContent =
-        estado.usuario.nome || "Instrutor";
-
-      const iniciais = (estado.usuario.nome || "I")
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .substring(0, 2)
-        .toUpperCase();
-      document.getElementById("userAvatar").textContent = iniciais;
-
-      return true;
-    }
-
-    // Se não tiver no localStorage, tentar auth do Supabase
-    const {
-      data: { user },
-    } = await supabaseClient.auth.getUser();
-
-    if (user) {
-      const { data: usuarioData } = await supabaseClient
-        .from("usuarios")
-        .select("id, nome, email, role")
-        .eq("id", user.id)
-        .single();
-
-      if (usuarioData) {
-        estado.usuario = usuarioData;
-        localStorage.setItem("usuario", JSON.stringify(usuarioData));
-
-        document.getElementById("userName").textContent = usuarioData.nome;
-        const iniciais = usuarioData.nome
-          .split(" ")
-          .map((n) => n[0])
-          .join("")
-          .substring(0, 2)
-          .toUpperCase();
-        document.getElementById("userAvatar").textContent = iniciais;
-
-        return true;
-      }
-    }
-
-    // Se não encontrar, redirecionar para login
-    window.location.href = "index.html";
-    return false;
-  } catch (error) {
-    console.error("Erro ao verificar login:", error);
-    window.location.href = "index.html";
-    return false;
+  const usuario = await window.requireAuthenticatedUser(supabaseClient);
+  if (!usuario) return false;
+  estado.usuario = usuario;
+  if (typeof atualizarInterfaceUsuario === "function") {
+    atualizarInterfaceUsuario();
+  } else if (typeof atualizarHeaderUsuario === "function") {
+    atualizarHeaderUsuario();
   }
+  return true;
 }
 
 async function fazerLogout() {
-  await supabaseClient.auth.signOut();
-  localStorage.removeItem("usuario");
-  window.location.href = "index.html";
+  await window.signOutPilates(supabaseClient);
 }
 
 // ============================================================

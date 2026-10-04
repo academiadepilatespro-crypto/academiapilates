@@ -3697,49 +3697,19 @@ function getDataLocalString(data) {
 }
 
 async function verificarLogin() {
-  try {
-    const {
-      data: { user },
-    } = await supabaseClient.auth.getUser();
-    if (!user) {
-      const usuarioSalvo = localStorage.getItem("usuario");
-      if (usuarioSalvo) {
-        estado.usuario = JSON.parse(usuarioSalvo);
-        return true;
-      }
-      window.location.href = "index.html";
-      return false;
-    }
-    const { data: usuarioData } = await supabaseClient
-      .from("usuarios")
-      .select("id, nome, email, role")
-      .eq("id", user.id)
-      .single();
-    if (usuarioData) {
-      estado.usuario = usuarioData;
-      localStorage.setItem("usuario", JSON.stringify(usuarioData));
-      document.getElementById("userName").textContent = usuarioData.nome;
-      document.getElementById("userRole").textContent = usuarioData.role;
-      const iniciais = usuarioData.nome
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .substring(0, 2)
-        .toUpperCase();
-      document.getElementById("userAvatar").textContent = iniciais;
-      return true;
-    }
-  } catch (error) {
-    console.error(error);
-    window.location.href = "index.html";
-    return false;
+  const usuario = await window.requireAuthenticatedUser(supabaseClient);
+  if (!usuario) return false;
+  estado.usuario = usuario;
+  if (typeof atualizarInterfaceUsuario === "function") {
+    atualizarInterfaceUsuario();
+  } else if (typeof atualizarHeaderUsuario === "function") {
+    atualizarHeaderUsuario();
   }
+  return true;
 }
 
 async function fazerLogout() {
-  await supabaseClient.auth.signOut();
-  localStorage.removeItem("usuario");
-  window.location.href = "index.html";
+  await window.signOutPilates(supabaseClient);
 }
 
 function toggleNotificacoes() {

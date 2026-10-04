@@ -908,11 +908,13 @@ async function fazerLogin() {
 
     const { data: usuarioData, error: usuarioError } = await supabaseClient
       .from("usuarios")
-      .select("id, nome, email, role")
-      .eq("id", data.user.id)
-      .single();
+      .select("id, nome, email, role, ativo")
+      .eq("email", data.user.email)
+      .eq("ativo", true)
+      .maybeSingle();
 
     if (usuarioError) throw usuarioError;
+    if (!usuarioData) throw new Error("Perfil de usuário ativo não encontrado");
 
     estado.usuario = usuarioData;
     localStorage.setItem("usuario", JSON.stringify(usuarioData));
@@ -948,9 +950,9 @@ async function fazerLogin() {
   }
 }
 
-function fazerLogout() {
+async function fazerLogout() {
   estado.usuario = null;
-  localStorage.removeItem("usuario");
+  await window.signOutPilates(supabaseClient);
   document.getElementById("loginPage").classList.remove("hidden");
   document.getElementById("mainSystem").classList.remove("show");
   mostrarToast("Logout realizado!", "info");
@@ -983,42 +985,33 @@ function abrirModulo(modulo) {
 // ============================================================
 
 window.onload = async function () {
-  const usuarioSalvo = localStorage.getItem("usuario");
-  if (usuarioSalvo) {
+  const usuarioAutenticado = await window.requireAuthenticatedUser(supabaseClient);
+  if (usuarioAutenticado) {
     try {
-      estado.usuario = JSON.parse(usuarioSalvo);
+      estado.usuario = usuarioAutenticado;
 
-      const {
-        data: { user },
-      } = await supabaseClient.auth.getUser();
+      document.getElementById("loginPage").classList.add("hidden");
+      document.getElementById("mainSystem").classList.add("show");
 
-      if (user) {
-        document.getElementById("loginPage").classList.add("hidden");
-        document.getElementById("mainSystem").classList.add("show");
+      document.getElementById("sidebarUserName").textContent = estado.usuario.nome;
+      document.getElementById("sidebarUserRole").textContent =
+        estado.usuario.role === "admin"
+          ? "Administrador"
+          : estado.usuario.role === "instrutor"
+            ? "Instrutor"
+            : "Financeiro";
 
-        document.getElementById("sidebarUserName").textContent =
-          estado.usuario.nome;
-        document.getElementById("sidebarUserRole").textContent =
-          estado.usuario.role === "admin"
-            ? "Administrador"
-            : estado.usuario.role === "instrutor"
-              ? "Instrutor"
-              : "Financeiro";
+      const iniciais = estado.usuario.nome
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .substring(0, 2)
+        .toUpperCase();
+      document.getElementById("sidebarUserAvatar").textContent = iniciais;
 
-        const iniciais = estado.usuario.nome
-          .split(" ")
-          .map((n) => n[0])
-          .join("")
-          .substring(0, 2)
-          .toUpperCase();
-        document.getElementById("sidebarUserAvatar").textContent = iniciais;
-
-        await carregarTodosDados();
-      } else {
-        localStorage.removeItem("usuario");
-      }
+      await carregarTodosDados();
     } catch (e) {
-      localStorage.removeItem("usuario");
+      console.error("Erro ao restaurar sessão:", e);
     }
   }
 

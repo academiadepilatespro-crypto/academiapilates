@@ -25,6 +25,8 @@
     <!-- Bibliotecas para exportação -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="../js/auth.js"></script>
 
     <style>
       * {
@@ -2276,320 +2278,19 @@
       // ============================================================
       // ESTADO GLOBAL
       // ============================================================
+      const supabaseClient = window.supabase.createClient(
+        "https://mputdowrhzrvqslslubk.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wdXRkb3dyaHpydnFzbHNsdWJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxNjY1NDEsImV4cCI6MjA4NDc0MjU0MX0.1TlAIzCd7896EBOeYIYy3B5Czt41l-XcWYboaspEizc",
+      );
       const estado = {
-        usuario: {
-          nome: "Instrutor Master",
-          role: "admin",
-          id: 1,
-        },
+        usuario: null,
         alunoSelecionado: null,
-        planosSalvos: [
-          {
-            id: 1,
-            aluno_id: 1,
-            aluno_nome: "João Silva",
-            nome: "Plano de Março/2024",
-            data_inicio: "2026-03-01",
-            data_fim: "2026-03-31",
-            ativo: true,
-            instrutor: "Instrutor Master",
-            atribuicoes: [
-              { aula_id: 1, treino_id: 1 },
-              { aula_id: 4, treino_id: 1 },
-              { aula_id: 6, treino_id: 2 },
-              { aula_id: 7, treino_id: null },
-            ],
-          },
-          {
-            id: 2,
-            aluno_id: 2,
-            aluno_nome: "Maria Oliveira",
-            nome: "Plano de Março/2024",
-            data_inicio: "2026-03-01",
-            data_fim: "2026-03-31",
-            ativo: true,
-            instrutor: "Instrutor Master",
-            atribuicoes: [
-              { aula_id: 2, treino_id: 2 },
-              { aula_id: 9, treino_id: 3 },
-              { aula_id: 10, treino_id: 1 },
-            ],
-          },
-        ],
-        treinos: [
-          {
-            id: 1,
-            nome: "Treino Força Básica",
-            criado_em: "2026-03-01",
-            exercicios: [
-              {
-                id: 1,
-                nome: "The Hundred",
-                equipamento: "Solo",
-                categoria: "Core",
-                series: 3,
-                repeticoes: "10",
-                carga: "",
-                obs: "",
-              },
-              {
-                id: 2,
-                nome: "Footwork",
-                equipamento: "Reformer",
-                categoria: "MMII",
-                series: 3,
-                repeticoes: "15",
-                carga: "2 molas vermelhas",
-                obs: "",
-              },
-              {
-                id: 8,
-                nome: "Roll Up",
-                equipamento: "Solo",
-                categoria: "Mobilidade",
-                series: 3,
-                repeticoes: "8",
-                carga: "",
-                obs: "",
-              },
-            ],
-          },
-          {
-            id: 2,
-            nome: "Treino Mobilidade",
-            criado_em: "2026-03-01",
-            exercicios: [
-              {
-                id: 4,
-                nome: "Short Box Series",
-                equipamento: "Reformer",
-                categoria: "Mobilidade",
-                series: 3,
-                repeticoes: "12",
-                carga: "Mola leve",
-                obs: "",
-              },
-              {
-                id: 5,
-                nome: "Elephant",
-                equipamento: "Reformer",
-                categoria: "Alongamento",
-                series: 3,
-                repeticoes: "8",
-                carga: "Mola média",
-                obs: "",
-              },
-              {
-                id: 8,
-                nome: "Roll Up",
-                equipamento: "Solo",
-                categoria: "Mobilidade",
-                series: 3,
-                repeticoes: "8",
-                carga: "",
-                obs: "",
-              },
-            ],
-          },
-          {
-            id: 3,
-            nome: "Treino Avançado",
-            criado_em: "2026-03-01",
-            exercicios: [
-              {
-                id: 1,
-                nome: "The Hundred",
-                equipamento: "Solo",
-                categoria: "Core",
-                series: 3,
-                repeticoes: "10",
-                carga: "",
-                obs: "",
-              },
-              {
-                id: 3,
-                nome: "Swan",
-                equipamento: "Cadillac",
-                categoria: "Extensão",
-                series: 3,
-                repeticoes: "8",
-                carga: "Mola média",
-                obs: "",
-              },
-              {
-                id: 7,
-                nome: "Teaser",
-                equipamento: "Solo",
-                categoria: "Core",
-                series: 3,
-                repeticoes: "6",
-                carga: "",
-                obs: "",
-              },
-            ],
-          },
-        ],
-        exercicios: [
-          {
-            id: 1,
-            nome: "The Hundred",
-            equipamento: "Solo",
-            categoria: "Core",
-            nivel: 1,
-            instrucoes: "Exercício clássico de aquecimento",
-            ativo: true,
-          },
-          {
-            id: 2,
-            nome: "Footwork",
-            equipamento: "Reformer",
-            categoria: "MMII",
-            nivel: 1,
-            instrucoes: "Trabalho de pernas no reformer",
-            ativo: true,
-          },
-          {
-            id: 3,
-            nome: "Swan",
-            equipamento: "Cadillac",
-            categoria: "Extensão",
-            nivel: 2,
-            instrucoes: "Extensão de tronco",
-            ativo: true,
-          },
-          {
-            id: 4,
-            nome: "Short Box Series",
-            equipamento: "Reformer",
-            categoria: "Mobilidade",
-            nivel: 2,
-            instrucoes: "Série de mobilidade",
-            ativo: true,
-          },
-          {
-            id: 5,
-            nome: "Elephant",
-            equipamento: "Reformer",
-            categoria: "Alongamento",
-            nivel: 1,
-            instrucoes: "Alongamento de cadeia posterior",
-            ativo: true,
-          },
-          {
-            id: 6,
-            nome: "Leg Springs",
-            equipamento: "Wall Unit",
-            categoria: "MMII",
-            nivel: 2,
-            instrucoes: "Trabalho de pernas no wall unit",
-            ativo: true,
-          },
-          {
-            id: 7,
-            nome: "Teaser",
-            equipamento: "Solo",
-            categoria: "Core",
-            nivel: 3,
-            instrucoes: "Exercício avançado de core",
-            ativo: false,
-          },
-          {
-            id: 8,
-            nome: "Roll Up",
-            equipamento: "Solo",
-            categoria: "Mobilidade",
-            nivel: 1,
-            instrucoes: "Mobilidade de coluna",
-            ativo: true,
-          },
-        ],
-        alunos: [
-          { id: 1, nome: "João Silva", cpf: "123.456.789-00" },
-          { id: 2, nome: "Maria Oliveira", cpf: "987.654.321-00" },
-          { id: 3, nome: "Ana Santos", cpf: "456.789.123-00" },
-          { id: 4, nome: "Pedro Costa", cpf: "789.123.456-00" },
-          { id: 5, nome: "Carlos Souza", cpf: "321.654.987-00" },
-        ],
-        aulas: [
-          {
-            id: 1,
-            aluno_id: 1,
-            data: "2026-03-06",
-            horario: "08:00",
-            foco: "Pilates Solo",
-          },
-          {
-            id: 2,
-            aluno_id: 2,
-            data: "2026-03-06",
-            horario: "14:00",
-            foco: "Reformer",
-          },
-          {
-            id: 3,
-            aluno_id: 3,
-            data: "2026-03-07",
-            horario: "09:00",
-            foco: "Cadillac",
-          },
-          {
-            id: 4,
-            aluno_id: 1,
-            data: "2026-03-08",
-            horario: "08:00",
-            foco: "Pilates Solo",
-          },
-          {
-            id: 5,
-            aluno_id: 4,
-            data: "2026-03-06",
-            horario: "16:00",
-            foco: "Reformer",
-          },
-          {
-            id: 6,
-            aluno_id: 1,
-            data: "2026-03-10",
-            horario: "08:00",
-            foco: "Pilates Solo",
-          },
-          {
-            id: 7,
-            aluno_id: 1,
-            data: "2026-03-12",
-            horario: "08:00",
-            foco: "Pilates Solo",
-          },
-          {
-            id: 8,
-            aluno_id: 1,
-            data: "2026-03-15",
-            horario: "08:00",
-            foco: "Pilates Solo",
-          },
-          {
-            id: 9,
-            aluno_id: 2,
-            data: "2026-03-09",
-            horario: "14:00",
-            foco: "Reformer",
-          },
-          {
-            id: 10,
-            aluno_id: 2,
-            data: "2026-03-11",
-            horario: "14:00",
-            foco: "Reformer",
-          },
-        ],
-        planoAtual: {
-          id: null,
-          aluno_id: null,
-          nome: "",
-          data_inicio: new Date().toISOString().split("T")[0],
-          data_fim: "",
-          atribuicoes: [],
-        },
+        planosSalvos: [],
+        treinos: [],
+        exercicios: [],
+        alunos: [],
+        aulas: [],
+        planoAtual: { id: null, aluno_id: null, nome: "", data_inicio: new Date().toISOString().split("T")[0], data_fim: "", atribuicoes: [] },
         treinoEditando: null,
         timeoutBusca: null,
         tourAtivo: false,
@@ -2739,15 +2440,70 @@
       // ============================================================
       // FUNÇÕES DE AUTENTICAÇÃO
       // ============================================================
-      function verificarLogin() {
-        document.getElementById("userName").textContent = estado.usuario.nome;
-        document.getElementById("userRole").textContent = "Instrutor";
-        document.getElementById("userAvatar").textContent = "IM";
+      async function verificarLogin() {
+        const usuario = await window.requireAuthenticatedUser(supabaseClient);
+        if (!usuario) return false;
+        estado.usuario = usuario;
+        document.getElementById("userName").textContent = usuario.nome;
+        document.getElementById("userRole").textContent = usuario.role;
+        document.getElementById("userAvatar").textContent = usuario.nome
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .substring(0, 2)
+          .toUpperCase();
         return true;
       }
 
-      function fazerLogout() {
-        window.location.href = "index.html";
+      async function fazerLogout() {
+        await window.signOutPilates(supabaseClient);
+      }
+
+      async function carregarDadosReais() {
+        const [alunosResult, aulasResult, exerciciosResult, fichasResult] =
+          await Promise.all([
+            supabaseClient
+              .from("alunos")
+              .select("id, nome, cpf")
+              .eq("ativo", true)
+              .order("nome"),
+            supabaseClient
+              .from("aulas")
+              .select("id, aluno_id, data, horario, status, presenca")
+              .order("data", { ascending: false }),
+            supabaseClient
+              .from("exercicios")
+              .select("id, nome, descricao, categoria, nivel_dificuldade, equipamentos, contraindicacoes, ativo")
+              .eq("ativo", true)
+              .order("nome"),
+            supabaseClient
+              .from("fichas_treino")
+              .select("id, aluno_id, titulo, data_criacao, data_validade, objetivo, exercicios, recomendacoes, contraindicacoes, observacoes, ativa")
+              .eq("ativa", true)
+              .order("data_criacao", { ascending: false }),
+          ]);
+        const erro = [alunosResult, aulasResult, exerciciosResult, fichasResult].find(
+          (result) => result.error,
+        );
+        if (erro) throw erro.error;
+
+        estado.alunos = alunosResult.data || [];
+        estado.aulas = aulasResult.data || [];
+        estado.exercicios = (exerciciosResult.data || []).map((exercicio) => ({
+          ...exercicio,
+          equipamento: Array.isArray(exercicio.equipamentos)
+            ? exercicio.equipamentos.join(", ")
+            : exercicio.equipamentos || "",
+          nivel: exercicio.nivel_dificuldade,
+          instrucoes: exercicio.descricao || "",
+        }));
+        estado.treinos = (fichasResult.data || []).map((ficha) => ({
+          ...ficha,
+          nome: ficha.titulo,
+          criado_em: ficha.data_criacao,
+          exercicios: Array.isArray(ficha.exercicios) ? ficha.exercicios : [],
+        }));
+        estado.planosSalvos = [];
       }
 
       // ============================================================
@@ -3771,8 +3527,15 @@
       // ============================================================
       // INICIALIZAÇÃO
       // ============================================================
-      document.addEventListener("DOMContentLoaded", function () {
-        verificarLogin();
+      document.addEventListener("DOMContentLoaded", async function () {
+        if (!(await verificarLogin())) return;
+        try {
+          await carregarDadosReais();
+        } catch (error) {
+          console.error("Erro ao carregar dados de treinos:", error);
+          mostrarToast("Não foi possível carregar os dados do Supabase", "error");
+          return;
+        }
         carregarAlunosSelect();
 
         const hoje = new Date().toISOString().split("T")[0];
