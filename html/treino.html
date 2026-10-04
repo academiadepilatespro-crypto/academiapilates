@@ -2290,6 +2290,7 @@
         exercicios: [],
         alunos: [],
         aulas: [],
+        atribuicoes: [],
         planoAtual: { id: null, aluno_id: null, nome: "", data_inicio: new Date().toISOString().split("T")[0], data_fim: "", atribuicoes: [] },
         treinoEditando: null,
         timeoutBusca: null,
@@ -2460,7 +2461,7 @@
       }
 
       async function carregarDadosReais() {
-        const [alunosResult, aulasResult, exerciciosResult, fichasResult] =
+        const [alunosResult, aulasResult, exerciciosResult, fichasResult, atribuicoesResult, planosResult] =
           await Promise.all([
             supabaseClient
               .from("alunos")
@@ -2481,14 +2482,23 @@
               .select("id, aluno_id, titulo, data_criacao, data_validade, objetivo, exercicios, recomendacoes, contraindicacoes, observacoes, ativa")
               .eq("ativa", true)
               .order("data_criacao", { ascending: false }),
+            supabaseClient
+              .from("aulas_treinos")
+              .select("id, aula_id, ficha_id")
+              .order("id"),
+            supabaseClient
+              .from("planos_alunos")
+              .select("id, aluno_id, plano, data_inicio, data_fim, status, observacoes, criado_em")
+              .order("criado_em", { ascending: false }),
           ]);
-        const erro = [alunosResult, aulasResult, exerciciosResult, fichasResult].find(
+        const erro = [alunosResult, aulasResult, exerciciosResult, fichasResult, atribuicoesResult, planosResult].find(
           (result) => result.error,
         );
         if (erro) throw erro.error;
 
         estado.alunos = alunosResult.data || [];
         estado.aulas = aulasResult.data || [];
+        estado.atribuicoes = atribuicoesResult.data || [];
         estado.exercicios = (exerciciosResult.data || []).map((exercicio) => ({
           ...exercicio,
           equipamento: Array.isArray(exercicio.equipamentos)
@@ -2503,7 +2513,22 @@
           criado_em: ficha.data_criacao,
           exercicios: Array.isArray(ficha.exercicios) ? ficha.exercicios : [],
         }));
-        estado.planosSalvos = [];
+        estado.planosSalvos = (planosResult.data || []).map((plano) => ({
+          id: plano.id,
+          aluno_id: plano.aluno_id,
+          aluno_nome: estado.alunos.find((aluno) => aluno.id === plano.aluno_id)?.nome || "Aluno",
+          nome: plano.plano,
+          data_inicio: plano.data_inicio,
+          data_fim: plano.data_fim || "",
+          ativo: plano.status === "ativo",
+          instrutor: estado.usuario?.nome || "",
+          atribuicoes: estado.aulas
+            .filter((aula) => aula.plano_aluno_id === plano.id)
+            .map((aula) => ({
+              aula_id: aula.id,
+              treino_id: estado.atribuicoes.find((item) => item.aula_id === aula.id)?.ficha_id || null,
+            })),
+        }));
       }
 
       // ============================================================
@@ -2633,14 +2658,11 @@
 
         // Inicializar atribuições se necessário
         aulasAluno.forEach((aula) => {
-          if (
-            !estado.planoAtual.atribuicoes.find(
-              (attr) => attr.aula_id === aula.id
-            )
-          ) {
+          if (!estado.planoAtual.atribuicoes.find((attr) => attr.aula_id === aula.id)) {
+            const atribuicaoPersistida = estado.atribuicoes.find((item) => item.aula_id === aula.id);
             estado.planoAtual.atribuicoes.push({
               aula_id: aula.id,
-              treino_id: null,
+              treino_id: atribuicaoPersistida?.ficha_id || null,
             });
           }
         });
@@ -2707,7 +2729,7 @@
         renderizarTreinosContainer();
       }
 
-      function atribuirTreino(aulaId, treinoId) {
+      async function atribuirTreino(aulaId, treinoId) {
         const atribuicao = estado.planoAtual.atribuicoes.find(
           (attr) => attr.aula_id === aulaId
         );
@@ -2718,6 +2740,26 @@
             aula_id: aulaId,
             treino_id: treinoId ? parseInt(treinoId) : null,
           });
+        }
+
+        try {
+          if (treinoId) {
+            const { error } = await supabaseClient
+              .from("aulas_treinos")
+              .upsert({ aula_id: aulaId, ficha_id: parseInt(treinoId), atualizado_em: new Date().toISOString() }, { onConflict: "aula_id" });
+            if (error) throw error;
+          } else {
+            const { error } = await supabaseClient
+              .from("aulas_treinos")
+              .delete()
+              .eq("aula_id", aulaId);
+            if (error) throw error;
+          }
+          estado.atribuicoes = estado.atribuicoes.filter((item) => item.aula_id !== aulaId);
+          if (treinoId) estado.atribuicoes.push({ aula_id: aulaId, ficha_id: parseInt(treinoId) });
+        } catch (error) {
+          console.error("Erro ao persistir atribuição:", error);
+          mostrarToast("Não foi possível salvar a atribuição", "error");
         }
 
         const select = document.getElementById(`select-${aulaId}`);
@@ -2833,6 +2875,9 @@
         document.getElementById("modalPlanoConteudo").innerHTML = html;
         document.getElementById("modalPlanoFooter").innerHTML = `
           <button class="btn-secondary" onclick="fecharModal('modalPlano')">Fechar</button>
+          <button class="btn-outline" onclick="editarTreino(${treino.id}); fecharModal('modalPlano')">
+            <i class="fas fa-edit"></i> Editar treino
+          </button>
           <button class="btn-outline" onclick="exportarTreinoPDF(${treino.id})">
             <i class="fas fa-file-pdf"></i> Exportar PDF
           </button>
@@ -3035,7 +3080,7 @@
           .join("");
       }
 
-      function salvarTreino() {
+      async function salvarTreino() {
         const nome = document.getElementById("nomeNovoTreino").value;
         if (!nome) {
           mostrarToast("Dê um nome ao treino", "error");
@@ -3050,14 +3095,40 @@
           return;
         }
 
-        const novoTreino = {
-          id: estado.treinos.length + 1,
-          nome: nome,
-          criado_em: new Date().toISOString().split("T")[0],
+        if (!estado.alunoSelecionado) {
+          mostrarToast("Selecione um aluno antes de salvar o treino", "error");
+          return;
+        }
+
+        const payload = {
+          aluno_id: estado.alunoSelecionado.id,
+          titulo: nome,
+          data_criacao: new Date().toISOString().split("T")[0],
           exercicios: estado.treinoEditando.exercicios.map((ex) => ({ ...ex })),
+          profissional_responsavel: estado.usuario?.nome || null,
+          ativa: true,
+        };
+        let result;
+        if (estado.treinoEditando.id) {
+          result = await supabaseClient.from("fichas_treino").update(payload).eq("id", estado.treinoEditando.id).select().single();
+        } else {
+          result = await supabaseClient.from("fichas_treino").insert(payload).select().single();
+        }
+        if (result.error) {
+          mostrarToast("Erro ao salvar treino: " + result.error.message, "error");
+          return;
+        }
+        const novoTreino = {
+          ...result.data,
+          id: result.data.id,
+          nome: result.data.titulo,
+          criado_em: result.data.data_criacao,
+          exercicios: Array.isArray(result.data.exercicios) ? result.data.exercicios : [],
         };
 
-        estado.treinos.push(novoTreino);
+        const index = estado.treinos.findIndex((treino) => treino.id === novoTreino.id);
+        if (index >= 0) estado.treinos[index] = novoTreino;
+        else estado.treinos.unshift(novoTreino);
         renderizarTreinosContainer();
         renderizarBibliotecaExercicios();
 
@@ -3105,7 +3176,7 @@
         mostrarToast("Novo plano criado", "success");
       }
 
-      function salvarPlano() {
+      async function salvarPlano() {
         if (!estado.alunoSelecionado) {
           mostrarToast("Selecione um aluno", "error");
           return;
@@ -3120,27 +3191,33 @@
         const dataInicio = document.getElementById("dataInicio").value;
         const dataFim = document.getElementById("dataFim").value;
 
-        const novoPlano = {
-          id: estado.planosSalvos.length + 1,
+        const planoPayload = {
           aluno_id: estado.alunoSelecionado.id,
-          aluno_nome: estado.alunoSelecionado.nome,
-          nome: nome,
+          plano: nome,
           data_inicio: dataInicio,
-          data_fim: dataFim,
-          ativo: true,
-          instrutor: estado.usuario.nome,
-          atribuicoes: estado.planoAtual.atribuicoes.map((attr) => ({
-            ...attr,
-          })),
+          data_fim: dataFim || null,
+          status: "ativo",
+          observacoes: `Criado por ${estado.usuario?.nome || "usuário autenticado"}`,
         };
-
-        estado.planosSalvos.push(novoPlano);
+        const result = estado.planoAtual.id
+          ? await supabaseClient.from("planos_alunos").update(planoPayload).eq("id", estado.planoAtual.id).select().single()
+          : await supabaseClient.from("planos_alunos").insert(planoPayload).select().single();
+        if (result.error) {
+          mostrarToast("Erro ao salvar plano: " + result.error.message, "error");
+          return;
+        }
+        const planoId = result.data.id;
+        const aulasDoAluno = estado.aulas.filter((aula) => aula.aluno_id === estado.alunoSelecionado.id);
+        for (const aula of aulasDoAluno) {
+          const { error } = await supabaseClient.from("aulas").update({ plano_aluno_id: planoId }).eq("id", aula.id);
+          if (error) throw error;
+        }
+        await carregarDadosReais();
         renderizarHistorico();
+        estado.planoAtual.id = planoId;
 
         mostrarToast(
-          `Plano salvo com ${
-            novoPlano.atribuicoes.filter((a) => a.treino_id).length
-          } treinos atribuídos!`,
+          `Plano salvo com ${estado.planoAtual.atribuicoes.filter((a) => a.treino_id).length} treinos atribuídos!`,
           "success"
         );
         novoPlano();
@@ -3284,6 +3361,27 @@
         document.getElementById("modalPlano").classList.add("show");
       }
 
+      function editarTreino(treinoId) {
+        const treino = estado.treinos.find((item) => item.id === treinoId);
+        if (!treino) return;
+        const aluno = estado.alunos.find((item) => item.id === treino.aluno_id);
+        if (aluno) {
+          estado.alunoSelecionado = aluno;
+          document.getElementById("alunoNome").value = aluno.nome;
+          document.getElementById("buscaAluno").value = aluno.nome;
+          document.getElementById("seletorAluno").value = aluno.id;
+        }
+        estado.treinoEditando = {
+          id: treino.id,
+          nome: treino.nome,
+          exercicios: (treino.exercicios || []).map((ex) => ({ ...ex })),
+        };
+        document.getElementById("nomeNovoTreino").value = treino.nome;
+        document.getElementById("construtorTreino").style.display = "block";
+        renderizarFicha();
+        document.getElementById("construtorTreino").scrollIntoView({ behavior: "smooth" });
+      }
+
       function editarPlano(id) {
         const plano = estado.planosSalvos.find((p) => p.id === id);
         if (!plano) return;
@@ -3411,7 +3509,7 @@
         document.getElementById("modalEditarExercicio").classList.add("show");
       }
 
-      function salvarEdicaoExercicio() {
+      async function salvarEdicaoExercicio() {
         const id = parseInt(document.getElementById("editExercicioId").value);
         const nome = document.getElementById("editExercicioNome").value;
         const equipamento = document.getElementById(
@@ -3427,6 +3525,15 @@
 
         if (!nome || !equipamento || !categoria) {
           mostrarToast("Preencha os campos obrigatórios", "error");
+          return;
+        }
+
+        const { error } = await supabaseClient
+          .from("exercicios")
+          .update({ nome, equipamentos: [equipamento], categoria, nivel_dificuldade: parseInt(nivel), descricao: instrucoes })
+          .eq("id", id);
+        if (error) {
+          mostrarToast("Erro ao atualizar exercício: " + error.message, "error");
           return;
         }
 
@@ -3447,10 +3554,16 @@
         }
       }
 
-      function toggleExercicioStatus(id) {
+      async function toggleExercicioStatus(id) {
         const exercicio = estado.exercicios.find((ex) => ex.id === id);
         if (exercicio) {
-          exercicio.ativo = !exercicio.ativo;
+          const novoStatus = !exercicio.ativo;
+          const { error } = await supabaseClient.from("exercicios").update({ ativo: novoStatus }).eq("id", id);
+          if (error) {
+            mostrarToast("Erro ao alterar status: " + error.message, "error");
+            return;
+          }
+          exercicio.ativo = novoStatus;
           renderizarTabelaExercicios();
           renderizarBibliotecaExercicios();
           mostrarToast(
@@ -3464,7 +3577,7 @@
         document.getElementById("modalExercicio").classList.add("show");
       }
 
-      function salvarExercicio() {
+      async function salvarExercicio() {
         const nome = document.getElementById("exercicioNome").value;
         const equipamento = document.getElementById(
           "exercicioEquipamento"
@@ -3478,14 +3591,20 @@
           return;
         }
 
+        const { data, error } = await supabaseClient
+          .from("exercicios")
+          .insert({ nome, equipamentos: [equipamento], categoria, nivel_dificuldade: parseInt(nivel), descricao: instrucoes, ativo: true })
+          .select()
+          .single();
+        if (error) {
+          mostrarToast("Erro ao cadastrar exercício: " + error.message, "error");
+          return;
+        }
         const novoExercicio = {
-          id: estado.exercicios.length + 1,
-          nome,
+          ...data,
           equipamento,
-          categoria,
-          nivel: parseInt(nivel),
-          instrucoes,
-          ativo: true,
+          nivel: data.nivel_dificuldade,
+          instrucoes: data.descricao || "",
         };
 
         estado.exercicios.push(novoExercicio);
