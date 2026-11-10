@@ -427,18 +427,74 @@ function preencherFormulario(data) {
     .querySelectorAll(".rating-option")
     .forEach((o) => o.classList.remove("selected"));
 
-  // Preencher campos
-  Object.keys(data).forEach((key) => {
-    const element = document.getElementById(key);
-    if (element) {
-      if (element.type === "checkbox") {
-        element.checked = data[key] === true;
-      } else if (element.classList.contains("rating-option")) {
-        // Ignorar, já tratado pelas escalas
-      } else {
-        element.value = data[key] || "";
-      }
-    }
+  const campos = {
+    objetivo_principal: "objetivoPrincipal",
+    tempo_experiencia: "tempoExperiencia",
+    medico_responsavel: "medicoResponsavel",
+    data_checkup: "dataCheckup",
+    pressao_arterial: "pressaoArterial",
+    frequencia_cardiaca: "frequenciaCardiaca",
+    peso_atual: "pesoAtual",
+    altura: "altura",
+    imc: "imc",
+    resultados_exames: "resultadosExames",
+    outras_doencas: "outrasDoencas",
+    cirurgias: "cirurgias",
+    medicamentos: "medicamentos",
+    alergias: "alergias",
+    restricoes_movimento: "restricoesMovimento",
+    exercicios_proibidos: "exerciciosProibidos",
+    exercicios_recomendados: "exerciciosRecomendados",
+    acompanhamento_medico: "acompanhamentoMedico",
+    postura_em_pe: "posturaEmPe",
+    postura_sentada: "posturaSentada",
+    amplitude_movimento: "amplitudeMovimento",
+    simetria_desequilibrios: "simetriaDesequilibrios",
+    queixas_dor: "queixasDor",
+    historico_lesoes: "historicoLesoes",
+    nivel_atividade_fisica: "nivelAtividadeFisica",
+    outras_atividades: "outrasAtividades",
+    horas_sono: "horasSono",
+    habitos_alimentares: "habitosAlimentares",
+    tabagismo: "tabagismo",
+    consumo_alcool: "consumoAlcool",
+    observacoes_gerais: "observacoesGerais",
+    recomendacoes_treino: "recomendacoesTreino",
+    pontos_atencao: "pontosAtencao",
+    data_avaliacao: "dataAvaliacao",
+    proxima_reavaliacao: "proximaReavaliacao",
+  };
+  Object.entries(campos).forEach(([coluna, id]) => {
+    const element = document.getElementById(id);
+    if (element) element.value = data[coluna] ?? "";
+  });
+  const checkboxes = {
+    exame_ecg: "exameECG",
+    exame_ergometria: "exameErgometria",
+    exame_raio_x: "exameRaioX",
+    exame_ressonancia: "exameRessonancia",
+    exame_tomografia: "exameTomografia",
+    exame_ultrassom: "exameUltrassom",
+    hipertensao: "hipertensao",
+    diabetes: "diabetes",
+    doenca_cardiaca: "doencaCardiaca",
+    osteoporose: "osteoporose",
+    artrite: "artrite",
+    asma: "asma",
+    problemas_tireoide: "tiroideia",
+    depressao: "depressao",
+    dor_cervical: "dorCervical",
+    dor_ombro: "dorOmbro",
+    dor_torax: "dorTorax",
+    dor_lombar: "dorLombar",
+    dor_quadril: "dorQuadril",
+    dor_joelho: "dorJoelho",
+    dor_tornozelo: "dorTornozelo",
+    dor_membros: "dorMembros",
+  };
+  Object.entries(checkboxes).forEach(([coluna, id]) => {
+    const element = document.getElementById(id);
+    if (element) element.checked = data[coluna] === true;
   });
 
   // Preencher escalas
@@ -452,14 +508,18 @@ function preencherFormulario(data) {
   ];
 
   escalas.forEach((escala) => {
-    if (escala.value) {
+    if (escala.value !== null && escala.value !== undefined) {
       document.getElementById(escala.input).value = escala.value;
       // Marcar o botão correspondente
-      const container = document.querySelector(
-        `#escala${
-          escala.input.charAt(0).toUpperCase() + escala.input.slice(1, -5)
-        }`,
-      );
+      const nomesEscalas = {
+        flexibilidadeValue: "escalaFlexibilidade",
+        forcaValue: "escalaForca",
+        equilibrioValue: "escalaEquilibrio",
+        dorValue: "escalaDor",
+        sonoValue: "escalaSono",
+        estresseValue: "escalaEstresse",
+      };
+      const container = document.getElementById(nomesEscalas[escala.input]);
       if (container) {
         const botoes = container.querySelectorAll(".rating-option");
         botoes.forEach((btn) => {
@@ -801,12 +861,19 @@ async function salvarAvaliacao() {
       result = await supabaseClient
         .from("avaliacoes")
         .update(dados)
-        .eq("id", estado.avaliacaoAtual.id);
+        .eq("id", estado.avaliacaoAtual.id)
+        .select()
+        .single();
     } else {
-      result = await supabaseClient.from("avaliacoes").insert([dados]);
+      result = await supabaseClient
+        .from("avaliacoes")
+        .insert([dados])
+        .select()
+        .single();
     }
 
     if (result.error) throw result.error;
+    estado.avaliacaoAtual = result.data;
 
     // Limpar cache para forçar recarregar
     const cacheKey = `${CACHE_KEYS.AVALIACOES}_${estado.alunoSelecionado.id}`;
@@ -823,20 +890,77 @@ async function salvarAvaliacao() {
 }
 
 function coletarDadosFormulario() {
-  const dados = {};
-  const inputs = document.querySelectorAll(
-    "#formAvaliacao input, #formAvaliacao select, #formAvaliacao textarea",
-  );
-  inputs.forEach((input) => {
-    if (input.type === "checkbox") {
-      dados[input.id] = input.checked;
-    } else if (input.type === "hidden") {
-      // ignorar
-    } else {
-      dados[input.id] = input.value;
-    }
-  });
-  return dados;
+  const texto = (id) => document.getElementById(id)?.value || null;
+  const numero = (id) => {
+    const valor = document.getElementById(id)?.value;
+    return valor === "" || valor === undefined ? null : Number(valor);
+  };
+  const marcado = (id) => Boolean(document.getElementById(id)?.checked);
+  return {
+    data_avaliacao: texto("dataAvaliacao"),
+    objetivo_principal: texto("objetivoPrincipal"),
+    tempo_experiencia: texto("tempoExperiencia"),
+    medico_responsavel: texto("medicoResponsavel"),
+    data_checkup: texto("dataCheckup"),
+    pressao_arterial: texto("pressaoArterial"),
+    frequencia_cardiaca: numero("frequenciaCardiaca"),
+    peso_atual: numero("pesoAtual"),
+    altura: numero("altura"),
+    imc: numero("imc"),
+    exame_ecg: marcado("exameECG"),
+    exame_ergometria: marcado("exameErgometria"),
+    exame_raio_x: marcado("exameRaioX"),
+    exame_ressonancia: marcado("exameRessonancia"),
+    exame_tomografia: marcado("exameTomografia"),
+    exame_ultrassom: marcado("exameUltrassom"),
+    resultados_exames: texto("resultadosExames"),
+    hipertensao: marcado("hipertensao"),
+    diabetes: marcado("diabetes"),
+    doenca_cardiaca: marcado("doencaCardiaca"),
+    osteoporose: marcado("osteoporose"),
+    artrite: marcado("artrite"),
+    asma: marcado("asma"),
+    problemas_tireoide: marcado("tiroideia"),
+    depressao: marcado("depressao"),
+    outras_doencas: texto("outrasDoencas"),
+    cirurgias: texto("cirurgias"),
+    medicamentos: texto("medicamentos"),
+    alergias: texto("alergias"),
+    restricoes_movimento: texto("restricoesMovimento"),
+    exercicios_proibidos: texto("exerciciosProibidos"),
+    exercicios_recomendados: texto("exerciciosRecomendados"),
+    acompanhamento_medico: texto("acompanhamentoMedico"),
+    postura_em_pe: texto("posturaEmPe"),
+    postura_sentada: texto("posturaSentada"),
+    amplitude_movimento: texto("amplitudeMovimento"),
+    simetria_desequilibrios: texto("simetriaDesequilibrios"),
+    flexibilidade_value: numero("flexibilidadeValue"),
+    forca_value: numero("forcaValue"),
+    equilibrio_value: numero("equilibrioValue"),
+    queixas_dor: texto("queixasDor"),
+    dor_value: numero("dorValue"),
+    dor_cervical: marcado("dorCervical"),
+    dor_ombro: marcado("dorOmbro"),
+    dor_torax: marcado("dorTorax"),
+    dor_lombar: marcado("dorLombar"),
+    dor_quadril: marcado("dorQuadril"),
+    dor_joelho: marcado("dorJoelho"),
+    dor_tornozelo: marcado("dorTornozelo"),
+    dor_membros: marcado("dorMembros"),
+    historico_lesoes: texto("historicoLesoes"),
+    nivel_atividade_fisica: texto("nivelAtividadeFisica"),
+    outras_atividades: texto("outrasAtividades"),
+    sono_value: numero("sonoValue"),
+    horas_sono: numero("horasSono"),
+    estresse_value: numero("estresseValue"),
+    habitos_alimentares: texto("habitosAlimentares"),
+    tabagismo: texto("tabagismo"),
+    consumo_alcool: texto("consumoAlcool"),
+    observacoes_gerais: texto("observacoesGerais"),
+    recomendacoes_treino: texto("recomendacoesTreino"),
+    pontos_atencao: texto("pontosAtencao"),
+    proxima_reavaliacao: texto("proximaReavaliacao"),
+  };
 }
 
 function gerarFichaTreino() {
@@ -850,9 +974,13 @@ function gerarFichaTreino() {
   const recomendados = document.getElementById("exerciciosRecomendados").value;
   const objetivo = document.getElementById("objetivoPrincipal").value;
   const dores = document.getElementById("queixasDor").value;
-  const flexibilidade = document.getElementById("flexibilidadeValue").value;
-  const forca = document.getElementById("forcaValue").value;
-  const equilibrio = document.getElementById("equilibrioValue").value;
+  const flexibilidade = Number(
+    document.getElementById("flexibilidadeValue").value,
+  );
+  const forca = Number(document.getElementById("forcaValue").value);
+  const equilibrio = Number(
+    document.getElementById("equilibrioValue").value,
+  );
 
   let recomendacoes = [];
 
@@ -930,7 +1058,7 @@ function gerarFichaTreino() {
   }
 
   // Análise de flexibilidade
-  if (flexibilidade < 4) {
+  if (flexibilidade > 0 && flexibilidade < 4) {
     recomendacoes.push({
       tipo: "recomendado",
       exercicio: "Série de alongamentos gerais",
@@ -940,7 +1068,7 @@ function gerarFichaTreino() {
   }
 
   // Análise de força
-  if (forca < 4) {
+  if (forca > 0 && forca < 4) {
     recomendacoes.push({
       tipo: "recomendado",
       exercicio: "Exercícios básicos de fortalecimento",
@@ -956,7 +1084,7 @@ function gerarFichaTreino() {
   }
 
   // Análise de equilíbrio
-  if (equilibrio < 4) {
+  if (equilibrio > 0 && equilibrio < 4) {
     recomendacoes.push({
       tipo: "recomendado",
       exercicio: "Exercícios proprioceptivos",
@@ -995,7 +1123,7 @@ function gerarFichaTreino() {
         }</div>
       </div>
     </div>
-    
+
     <div class="ficha-section">
       <h3 class="ficha-section-title">✅ Exercícios Recomendados</h3>
       ${recomendacoes
@@ -1015,7 +1143,7 @@ function gerarFichaTreino() {
           : ""
       }
     </div>
-    
+
     <div class="ficha-section">
       <h3 class="ficha-section-title">❌ Exercícios Contraindicados</h3>
       ${recomendacoes
@@ -1035,7 +1163,7 @@ function gerarFichaTreino() {
           : ""
       }
     </div>
-    
+
     <div class="ficha-section">
       <h3 class="ficha-section-title">⚠️ Pontos de Atenção</h3>
       ${recomendacoes
@@ -1057,6 +1185,18 @@ function gerarFichaTreino() {
 }
 
 function exportarFichaPDF() {
+  if (!window.jspdf?.jsPDF) {
+    mostrarToast("Biblioteca de PDF indisponível", "error");
+    return;
+  }
+  const doc = new window.jspdf.jsPDF();
+  const titulo = `Ficha de Treino - ${estado.alunoSelecionado?.nome || "Aluno"}`;
+  const texto = document.getElementById("fichaConteudo")?.innerText || "";
+  doc.setFontSize(16);
+  doc.text(titulo, 15, 18);
+  doc.setFontSize(10);
+  doc.text(doc.splitTextToSize(texto, 180), 15, 30);
+  doc.save(`ficha-treino-${estado.alunoSelecionado?.id || "aluno"}.pdf`);
   mostrarToast("Ficha exportada com sucesso!", "success");
 }
 
@@ -1105,6 +1245,20 @@ function limparFormulario() {
     id: null,
     aluno_id: estado.alunoSelecionado?.id,
   };
+  if (estado.alunoSelecionado) {
+    document.getElementById("nomeAluno").value =
+      estado.alunoSelecionado.nome || "";
+    document.getElementById("dataNascimento").value =
+      estado.alunoSelecionado.nascimento || "";
+    document.getElementById("cpf").value = estado.alunoSelecionado.cpf || "";
+    document.getElementById("contato").value =
+      estado.alunoSelecionado.telefone || estado.alunoSelecionado.email || "";
+    document.getElementById("profissao").value =
+      estado.alunoSelecionado.profissao || "";
+    document.getElementById("seletorAluno").value = estado.alunoSelecionado.id;
+    document.getElementById("buscaAluno").value =
+      estado.alunoSelecionado.nome || "";
+  }
   calcularProgresso();
 }
 
@@ -1113,6 +1267,22 @@ function exportarPDF() {
     mostrarToast("Selecione um aluno primeiro", "warning");
     return;
   }
+  if (!window.jspdf?.jsPDF) {
+    mostrarToast("Biblioteca de PDF indisponível", "error");
+    return;
+  }
+  const doc = new window.jspdf.jsPDF();
+  const aluno = estado.alunoSelecionado.nome || "Aluno";
+  const linhas = [
+    `Avaliação detalhada - ${aluno}`,
+    `Data: ${document.getElementById("dataAvaliacao").value || "Não informada"}`,
+    `Objetivo: ${document.getElementById("objetivoPrincipal").value || "Não informado"}`,
+    `Observações: ${document.getElementById("observacoesGerais").value || "-"}`,
+    `Recomendações: ${document.getElementById("recomendacoesTreino").value || "-"}`,
+  ];
+  doc.setFontSize(14);
+  doc.text(doc.splitTextToSize(linhas.join("\n"), 180), 15, 20);
+  doc.save(`avaliacao-${estado.alunoSelecionado.id}.pdf`);
   mostrarToast("PDF gerado com sucesso!", "success");
 }
 
