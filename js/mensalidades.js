@@ -14,6 +14,7 @@ const estado = {
     mensalidades: [],
     parcelas: [],
     planos: [],
+    planosAlunos: [],
   },
   filtros: {
     busca: "",
@@ -81,6 +82,36 @@ function adicionarMeses(dataStr, n, diaFixo = null) {
   return d.toISOString().split("T")[0];
 }
 
+function adicionarDias(dataStr, dias) {
+  const d = new Date(dataStr + "T12:00:00");
+  d.setDate(d.getDate() + dias);
+  return d.toISOString().split("T")[0];
+}
+
+function obterPausaAluno(alunoId) {
+  return estado.dados.planosAlunos
+    .filter(
+      (p) =>
+        p.aluno_id === alunoId &&
+        p.status === "ativo" &&
+        p.pausa_inicio &&
+        p.pausa_fim &&
+        p.pausa_fim >= p.pausa_inicio,
+    )
+    .sort((a, b) =>
+      (b.data_inicio || "").localeCompare(a.data_inicio || ""),
+    )[0];
+}
+
+function aplicarPausaAoVencimento(dataStr, alunoId) {
+  const pausa = obterPausaAluno(alunoId);
+  if (!pausa || dataStr < pausa.pausa_inicio) return dataStr;
+  const inicio = new Date(pausa.pausa_inicio + "T12:00:00");
+  const fim = new Date(pausa.pausa_fim + "T12:00:00");
+  const dias = Math.floor((fim - inicio) / 86400000) + 1;
+  return adicionarDias(dataStr, dias);
+}
+
 function fecharModal(id) {
   document.getElementById(id).classList.remove("show");
 }
@@ -146,22 +177,25 @@ async function atualizarStatusParcelasAtrasadas() {
 
 async function carregarDados() {
   try {
-    const [alunos, mensalidades, parcelas, planos] = await Promise.all([
+    const [alunos, mensalidades, parcelas, planos, planosAlunos] = await Promise.all([
       supabaseClient.from("alunos").select("*").order("nome"),
       supabaseClient.from("mensalidades").select("*"),
       supabaseClient.from("parcelas").select("*"),
       supabaseClient.from("planos").select("*").eq("ativo", true).order("nome"),
+      supabaseClient.from("planos_alunos").select("*").eq("status", "ativo"),
     ]);
 
     if (alunos.error) throw alunos.error;
     if (mensalidades.error) throw mensalidades.error;
     if (parcelas.error) throw parcelas.error;
     if (planos.error) throw planos.error;
+    if (planosAlunos.error) throw planosAlunos.error;
 
     estado.dados.alunos = alunos.data || [];
     estado.dados.mensalidades = mensalidades.data || [];
     estado.dados.parcelas = parcelas.data || [];
     estado.dados.planos = planos.data || [];
+    estado.dados.planosAlunos = planosAlunos.data || [];
 
     await atualizarStatusParcelasAtrasadas();
 
@@ -792,8 +826,12 @@ function calcularValoresMensalidade() {
   }
 
   let html = "";
+  const alunoId = parseInt(
+    document.getElementById("mensalidadeAlunoId").value,
+  );
   for (let i = 0; i < numParcelas; i++) {
-    const dataVenc = adicionarMeses(primeiroVenc, i, dia);
+    const dataBase = adicionarMeses(primeiroVenc, i, dia);
+    const dataVenc = aplicarPausaAoVencimento(dataBase, alunoId);
     html += `
       <div class="parcela-item">
         <div class="parcela-info">
@@ -990,11 +1028,12 @@ async function salvarMensalidade() {
         const parcelas = [];
         const valorParcelaComDesconto = totalComDesconto / numParcelas;
         for (let i = 0; i < numParcelas; i++) {
+          const dataBase = adicionarMeses(primeiroVenc, i, dia);
           parcelas.push({
             mensalidade_id: parseInt(id),
             numero: i + 1,
             valor: valorParcelaComDesconto,
-            vencimento: adicionarMeses(primeiroVenc, i, dia),
+            vencimento: aplicarPausaAoVencimento(dataBase, alunoId),
             status: "pendente",
           });
         }
@@ -1030,11 +1069,12 @@ async function salvarMensalidade() {
         const parcelas = [];
         const valorParcelaComDesconto = totalComDesconto / numParcelas;
         for (let i = 0; i < numParcelas; i++) {
+          const dataBase = adicionarMeses(primeiroVenc, i, dia);
           parcelas.push({
             mensalidade_id: mensalidadeId,
             numero: i + 1,
             valor: valorParcelaComDesconto,
-            vencimento: adicionarMeses(primeiroVenc, i, dia),
+            vencimento: aplicarPausaAoVencimento(dataBase, alunoId),
             status: "pendente",
           });
         }
@@ -2399,18 +2439,20 @@ async function confirmarCancelamento() {
         );
         for (const parcela of parcelas) {
           if (parcela.status === "pago" && tipo === "com_estorno") {
-            await supabaseClient
+            const { error: erroEstorno } = await supabaseClient
               .from("parcelas")
               .update({
                 estornado: true,
                 observacoes: `${parcela.observacoes || ""} Estornado em ${dataCancelamento}`,
               })
               .eq("id", parcela.id);
+            if (erroEstorno) throw erroEstorno;
           } else if (parcela.status !== "pago") {
-            await supabaseClient
+            const { error: erroParcela } = await supabaseClient
               .from("parcelas")
               .update({ status: "cancelada" })
               .eq("id", parcela.id);
+            if (erroParcela) throw erroParcela;
           }
         }
 

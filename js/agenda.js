@@ -1038,6 +1038,22 @@ async function salvarAgendamento() {
   if (!planoNome) {
     return mostrarToast("Selecione um plano.", "error");
   }
+  const pausaInicioInformada =
+    document.getElementById("agendamentoPausaInicio").value;
+  const pausaFimInformada =
+    document.getElementById("agendamentoPausaFim").value;
+  if (
+    (pausaInicioInformada && !pausaFimInformada) ||
+    (!pausaInicioInformada && pausaFimInformada) ||
+    (pausaInicioInformada &&
+      pausaFimInformada &&
+      pausaFimInformada < pausaInicioInformada)
+  ) {
+    return mostrarToast(
+      "Informe um período de férias válido, com início e fim.",
+      "error",
+    );
+  }
 
   abrirModalConfirmar("Deseja realmente gerar este agendamento?", async () => {
     calcularPrevisaoAgendamento();
@@ -1084,6 +1100,7 @@ async function salvarAgendamento() {
     }
 
     mostrarLoading();
+    let planoCriadoId = null;
     try {
       const { data: planoInserido, error: erroPlano } = await supabaseClient
         .from("planos_alunos")
@@ -1091,6 +1108,7 @@ async function salvarAgendamento() {
         .select()
         .single();
       if (erroPlano) throw erroPlano;
+      planoCriadoId = planoInserido.id;
 
       const horariosParaInserir = diasHorarios.map((dh) => ({
         plano_aluno_id: planoInserido.id,
@@ -1184,18 +1202,18 @@ async function salvarAgendamento() {
               console.warn(
                 `Conflito de horário para o aluno ${alunoId} em ${dataStr} ${horario}. Aula não gerada.`,
               );
-              continue;
+            } else {
+              aulasParaInserir.push({
+                aluno_id: parseInt(alunoId),
+                plano_aluno_id: planoInserido.id,
+                data: dataStr,
+                horario: horario + ":00",
+                duracao: estado.agendamentoAtual.duracao,
+                status: "confirmada",
+                observacoes: estado.agendamentoAtual.observacoes,
+              });
+              count++;
             }
-            aulasParaInserir.push({
-              aluno_id: parseInt(alunoId),
-              plano_aluno_id: planoInserido.id,
-              data: dataStr,
-              horario: horario + ":00",
-              duracao: estado.agendamentoAtual.duracao,
-              status: "confirmada",
-              observacoes: estado.agendamentoAtual.observacoes,
-            });
-            count++;
           }
         }
 
@@ -1223,6 +1241,14 @@ async function salvarAgendamento() {
       carregarDisponibilidade();
     } catch (error) {
       console.error(error);
+      if (planoCriadoId) {
+        await supabaseClient.from("aulas").delete().eq("plano_aluno_id", planoCriadoId);
+        await supabaseClient
+          .from("planos_horarios")
+          .delete()
+          .eq("plano_aluno_id", planoCriadoId);
+        await supabaseClient.from("planos_alunos").delete().eq("id", planoCriadoId);
+      }
       mostrarToast("Erro ao salvar agendamento: " + error.message, "error");
     } finally {
       esconderLoading();
