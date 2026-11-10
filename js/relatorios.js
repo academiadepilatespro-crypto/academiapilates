@@ -14,6 +14,7 @@ const estado = {
   usuario: null,
   dados: {
     alunos: [],
+    avaliacoes: [],
     planos: [],
     aulas: [],
     mensalidades: [],
@@ -48,7 +49,7 @@ const estado = {
   benchmarkAtivo: false,
   cardsDashboardVisiveis: JSON.parse(
     localStorage.getItem("cardsDashboardVisiveis"),
-  ) || ["totalAlunos", "aulasMes", "faturamento", "inadimplencia"],
+  ) || ["totalAlunos", "aulasMes", "faturamento", "inadimplencia", "avaliacoes"],
 };
 
 // ============================================================
@@ -168,13 +169,18 @@ function carregarInfoUsuario() {
 // ============================================================
 async function carregarDadosBasicos() {
   try {
-    const [alunos, aulas, parcelas, contas] = await Promise.all([
+    const [alunos, avaliacoes, aulas, parcelas, contas] = await Promise.all([
       supabaseClient.from("alunos").select("*").order("nome"),
+      supabaseClient
+        .from("avaliacoes")
+        .select("id, aluno_id, data_avaliacao, objetivo_principal, flexibilidade_value, forca_value, equilibrio_value, dor_value")
+        .order("data_avaliacao", { ascending: false }),
       supabaseClient.from("aulas_agendadas").select("*"),
       supabaseClient.from("parcelas").select("*, mensalidades(alunos(*))"),
       supabaseClient.from("contas_pagar").select("*"),
     ]);
     if (!alunos.error) estado.dados.alunos = alunos.data || [];
+    if (!avaliacoes.error) estado.dados.avaliacoes = avaliacoes.data || [];
     if (!aulas.error) estado.dados.aulas = aulas.data || [];
     if (!parcelas.error) estado.dados.parcelas = parcelas.data || [];
     if (!contas.error) estado.dados.contasPagar = contas.data || [];
@@ -720,6 +726,18 @@ function carregarDashboardExecutivo() {
         </div>
       </div>`;
   }
+  if (cardsVisiveis.includes("avaliacoes")) {
+    const metricas = indicadores.metricasAvaliacoes;
+    cardsHtml += `
+      <div class="stat-card" data-tooltip="Avaliações detalhadas no período">
+        <div class="stat-icon"><i class="fas fa-stethoscope"></i></div>
+        <div class="stat-info">
+          <div class="stat-value">${metricas.total}</div>
+          <div class="stat-label">Avaliações</div>
+          <div class="stat-trend">Média geral ${((metricas.mediaFlexibilidade + metricas.mediaForca + metricas.mediaEquilibrio) / 3 || 0).toFixed(1)}/10</div>
+        </div>
+      </div>`;
+  }
 
   const html = `
           <div>
@@ -742,6 +760,20 @@ function carregarDashboardExecutivo() {
                       <div class="chart-container"><canvas id="graficoStatusAlunos"></canvas></div>
                   </div>
               </div>
+
+              ${(() => {
+                const m = indicadores.metricasAvaliacoes;
+                return `<div class="report-container">
+                  <div class="report-header"><div class="report-title">🩺 Métricas das Avaliações</div></div>
+                  <div class="report-summary">
+                    <div><div class="relatorio-valor-destaque">${m.total}</div><div class="relatorio-label">avaliações</div></div>
+                    <div><div class="relatorio-valor-destaque">${m.mediaFlexibilidade.toFixed(1)}</div><div class="relatorio-label">flexibilidade média</div></div>
+                    <div><div class="relatorio-valor-destaque">${m.mediaForca.toFixed(1)}</div><div class="relatorio-label">força média</div></div>
+                    <div><div class="relatorio-valor-destaque">${m.mediaEquilibrio.toFixed(1)}</div><div class="relatorio-label">equilíbrio médio</div></div>
+                    <div><div class="relatorio-valor-destaque">${m.mediaDor.toFixed(1)}</div><div class="relatorio-label">dor média</div></div>
+                  </div>
+                </div>`;
+              })()}
 
               <div class="report-container">
                   <div class="report-header">
@@ -802,6 +834,10 @@ function calcularIndicadoresPrincipais() {
     estado.periodo.fim,
   );
   const inadimplencia = calcularInadimplencia();
+  const metricasAvaliacoes = calcularMetricasAvaliacoes(
+    estado.periodo.inicio,
+    estado.periodo.fim,
+  );
   return {
     totalAlunos,
     novosAlunos,
@@ -811,6 +847,7 @@ function calcularIndicadoresPrincipais() {
     ticketMedio,
     inadimplencia: inadimplencia.total,
     inadimplentes: inadimplencia.alunos,
+    metricasAvaliacoes,
   };
 }
 
@@ -820,6 +857,29 @@ function calcularIndicadoresPeriodo(inicio, fim) {
   ).length;
   const faturamentoMes = calcularFaturamentoPeriodo(inicio, fim);
   return { totalAlunos, faturamentoMes };
+}
+
+function calcularMetricasAvaliacoes(inicio = null, fim = null) {
+  const avaliadas = estado.dados.avaliacoes.filter((avaliacao) => {
+    if (!inicio || !fim) return true;
+    return avaliacao.data_avaliacao >= inicio && avaliacao.data_avaliacao <= fim;
+  });
+  const media = (campo) => {
+    const valores = avaliadas
+      .map((avaliacao) => Number(avaliacao[campo]))
+      .filter((valor) => Number.isFinite(valor));
+    return valores.length
+      ? valores.reduce((total, valor) => total + valor, 0) / valores.length
+      : 0;
+  };
+  return {
+    total: avaliadas.length,
+    mediaFlexibilidade: media("flexibilidade_value"),
+    mediaForca: media("forca_value"),
+    mediaEquilibrio: media("equilibrio_value"),
+    mediaDor: media("dor_value"),
+    avaliadas,
+  };
 }
 
 function calcularFaturamentoPeriodo(inicio, fim) {
@@ -2154,6 +2214,7 @@ function obterTipoDespesa(categoria) {
 // ============================================================
 function carregarRelatorioPerformance() {
   const subTabs = gerarSubTabs("performance", [
+    { id: "avaliacoes", icone: "fa-stethoscope", label: "Avaliações" },
     { id: "crescimento", icone: "fa-chart-line", label: "Crescimento" },
     { id: "metas", icone: "fa-bullseye", label: "Metas" },
     { id: "forecast", icone: "fa-chart-simple", label: "Previsão" },
@@ -2173,6 +2234,8 @@ function carregarRelatorioPerformance() {
 
 function gerarRelatorioPerformancePorSub(subId) {
   switch (subId) {
+    case "avaliacoes":
+      return gerarRelatorioMetricasAvaliacoes();
     case "crescimento":
       return gerarRelatorioCrescimento();
     case "metas":
@@ -2188,6 +2251,31 @@ function gerarRelatorioPerformancePorSub(subId) {
     default:
       return gerarRelatorioCrescimento();
   }
+}
+
+function gerarRelatorioMetricasAvaliacoes() {
+  const metricas = calcularMetricasAvaliacoes(
+    estado.periodo.inicio,
+    estado.periodo.fim,
+  );
+  const porAluno = metricas.avaliadas.map((avaliacao) => {
+    const aluno = estado.dados.alunos.find((item) => item.id === avaliacao.aluno_id);
+    return { ...avaliacao, nome: aluno?.nome || `Aluno #${avaliacao.aluno_id}` };
+  });
+  const linhas = porAluno.map((avaliacao) =>
+    `<tr><td>${avaliacao.nome}</td><td>${fmtData(avaliacao.data_avaliacao)}</td><td>${avaliacao.flexibilidade_value ?? "-"}</td><td>${avaliacao.forca_value ?? "-"}</td><td>${avaliacao.equilibrio_value ?? "-"}</td><td>${avaliacao.dor_value ?? "-"}</td><td>${avaliacao.objetivo_principal || "-"}</td></tr>`,
+  ).join("");
+  return `<div class="report-container">
+    <div class="report-header"><div class="report-title">🩺 Métricas das Avaliações Detalhadas</div></div>
+    <div class="report-summary">
+      <div><div class="relatorio-valor-destaque">${metricas.total}</div><div class="relatorio-label">avaliações</div></div>
+      <div><div class="relatorio-valor-destaque">${metricas.mediaFlexibilidade.toFixed(1)}</div><div class="relatorio-label">flexibilidade média</div></div>
+      <div><div class="relatorio-valor-destaque">${metricas.mediaForca.toFixed(1)}</div><div class="relatorio-label">força média</div></div>
+      <div><div class="relatorio-valor-destaque">${metricas.mediaEquilibrio.toFixed(1)}</div><div class="relatorio-label">equilíbrio médio</div></div>
+      <div><div class="relatorio-valor-destaque">${metricas.mediaDor.toFixed(1)}</div><div class="relatorio-label">dor média</div></div>
+    </div>
+    ${linhas ? `<div class="table-responsive"><table><thead><tr><th>Aluno</th><th>Data</th><th>Flexibilidade</th><th>Força</th><th>Equilíbrio</th><th>Dor</th><th>Objetivo</th></tr></thead><tbody>${linhas}</tbody></table></div>` : '<p class="empty-state">Nenhuma avaliação no período selecionado.</p>'}
+  </div>`;
 }
 
 function gerarRelatorioCrescimento() {
@@ -2613,6 +2701,7 @@ function personalizarCardsDashboard() {
     { id: "aulasMes", label: "Aulas no Mês" },
     { id: "faturamento", label: "Faturamento" },
     { id: "inadimplencia", label: "Inadimplência" },
+    { id: "avaliacoes", label: "Avaliações detalhadas" },
   ];
   container.innerHTML = opcoes
     .map(

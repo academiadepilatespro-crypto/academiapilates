@@ -1691,11 +1691,18 @@ async function visualizarDossie(id) {
     const sau = estado.dados.saude.data[alunoIdStr];
     const docs = estado.dados.documentos.data[alunoIdStr] || [];
     const evos = estado.dados.evolucao.data[alunoIdStr] || [];
-    const [statusFinanceiro, ultimaAula, proximaAula] = await Promise.all([
+    const [statusFinanceiro, ultimaAula, proximaAula, avaliacoesResult] = await Promise.all([
       carregarStatusFinanceiro(aluno.id),
       carregarUltimaAula(aluno.id),
       carregarProximaAula(aluno.id),
+      supabaseClient
+        .from("avaliacoes")
+        .select("data_avaliacao, objetivo_principal, flexibilidade_value, forca_value, equilibrio_value, dor_value")
+        .eq("aluno_id", aluno.id)
+        .order("data_avaliacao", { ascending: false }),
     ]);
+    const avaliacoes = avaliacoesResult.error ? [] : avaliacoesResult.data || [];
+    const ultimaAvaliacao = avaliacoes[0];
     const idade = calcularIdade(aluno.nascimento);
     let fotoHtml = "";
     if (aluno.foto_url)
@@ -1708,6 +1715,7 @@ async function visualizarDossie(id) {
       <div class="dossie-section"><h3 class="section-title"><i class="fas fa-dollar-sign"></i> Financeiro</h3><div class="info-item"><div class="info-label">Status</div><div class="info-value">${statusFinanceiro === "em-dia" ? "Em dia" : statusFinanceiro === "pendente" ? "Pendente" : "Atrasado"}</div></div></div>
       <div class="dossie-section"><h3 class="section-title"><i class="fas fa-calendar-check"></i> Agenda</h3><div class="info-item"><div class="info-label">Última Aula</div><div class="info-value">${ultimaAula ? formatarData(ultimaAula) : "-"}</div></div><div class="info-item"><div class="info-label">Próxima Aula</div><div class="info-value">${proximaAula ? formatarData(proximaAula) : "-"}</div></div></div>
       <div class="dossie-section"><h3 class="section-title"><i class="fas fa-file"></i> Documentos (${docs.length})</h3>${docs.length > 0 ? docs.map((doc) => `<div style="display:flex; align-items:center; justify-content:space-between; padding:0.5rem; background:var(--off-white); margin-bottom:0.5rem; border-radius:4px;"><div style="display:flex; align-items:center; gap:0.5rem;"><i class="fas ${doc.tipo?.includes("pdf") ? "fa-file-pdf" : doc.tipo?.includes("image") ? "fa-file-image" : "fa-file"}"></i><span>${doc.nome || "Documento"}</span></div><span style="font-size:0.8rem; color:var(--grafite-claro);">${doc.observacao || ""}</span><button class="btn-download" onclick="window.open('${doc.url}', '_blank')" style="width:32px; height:32px;"><i class="fas fa-download"></i></button></div>`).join("") : "<p>Nenhum documento anexado.</p>"}</div>
+      <div class="dossie-section"><h3 class="section-title"><i class="fas fa-stethoscope"></i> Avaliações Detalhadas (${avaliacoes.length})</h3>${ultimaAvaliacao ? `<div class="info-grid"><div class="info-item"><div class="info-label">Última avaliação</div><div class="info-value">${formatarData(ultimaAvaliacao.data_avaliacao)}</div></div><div class="info-item"><div class="info-label">Objetivo</div><div class="info-value">${ultimaAvaliacao.objetivo_principal || "-"}</div></div><div class="info-item"><div class="info-label">Flexibilidade / Força / Equilíbrio</div><div class="info-value">${ultimaAvaliacao.flexibilidade_value ?? "-"} / ${ultimaAvaliacao.forca_value ?? "-"} / ${ultimaAvaliacao.equilibrio_value ?? "-"}</div></div><div class="info-item"><div class="info-label">Dor</div><div class="info-value">${ultimaAvaliacao.dor_value ?? "-"}</div></div></div>` : "<p>Nenhuma avaliação detalhada registrada.</p>"}</div>
       <div class="dossie-section"><h3 class="section-title"><i class="fas fa-chart-line"></i> Evoluções (${evos.length})</h3>${evos.length > 0 ? evos.map((evo) => `<div style="padding:0.8rem; background:var(--off-white); margin-bottom:0.5rem; border-radius:4px; border-left:4px solid var(--verde-principal);"><strong>${formatarData(evo.data)}:</strong> ${evo.titulo || "Evolução"}<p style="margin-top:0.3rem; font-size:0.8rem;">${evo.descricao || ""}</p></div>`).join("") : "<p>Nenhuma evolução registrada.</p>"}</div>
     `;
     document.getElementById("conteudoDossie").innerHTML = conteudo;
