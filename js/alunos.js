@@ -830,7 +830,7 @@ async function exibirTabelaAlunos() {
 
   if (alunosPaginados.length === 0) {
     tbody.innerHTML =
-      '<tr><td colspan="9" style="text-align:center; padding:2rem;">Nenhum aluno encontrado</td></tr>';
+      '<tr><td colspan="9"><div class="empty-state-table"><i class="fas fa-user-plus"></i><strong>Nenhum aluno encontrado</strong><span>Tente limpar os filtros ou cadastre o primeiro aluno.</span><button class="btn-primary" onclick="abrirModalAluno()"><i class="fas fa-plus"></i> Novo aluno</button></div></td></tr>';
     document.getElementById("resultadosEncontrados").textContent =
       "0 resultados";
     renderizarPaginacao();
@@ -895,14 +895,19 @@ async function exibirTabelaAlunos() {
             <td>${ultimaAulaStr}</td>
             <td>${proximaAulaStr}</td>
             <td>
-              <div class="action-buttons">
-                <button class="action-btn visualizar" onclick="visualizarDossie('${aluno.id}')" title="Visualizar dossiê"><i class="fas fa-eye"></i></button>
-                <button class="action-btn editar" onclick="abrirModalAluno('${aluno.id}')" title="Editar"><i class="fas fa-edit"></i></button>
-                <button class="action-btn avaliacao" onclick="abrirModalAvaliacao('${aluno.id}')" title="Avaliação Detalhada"><i class="fas fa-stethoscope"></i></button>
-                <button class="action-btn agenda" onclick="abrirModalAgenda('${aluno.id}')" title="Agenda do Aluno"><i class="fas fa-calendar-alt"></i></button>
-                <button class="action-btn financeiro" onclick="abrirModalFinanceiro('${aluno.id}')" title="Financeiro"><i class="fas fa-dollar-sign"></i></button>
-                <button class="action-btn lembrete" onclick="enviarLembreteIndividual('${aluno.id}', '${aluno.nome.replace(/'/g, "\\'")}')" title="Enviar lembrete de pagamento"><i class="fas fa-bell"></i></button>
-                ${aluno.ativo ? `<button class="action-btn desativar" onclick="toggleStatusAluno('${aluno.id}', ${aluno.ativo})" title="Desativar"><i class="fas fa-user-slash"></i></button>` : `<button class="action-btn ativar" onclick="toggleStatusAluno('${aluno.id}', ${aluno.ativo})" title="Reativar"><i class="fas fa-user-check"></i></button>`}
+              <div class="action-buttons action-buttons-compact">
+                <button class="action-btn action-btn-primary" onclick="visualizarDossie('${aluno.id}')" title="Abrir aluno"><i class="fas fa-folder-open"></i><span>Abrir</span></button>
+                <details class="action-menu">
+                  <summary class="action-menu-toggle">Mais</summary>
+                  <div class="action-menu-popover">
+                    <button class="action-btn editar" onclick="abrirModalAluno('${aluno.id}')" title="Editar aluno"><i class="fas fa-edit"></i> Editar</button>
+                    <button class="action-btn avaliacao" onclick="abrirModalAvaliacao('${aluno.id}')" title="Criar avaliação física"><i class="fas fa-stethoscope"></i> Avaliação</button>
+                    <button class="action-btn agenda" onclick="abrirModalAgenda('${aluno.id}')" title="Ver agenda do aluno"><i class="fas fa-calendar-alt"></i> Agenda</button>
+                    <button class="action-btn financeiro" onclick="abrirModalFinanceiro('${aluno.id}')" title="Ver financeiro do aluno"><i class="fas fa-dollar-sign"></i> Financeiro</button>
+                    <button class="action-btn lembrete" onclick="enviarLembreteIndividual('${aluno.id}', '${aluno.nome.replace(/'/g, "\\'")}')" title="Enviar lembrete de pagamento"><i class="fas fa-bell"></i> Lembrete</button>
+                    ${aluno.ativo ? `<button class="action-btn desativar" onclick="toggleStatusAluno('${aluno.id}', ${aluno.ativo})" title="Desativar aluno"><i class="fas fa-user-slash"></i> Desativar</button>` : `<button class="action-btn ativar" onclick="toggleStatusAluno('${aluno.id}', ${aluno.ativo})" title="Reativar aluno"><i class="fas fa-user-check"></i> Reativar</button>`}
+                  </div>
+                </details>
               </div>
             </td>
           </tr>
@@ -1594,7 +1599,8 @@ async function salvarAluno() {
         .eq("aluno_id", alunoId);
     else await supabaseClient.from("saude_alunos").insert([sauData]);
 
-    mostrarToast("Dossiê salvo com sucesso!", "success");
+    const nomeSalvo = document.getElementById("alunoNome")?.value || "aluno";
+    mostrarToast(`Cadastro de ${nomeSalvo} salvo com sucesso.`, "success");
     await carregarTodosDados(true);
     if (id) fecharModal("modalAluno");
     else {

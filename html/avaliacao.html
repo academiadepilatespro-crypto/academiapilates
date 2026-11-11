@@ -75,7 +75,7 @@
         </div>
         <div style="display: flex; gap: 0.5rem">
           <button class="btn-success" onclick="salvarAvaliacao()">
-            <i class="fas fa-save"></i> Salvar
+            <i class="fas fa-save"></i> Salvar avaliação
           </button>
           <button class="btn-outline" onclick="exportarPDF()">
             <i class="fas fa-file-pdf"></i> PDF
@@ -109,6 +109,12 @@
 
       <!-- BARRA DE PROGRESSO -->
       <div class="progress-section" id="progressSection">
+        <div class="form-steps" aria-label="Etapas da avaliação">
+          <span class="form-step is-current"><i class="fas fa-user"></i> 1. Dados</span>
+          <span class="form-step"><i class="fas fa-heartbeat"></i> 2. Saúde</span>
+          <span class="form-step"><i class="fas fa-person-running"></i> 3. Avaliação física</span>
+          <span class="form-step"><i class="fas fa-flag-checkered"></i> 4. Finalizar</span>
+        </div>
         <div class="progress-stats">
           <div class="progress-stat-item">
             <div class="progress-stat-value" id="progressPercent">0%</div>

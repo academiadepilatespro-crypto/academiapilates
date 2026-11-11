@@ -880,7 +880,7 @@ async function salvarAvaliacao() {
     localStorage.removeItem(cacheKey);
 
     await carregarAvaliacoesAluno(estado.alunoSelecionado.id);
-    mostrarToast("Avaliação salva com sucesso!", "success");
+    mostrarToast(`Avaliação de ${estado.alunoSelecionado.nome} salva com sucesso.`, "success");
   } catch (error) {
     console.error("Erro ao salvar avaliação:", error);
     mostrarToast("Erro ao salvar avaliação", "error");

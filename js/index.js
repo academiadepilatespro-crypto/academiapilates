@@ -347,7 +347,8 @@ async function carregarTodosDados(forceRefresh = false) {
     ]);
 
     await renderizarDashboard();
-    mostrarToast("Dados atualizados com sucesso!", "success");
+    const stats = calcularStats();
+    mostrarToast(`Visão geral atualizada: ${stats.totalAlunos} alunos e ${stats.aulasHojeCount} aulas hoje.`, "success");
   } catch (error) {
     console.error("Erro ao carregar dados:", error);
     mostrarToast("Erro ao carregar alguns dados", "error");
@@ -962,6 +963,18 @@ async function fazerLogout() {
   mostrarToast("Logout realizado!", "info");
 }
 
+function dispensarOrientacao() {
+  localStorage.setItem("orientacao_inicial_dispensada", "true");
+  document.getElementById("onboardingCard")?.remove();
+}
+
+function mostrarOrientacaoInicial() {
+  const card = document.getElementById("onboardingCard");
+  if (card && localStorage.getItem("orientacao_inicial_dispensada") === "true") {
+    card.remove();
+  }
+}
+
 // ============================================================
 // FUNÇÕES DE NAVEGAÇÃO (ATUALIZADA COM AVALIAÇÃO)
 // ============================================================
@@ -1014,6 +1027,7 @@ window.onload = async function () {
       document.getElementById("sidebarUserAvatar").textContent = iniciais;
 
       await carregarTodosDados();
+      mostrarOrientacaoInicial();
     } catch (e) {
       console.error("Erro ao restaurar sessão:", e);
     }
