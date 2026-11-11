@@ -470,6 +470,7 @@ const Templates = {
               <div class="stat-info">
                 <div class="stat-value">${stats.totalAlunos}</div>
                 <div class="stat-label">Total de Alunos</div>
+                <div class="card-action-hint"><i class="fas fa-arrow-right"></i> Abrir lista de alunos</div>
                 <div class="stat-trend up"><i class="fas fa-arrow-up"></i> ${
                   stats.alunosAtivos
                 } ativos</div>
@@ -480,6 +481,7 @@ const Templates = {
               <div class="stat-info">
                 <div class="stat-value">${stats.aulasHojeCount}</div>
                 <div class="stat-label">Aulas Hoje</div>
+                <div class="card-action-hint"><i class="fas fa-arrow-right"></i> Conferir agenda</div>
               </div>
             </div>
             <div class="stat-card">
@@ -493,6 +495,7 @@ const Templates = {
                   stats.valorPendente,
                 )}</div>
                 <div class="stat-label">Mensalidades Pendentes</div>
+                <div class="card-action-hint"><i class="fas fa-arrow-right"></i> Ver cobranças</div>
                 <div class="stat-trend down"><i class="fas fa-clock"></i> ${
                   stats.mensalidadesPendentes
                 } pendências</div>
@@ -507,6 +510,7 @@ const Templates = {
                   stats.valorContas,
                 )}</div>
                 <div class="stat-label">Contas a Pagar</div>
+                <div class="card-action-hint"><i class="fas fa-arrow-right"></i> Ver vencimentos</div>
                 <div class="stat-trend down"><i class="fas fa-exclamation-triangle"></i> ${
                   stats.contasPendentes
                 } contas</div>
@@ -712,7 +716,7 @@ const Templates = {
 
   acessoRapido: (stats) => `
           <div class="dashboard-card">
-            <div class="card-header"><h3 class="card-title">Acesso Rápido</h3></div>
+            <div class="card-header"><div><h3 class="card-title">Ações rápidas</h3><div class="card-action-hint"><i class="fas fa-hand-pointer"></i> Escolha o que deseja fazer</div></div></div>
             <div class="modulos-grid">
               <a href="#" class="modulo-card" onclick="abrirModulo('alunos'); return false;">
                 <div class="modulo-icon"><i class="fas fa-users"></i></div>
@@ -730,8 +734,8 @@ const Templates = {
                 <div class="modulo-count">${stats.mensalidadesPendentes} pendências</div>
               </a>
               <a href="#" class="modulo-card" onclick="abrirModulo('relatorios'); return false;">
-                <div class="modulo-icon"><i class="fas fa-chart-bar"></i></div>
-                <div class="modulo-nome">Relatórios</div>
+                <div class="modulo-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="modulo-nome">Progresso</div>
                 <div class="modulo-count">Análises</div>
               </a>
             </div>

@@ -1,0 +1,233 @@
+:root {
+  --visual-verde: #3a6b5c;
+  --visual-verde-escuro: #285044;
+  --visual-verde-claro: #e9f4ef;
+  --visual-azul: #3d7ea6;
+  --visual-azul-claro: #eaf4fb;
+  --visual-amarelo: #d89b28;
+  --visual-amarelo-claro: #fff6df;
+  --visual-vermelho: #c94c4c;
+  --visual-vermelho-claro: #fff0f0;
+  --visual-roxo: #8064a2;
+  --visual-roxo-claro: #f3eff9;
+  --visual-cinza: #64736d;
+  --visual-cinza-claro: #f5f8f7;
+  --visual-borda: #dce8e3;
+  --visual-sombra: 0 8px 24px rgba(40, 80, 68, 0.08);
+}
+
+/* Camada transversal: informação rápida antes de detalhes. */
+body {
+  background: #f7faf8;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease, background 0.18s ease;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(61, 126, 166, 0.28);
+  outline-offset: 2px;
+}
+
+.card-header,
+.dashboard-header,
+.chart-header {
+  gap: 0.75rem;
+}
+
+.card-title,
+.dashboard-title,
+.chart-title {
+  letter-spacing: -0.01em;
+}
+
+.stat-card,
+.dashboard-card,
+.chart-card,
+.alert-card,
+.alerta-card,
+.mini-card,
+.section-card,
+.list-card {
+  border: 1px solid var(--visual-borda);
+  box-shadow: var(--visual-sombra);
+  border-radius: 14px;
+}
+
+.stat-card:hover,
+.dashboard-card:hover,
+.chart-card:hover,
+.alert-card:hover,
+.alerta-card:hover,
+.mini-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(40, 80, 68, 0.12);
+}
+
+.stat-card .stat-label,
+.dashboard-card .card-subtitle,
+.chart-card .chart-subtitle {
+  color: var(--visual-cinza);
+}
+
+.stat-card .stat-trend,
+.badge,
+.status-badge,
+.relatorio-badge,
+.conta-badge,
+.tipo-badge,
+.disponibilidade-badge {
+  font-weight: 600;
+  border-radius: 999px;
+}
+
+/* Legenda semântica única para todo o produto. */
+.badge-success,
+.badge.ativo,
+.status-badge.presente,
+.status-badge.confirmada,
+.status-boa,
+.relatorio-badge.normal,
+.disponibilidade-badge.livre {
+  color: #22614d;
+  background: var(--visual-verde-claro);
+}
+
+.badge-warning,
+.badge.inativo,
+.status-badge.pendente,
+.status-atencao,
+.relatorio-badge.alerta,
+.disponibilidade-badge.alerta {
+  color: #8b6418;
+  background: var(--visual-amarelo-claro);
+}
+
+.badge-danger,
+.status-critica,
+.status-badge.ausente,
+.status-badge.cancelada,
+.relatorio-badge.critico,
+.disponibilidade-badge.lotado {
+  color: #9b3030;
+  background: var(--visual-vermelho-claro);
+}
+
+.badge-info,
+.status-badge.reagendada,
+.relatorio-badge.info {
+  color: #2c6385;
+  background: var(--visual-azul-claro);
+}
+
+.relatorio-badge.roxo,
+.visual-avaliacao {
+  color: #634d83;
+  background: var(--visual-roxo-claro);
+}
+
+.empty-state,
+.empty-state-text {
+  min-height: 92px;
+  display: grid;
+  place-items: center;
+  gap: 0.35rem;
+  padding: 1.25rem;
+  color: var(--visual-cinza);
+  background: var(--visual-cinza-claro);
+  border: 1px dashed var(--visual-borda);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.empty-state-icon {
+  color: var(--visual-azul);
+  font-size: 1.35rem;
+}
+
+.btn-primary,
+.btn-success,
+.login-btn {
+  background: var(--visual-verde);
+  border-color: var(--visual-verde);
+}
+
+.btn-primary:hover,
+.btn-success:hover,
+.login-btn:hover {
+  background: var(--visual-verde-escuro);
+  border-color: var(--visual-verde-escuro);
+  transform: translateY(-1px);
+}
+
+.btn-outline:hover,
+.btn-secondary:hover {
+  border-color: var(--visual-verde);
+  color: var(--visual-verde-escuro);
+}
+
+/* Microcopy operacional: títulos curtos e orientação de ação. */
+.action-hint,
+.card-action-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.45rem;
+  color: var(--visual-cinza);
+  font-size: 0.78rem;
+}
+
+.action-hint i,
+.card-action-hint i {
+  color: var(--visual-azul);
+}
+
+@media (max-width: 720px) {
+  .stat-card,
+  .dashboard-card,
+  .chart-card,
+  .alert-card,
+  .alerta-card {
+    border-radius: 11px;
+  }
+}
+
+/* Navegação agrupada: o usuário entende onde está cada tarefa. */
+.sidebar-nav .nav-group-label {
+  margin: 1.1rem 0 0.35rem;
+  padding: 0 1rem;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.sidebar-nav .nav-group-label:first-child {
+  margin-top: 0.2rem;
+}
+
+.sidebar-nav .nav-item {
+  border-radius: 10px;
+  margin: 0.18rem 0;
+}
+
+.sidebar-nav .nav-item:hover,
+.sidebar-nav .nav-item.active {
+  box-shadow: inset 3px 0 0 #b8e1cf;
+}
+
+@media (max-width: 860px) {
+  .sidebar-nav .nav-group-label {
+    padding-left: 0.7rem;
+  }
+}

@@ -8,6 +8,7 @@
     <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="css/sistema-visual.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
       rel="stylesheet"
@@ -121,80 +122,22 @@
             </button>
           </div>
 
-          <nav class="sidebar-nav">
-            <a href="#" class="nav-item active" onclick="return false;">
-              <i class="fas fa-home"></i> Dashboard
-            </a>
-            <a
-              href="#"
-              class="nav-item"
-              onclick="
-                abrirModulo('alunos');
-                return false;
-              "
-            >
-              <i class="fas fa-users"></i> Alunos
-            </a>
-            <a
-              href="#"
-              class="nav-item"
-              onclick="
-                abrirModulo('agenda');
-                return false;
-              "
-            >
-              <i class="fas fa-calendar-alt"></i> Agenda
-            </a>
-            <a
-              href="#"
-              class="nav-item"
-              onclick="
-                abrirModulo('financeiro');
-                return false;
-              "
-            >
-              <i class="fas fa-credit-card"></i> Financeiro
-            </a>
-            <a
-              href="#"
-              class="nav-item"
-              onclick="
-                abrirModulo('relatorios');
-                return false;
-              "
-            >
-              <i class="fas fa-chart-bar"></i> Relatórios
-            </a>
-            <a
-              href="#"
-              class="nav-item"
-              onclick="
-                abrirModulo('avaliacao');
-                return false;
-              "
-            >
-              <i class="fas fa-notes-medical"></i> Avaliação Detalhada
-            </a>
-            <a
-              href="#"
-              class="nav-item"
-              onclick="
-                abrirModulo('configuracoes');
-                return false;
-              "
-            >
-              <i class="fas fa-cog"></i> Configurações
-            </a>
-            <a
-              href="#"
-              class="nav-item"
-              onclick="
-                abrirModulo('ajuda');
-                return false;
-              "
-            >
-              <i class="fas fa-question-circle"></i> Central de Ajuda
-            </a>
+          <nav class="sidebar-nav" aria-label="Navegação principal">
+            <div class="nav-group-label">Operação</div>
+            <a href="#" class="nav-item active" onclick="return false;"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="#" class="nav-item" onclick="abrirModulo('alunos'); return false;"><i class="fas fa-users"></i> Alunos</a>
+            <a href="#" class="nav-item" onclick="abrirModulo('agenda'); return false;"><i class="fas fa-calendar-alt"></i> Agenda</a>
+
+            <div class="nav-group-label">Acompanhamento</div>
+            <a href="#" class="nav-item" onclick="abrirModulo('avaliacao'); return false;"><i class="fas fa-notes-medical"></i> Avaliações</a>
+            <a href="#" class="nav-item" onclick="abrirModulo('relatorios'); return false;"><i class="fas fa-chart-line"></i> Progresso</a>
+
+            <div class="nav-group-label">Financeiro</div>
+            <a href="#" class="nav-item" onclick="abrirModulo('financeiro'); return false;"><i class="fas fa-credit-card"></i> Financeiro</a>
+
+            <div class="nav-group-label">Administração</div>
+            <a href="#" class="nav-item" onclick="abrirModulo('configuracoes'); return false;"><i class="fas fa-cog"></i> Configurações</a>
+            <a href="#" class="nav-item" onclick="abrirModulo('ajuda'); return false;"><i class="fas fa-question-circle"></i> Ajuda</a>
           </nav>
         </aside>
 
