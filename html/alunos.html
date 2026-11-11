@@ -688,13 +688,18 @@
               </div>
             </div>
 
-            <!-- EVOLUÇÃO (com timeline visual e gráfico real) -->
+            <!-- EVOLUÇÃO (avaliações de progresso e registros manuais) -->
             <div class="tab-pane" id="tabEvolucao">
               <div class="dossie-section">
                 <h3 class="section-title">
-                  <i class="fas fa-chart-line"></i> Evolução do Aluno
+                  <i class="fas fa-chart-line"></i> Progresso do Aluno
                 </h3>
-                <!-- Gráfico de desempenho real -->
+                <p class="empty-state" id="estadoGraficoEvolucao" style="display: none; margin: 0 0 1rem">
+                  Nenhuma avaliação detalhada registrada para gerar o gráfico.
+                </p>
+                <p style="font-size: 0.8rem; color: var(--grafite-claro); margin-bottom: 0.75rem">
+                  Desempenho baseado nas avaliações detalhadas do aluno.
+                </p>
                 <div class="mini-chart-container">
                   <canvas
                     id="graficoEvolucao"
@@ -719,7 +724,7 @@
                       grid-column: 1/-1;
                     "
                   >
-                    Registrar Nova Evolução
+                    Registrar Evolução Manual
                   </h4>
                   <div class="form-group full-width">
                     <label class="form-label">Título</label>
@@ -755,7 +760,7 @@
                   </div>
                 </div>
                 <h4 style="margin-bottom: 1rem">
-                  Histórico de Evoluções (Timeline)
+                  Evoluções Manuais (Timeline)
                 </h4>
                 <div id="listaEvolucoesTimeline" class="timeline"></div>
               </div>
@@ -1028,6 +1033,6 @@
 
     <!-- Script principal -->
     <script src="../js/auth.js"></script>
-    <script src="../js/alunos.js?v=metrics-20261110"></script>
+    <script src="../js/alunos.js?v=progress-20261111"></script>
   </body>
 </html>

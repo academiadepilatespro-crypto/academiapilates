@@ -2188,26 +2188,34 @@ async function excluirEvolucao(evolucaoId) {
 // GRÁFICO DE EVOLUÇÃO REAL
 // ============================================================
 async function atualizarGraficoEvolucao(alunoId) {
+  const canvas = document.getElementById("graficoEvolucao");
+  const estadoGrafico = document.getElementById("estadoGraficoEvolucao");
   try {
     const { data, error } = await supabaseClient
       .from("avaliacoes")
       .select(
-        "data_avaliacao, flexibilidade_value, forca_value, equilibrio_value",
+        "data_avaliacao, flexibilidade_value, forca_value, equilibrio_value, dor_value",
       )
       .eq("aluno_id", alunoId)
       .order("data_avaliacao", { ascending: true });
     if (error) throw error;
     if (!data || data.length === 0) {
       if (estado.graficos.evolucao) estado.graficos.evolucao.destroy();
+      if (canvas) canvas.style.display = "none";
+      if (estadoGrafico) estadoGrafico.style.display = "block";
       return;
     }
 
+    if (canvas) canvas.style.display = "block";
+    if (estadoGrafico) estadoGrafico.style.display = "none";
     const labels = data.map((a) => formatarData(a.data_avaliacao));
-    const flex = data.map((a) => a.flexibilidade_value || 0);
-    const forca = data.map((a) => a.forca_value || 0);
-    const equil = data.map((a) => a.equilibrio_value || 0);
+    const flex = data.map((a) => a.flexibilidade_value ?? 0);
+    const forca = data.map((a) => a.forca_value ?? 0);
+    const equil = data.map((a) => a.equilibrio_value ?? 0);
+    const dor = data.map((a) => a.dor_value ?? 0);
 
-    const ctx = document.getElementById("graficoEvolucao").getContext("2d");
+    const ctx = canvas?.getContext("2d");
+    if (!ctx) return;
     if (estado.graficos.evolucao) estado.graficos.evolucao.destroy();
     estado.graficos.evolucao = new Chart(ctx, {
       type: "line",
@@ -2232,14 +2240,29 @@ async function atualizarGraficoEvolucao(alunoId) {
             borderColor: "#f39c12",
             fill: false,
           },
+          {
+            label: "Dor",
+            data: dor,
+            borderColor: "#8e44ad",
+            borderDash: [6, 4],
+            fill: false,
+          },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        scales: {
+          y: { beginAtZero: true, min: 0, max: 10 },
+        },
       },
     });
   } catch (error) {
+    if (canvas) canvas.style.display = "none";
+    if (estadoGrafico) {
+      estadoGrafico.textContent = "Não foi possível carregar o gráfico de progresso.";
+      estadoGrafico.style.display = "block";
+    }
     console.error("Erro ao carregar gráfico de evolução:", error);
   }
 }
@@ -2279,6 +2302,20 @@ async function carregarTodosDados(forceRefresh = false) {
     esconderLoading();
   }
 }
+
+async function atualizarProgressoAoRetornar() {
+  const modalAluno = document.getElementById("modalAluno");
+  const alunoId = document.getElementById("alunoId")?.value || estado.alunoAtual;
+  if (!alunoId || !modalAluno?.classList.contains("show")) return;
+  if (document.getElementById("tabEvolucao")?.classList.contains("active")) {
+    await atualizarGraficoEvolucao(alunoId);
+  }
+}
+
+window.addEventListener("focus", atualizarProgressoAoRetornar);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") atualizarProgressoAoRetornar();
+});
 
 // ============================================================
 // INICIALIZAÇÃO
